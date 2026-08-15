@@ -212,6 +212,8 @@ of a chaotic sport could exist.
 | **NFR-03** | Automated tests SHALL cover every leakage check (FR-204, FR-205) and every baseline (FR-301..303). |
 | **NFR-04** | Test suite SHALL complete in under 60 seconds without network access. |
 | **NFR-05** | No pipeline stage SHALL require network access except data collection. |
+| **NFR-06** | The pinned dependency set SHALL be internally consistent: `pip check` SHALL pass. A declared constraint violated by an installed version is a defect, not a warning. |
+| **NFR-07** | Dependency currency SHALL be re-verified against the index at the start of each phase, and the audit date recorded in `requirements.txt`. |
 
 ---
 

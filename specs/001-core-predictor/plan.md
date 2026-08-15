@@ -182,19 +182,44 @@ cannot be forgotten at a call site.
 
 ## 4. Technology
 
+Versions audited 2026-08-16 against PyPI; this is the latest mutually-compatible
+set on Python 3.13, and `pip check` passes.
+
 | Concern | Choice | Notes |
 |---------|--------|-------|
-| Language | Python 3.13 | NFR-02; matches existing `.venv` |
-| Data | pandas 3.x, pyarrow | already working under pandas 3 |
-| Model | xgboost 3.x | ranker + regressor, as v0 |
-| Metrics | scipy, numpy | Spearman, bootstrap |
-| CLI | click + rich | v0's choice, works well |
-| Tests | **pytest** | absent from v0's venv — tests were never runnable |
-| Collection | fastf1 3.8 | cache retained at `data/fastf1_cache/` |
+| Language | Python 3.13.5 | NFR-02. 3.14 exists but is not installed locally; 3.13 is fully supported and the gain does not justify a venv rebuild mid-project. |
+| Collection | fastf1 3.8.3 | Cache retained at `data/fastf1_cache/`. **Caps `pandas<3.0.0`** — see D-8. |
+| Data | pandas **2.3.3**, pyarrow 25.0.1, numpy 2.5.2 | pandas held at 2.x by fastf1's cap |
+| Model | xgboost 3.4.1, scikit-learn 1.9.0 | ranker + interval regressor |
+| Metrics | scipy 1.18.0, numpy | Spearman, bootstrap, proper scoring rules |
+| Plots | matplotlib 3.11.1 | reliability curves (FR-702) |
+| CLI | click 8.4.2 + rich 15.0.0 | v0's choice, works well |
+| Tests | pytest 9.1.1 | absent from v0's venv — its tests were never runnable |
 
-**Dependencies will be pinned**, not floated. v0 used `>=` throughout and
-silently drifted to pandas 3 / numpy 2.4 / xgboost 3.2. It happened to survive;
-that was luck, and luck is not a dependency strategy.
+**Dependencies are pinned**, not floated. v0 used `>=` throughout and drifted to
+pandas 3 / numpy 2.4 / xgboost 3.2. It happened to survive; that was luck, and
+luck is not a dependency strategy.
+
+### D-8 — pandas held at 2.x by fastf1
+**Forced by:** NFR-02, Constitution VI.1, VI.4
+
+fastf1 3.8.3 declares `pandas<3.0.0,>=2.1.1`. The v0 environment had pandas
+3.0.2 installed over that cap, so `pip check` failed and the environment was
+unsupported — undetected because the only code path exercising fastf1 heavily is
+collection, which is precisely what never completed.
+
+**Decision:** follow the resolver. pandas 2.3.3, everything else latest. pandas
+2.3 covers every operation this spec needs (groupby, rolling, parquet, merge),
+and a `pip check`-clean environment is worth more to a reproducibility-governed
+project than a major version number.
+
+**Revisit when** fastf1 lifts the cap. Do not resolve this by force-installing
+pandas 3 — that recreates the exact state this decision exists to fix.
+
+**Rejected alternative:** dropping fastf1 for the jolpica-f1 REST API. It would
+free pandas, but invalidates the 365M local cache, loses session/telemetry
+access (closing the door on future telemetry features), and requires rewriting
+all of P1. Reasonable later; not now.
 
 ---
 

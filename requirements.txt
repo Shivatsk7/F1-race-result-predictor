@@ -1,25 +1,34 @@
 # Pinned per plan.md §4 (NFR-02).
 # v0 floated every dependency with >= and silently drifted across three major
 # versions. It happened to survive; that was luck, not a strategy.
+#
+# Verified 2026-08-16: this is the latest mutually-compatible set on
+# Python 3.13. `pip check` passes. Re-verify before each phase.
 
 # Data acquisition
-fastf1==3.8.2
+fastf1==3.8.3
 
 # Data handling
-pandas==3.0.2
-numpy==2.4.4
-pyarrow==23.0.1
+#
+# CONSTRAINT: fastf1 declares pandas<3.0.0. Do not "upgrade" pandas to 3.x —
+# it breaks the resolver and leaves the environment unsupported. This project
+# arrived in exactly that state once already: pandas 3.0.2 was installed over
+# fastf1's cap and sat broken until `pip check` was run on 2026-08-16.
+# Collection (P1) is the phase that would have hit it.
+pandas==2.3.3
+numpy==2.5.2
+pyarrow==25.0.1
 
 # Modelling
-xgboost==3.2.0
-scikit-learn==1.8.0
-scipy==1.17.1
+xgboost==3.4.1
+scikit-learn==1.9.0
+scipy==1.18.0
 joblib==1.5.3
 
 # Reporting
-matplotlib==3.10.8
-rich==14.3.3
-click==8.3.2
+matplotlib==3.11.1
+rich==15.0.0
+click==8.4.2
 
 # Testing (NFR-03, NFR-04) — absent from v0, so its tests were never runnable
 pytest==9.1.1
