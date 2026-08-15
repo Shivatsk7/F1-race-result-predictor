@@ -5,7 +5,7 @@
 **Ratified by:** _pending — Shiva Kaushik_
 **Ratified on:** _pending_
 **Created:** 2026-08-15
-**Governed by:** `.specify/memory/constitution.md` v1.1.0
+**Governed by:** `.specify/memory/constitution.md` v1.2.0
 
 > **Ratification checklist** — tick each section once read in full (IX.2):
 >
@@ -16,7 +16,8 @@
 > - [ ] §3.3 Baselines (FR-301..305)
 > - [ ] §3.4 Model (FR-401..405)
 > - [ ] §3.5 Evaluation (FR-501..507) — *incl. choice of primary metric*
-> - [ ] §3.6–3.7 Simulation and calibration (FR-601..605, FR-701..705)
+> - [ ] §3.6–3.7 Simulation and calibration (FR-601..605, FR-701..706)
+> - [ ] §3.7a **Race randomness** (FR-751..755) — *Article X: noise floor, proper scoring*
 > - [ ] §3.8–3.9 Interface and documentation (FR-801..804, FR-901..904)
 > - [ ] §4 Non-functional requirements
 > - [ ] §5 **Out of scope** — every deletion in P0 was justified from this list
@@ -85,7 +86,7 @@ without running anything.
 
 | ID | Requirement |
 |----|-------------|
-| **FR-101** | The system SHALL collect race results, qualifying results, and session metadata for a configurable, contiguous range of seasons. |
+| **FR-101** | The system SHALL collect race results, qualifying results, and session metadata for a configurable, contiguous range of seasons, targeting **at least eight seasons** per Constitution IV.2. |
 | **FR-102** | The system SHALL persist a per-season checkpoint after each season completes, and SHALL NOT refetch any season for which a valid checkpoint exists. |
 | **FR-103** | WHEN collection is interrupted, THE SYSTEM SHALL, on the next run, resume from the first incomplete season without refetching completed seasons. |
 | **FR-104** | WHEN a single race session fails to load, THE SYSTEM SHALL record the failure, continue collecting remaining races, and report all failures in a summary at completion. |
@@ -112,7 +113,7 @@ without running anything.
 |----|-------------|
 | **FR-301** | The system SHALL implement a **grid-order baseline** predicting finishing position equal to starting grid position. |
 | **FR-302** | The system SHALL implement a **standings-order baseline** predicting finishing order by current championship standings. |
-| **FR-303** | The system SHALL implement a **random-order control** establishing the noise floor. |
+| **FR-303** | The system SHALL implement a **random-order control** establishing the random-chance floor. (Distinct from the *irreducible noise floor* of FR-754.) |
 | **FR-304** | All baselines SHALL be evaluated by the identical code path and metrics as the model, on the identical holdout. |
 | **FR-305** | Baselines SHALL be first-class citizens of the evaluation output, not a footnote. |
 
@@ -130,7 +131,8 @@ without running anything.
 
 | ID | Requirement |
 |----|-------------|
-| **FR-501** | Evaluation SHALL use a chronological holdout spanning **at least three distinct seasons**. |
+| **FR-501** | Evaluation SHALL use a chronological split over a corpus of **≥8 seasons**: **≥5 seasons training, ≥3 seasons holdout** (Constitution IV.2). |
+| **FR-501a** | IF fewer than 8 seasons are collected, THEN the shortfall SHALL be recorded in every results file and in the README, and the minima SHALL NOT be lowered to fit (Constitution IV.2a). |
 | **FR-502** | Evaluation SHALL report, for the model and every baseline: MAE, exact-position accuracy, within-1/2/3 accuracy, Spearman correlation, top-3 and top-5 set accuracy, and podium-set accuracy. |
 | **FR-503** | Every reported metric SHALL carry a bootstrap 95% confidence interval. |
 | **FR-504** | Evaluation SHALL report the model-minus-grid-baseline delta per metric, with a confidence interval on the delta. |
@@ -160,7 +162,26 @@ ordinal, and because position-difference metrics are dominated by DNF noise.
 | **FR-702** | Calibration SHALL be reported as a reliability curve with binned predicted-vs-observed frequencies, for win, podium, and points-finish events. |
 | **FR-703** | The system SHALL report Brier score per event type, compared against a climatological baseline (base rate) and the grid-order baseline. |
 | **FR-704** | The system SHALL report empirical coverage of stated prediction intervals; an interval labelled *X%* SHALL be reported against its observed containment rate. |
-| **FR-705** | IF calibration error exceeds a documented threshold, THEN probabilistic outputs SHALL be labelled as uncalibrated wherever they are displayed, per Constitution V.4. |
+| **FR-705** | IF calibration is unmeasured or exceeds a documented error threshold, THEN probabilistic outputs SHALL still be displayed but SHALL carry an `UNCALIBRATED` label applied at the rendering layer, so no call site can omit it (Constitution V.4). |
+| **FR-706** | Unmeasured or failing-calibration probabilities SHALL NOT support any performance claim in the README or results files (Constitution V.5). |
+
+### 3.7a Race Randomness (FR-75x) — Constitution Article X
+
+| ID | Requirement |
+|----|-------------|
+| **FR-751** | The system SHALL model retirement, safety-car incidence, pace variability, and position-change volatility as **distributions**, with parameters estimated from prior races only (X.1, X.3). |
+| **FR-752** | No prediction SHALL be published as a bare point estimate; every predicted position SHALL carry a distribution or interval (X.2). |
+| **FR-753** | Evaluation SHALL include at least one **proper scoring rule** (Brier or log score) that rewards correctly stated uncertainty, not rank accuracy alone (X.4). |
+| **FR-754** | The system SHALL estimate and report the **irreducible noise floor**: the share of finishing-order variance no pre-race information can explain. |
+| **FR-755** | Reported model error SHALL be interpreted against the noise floor rather than against zero, in both the evaluation report and the README (X.5). |
+
+**On FR-754 method.** The floor is estimated empirically — e.g. by measuring how
+much finishing order varies between races that are near-identical in all
+pre-race respects (same circuit, near-identical grid and car order), and by
+bounding the contribution of mechanical DNFs and first-lap incidents. The
+estimate will be crude. A crude floor is still far more informative than
+comparing model error to zero, which implicitly asserts that a perfect predictor
+of a chaotic sport could exist.
 
 ### 3.8 Interface (FR-8xx)
 
@@ -214,14 +235,16 @@ Explicitly excluded. Each entry is a deliberate decision, not an oversight.
 
 This spec is satisfied when all of the following hold:
 
-- [ ] **AC-1** A clean checkout can rebuild the dataset for ≥6 seasons via documented commands, and an interrupted run resumes without refetching. *(FR-101..107)*
+- [ ] **AC-1** A clean checkout can rebuild the dataset for **≥8 seasons** via documented commands, and an interrupted run resumes without refetching. Any shortfall is recorded, not accommodated. *(FR-101..107, FR-501a)*
 - [ ] **AC-2** The automated leakage check passes, and a deliberately introduced post-race feature causes it to fail. *(FR-204, FR-205, NFR-03)*
-- [ ] **AC-3** `evaluate` reports model and all three baselines on a ≥3-season holdout with bootstrap CIs on every metric and on every delta. *(FR-501..506)*
+- [ ] **AC-3** `evaluate` reports model and all three baselines on a **≥3-season holdout drawn from a ≥8-season corpus** with bootstrap CIs on every metric and on every delta. *(FR-501..506)*
 - [ ] **AC-4** The headline model-versus-grid comparison is stated in the README with its confidence interval, in whichever direction it falls. *(FR-507, FR-901)*
-- [ ] **AC-5** Reliability curves and Brier scores exist for win, podium, and points events, each against two baselines. *(FR-701..703)*
+- [ ] **AC-5** Reliability curves and Brier scores exist for win, podium, and points events, each against two baselines, and a proper scoring rule appears in the main evaluation. *(FR-701..703, FR-753)*
 - [ ] **AC-6** Stated interval coverage is measured and reported. *(FR-704)*
 - [ ] **AC-7** Every number in the README resolves to a committed results file. *(FR-902)*
 - [ ] **AC-8** Full test suite passes offline in under 60 seconds. *(NFR-04, NFR-05)*
+- [ ] **AC-9** The irreducible noise floor is estimated, committed to `results/`, and model error is reported relative to it. *(FR-754, FR-755)*
+- [ ] **AC-10** No prediction anywhere in the system is emitted as a bare point estimate. *(FR-752)*
 
 ---
 
@@ -232,3 +255,5 @@ This spec is satisfied when all of the following hold:
 | **OQ-1** | Which seasons form the holdout? Depends on how many collect cleanly. | FR-501 | Defer to after AC-1; target the three most recent complete seasons. |
 | **OQ-2** | Is a pre-race weather forecast source obtainable for historical races? If not, FR-206 forces dropping weather from the primary set entirely. | FR-206 | Investigate during Phase 1; dropping weather is the acceptable fallback. |
 | **OQ-3** | What is the documented calibration-error threshold for FR-705? | FR-705 | Set empirically once first reliability curves exist; must be fixed before any public claim. |
+| **OQ-4** | Which estimator for the irreducible noise floor? Near-identical-race variance, DNF-bound decomposition, or both? | FR-754 | Decide in P5 with real data; both are cheap, so likely both with the wider bound reported. |
+| **OQ-5** | Can 8 seasons actually be collected, given FastF1 coverage for 2018–19? | FR-101, FR-501a | Answered by T-106. If not, IV.2a governs: publish the shortfall. |

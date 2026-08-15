@@ -1,8 +1,8 @@
 # Project Constitution
 
 **Project:** Race Result Predictor
-**Version:** 1.1.0
-**Ratified:** 2026-08-15 (v1.0.0) · Amended 2026-08-15 (v1.1.0)
+**Version:** 1.2.0
+**Ratified:** 2026-08-15 (v1.0.0) · Amended 2026-08-15 (v1.1.0, v1.2.0)
 
 This document defines the non-negotiable rules of this project. Every spec, plan,
 and task must comply. Where a spec conflicts with this constitution, the
@@ -77,6 +77,20 @@ bound. Oracle results SHALL NEVER be reported as the model's performance.
 its inputs become available. Features that cannot make this declaration do not
 ship.
 
+**III.6** This Article prohibits **knowing the outcome**, not **modelling
+randomness**. The two are opposites and SHALL NOT be conflated:
+
+| Admissible — uncertainty *modelled* | Inadmissible — uncertainty *deleted* |
+|---|---|
+| Pre-race probability of rain | Whether it actually rained |
+| Historical DNF rate for a team | Whether that car actually retired |
+| Circuit safety-car base rate | Whether a safety car actually deployed |
+| Distribution over finishing positions | The actual finishing position |
+
+Supplying an actual outcome does not capture unpredictability — it removes the
+model's need to handle it. The affirmative obligation to represent race
+randomness is Article X.
+
 > **Rationale.** In v0, `weather_mixed` was the third most important feature and
 > was computed from the actual weather of the race being predicted. Every metric
 > the project reported was inflated by knowing whether it rained.
@@ -88,8 +102,21 @@ ship.
 **IV.1** Train/test splits SHALL be chronological. Random splits over race data
 are prohibited, as they leak future information into the past.
 
-**IV.2** The holdout SHALL span **at least three distinct seasons**. Evaluation
-on a single season, or on fewer than 200 driver-race rows, is not evidence.
+**IV.2** The dataset SHALL span **at least eight distinct seasons**, split as:
+
+| Partition | Minimum |
+|-----------|---------|
+| Total corpus | 8 seasons |
+| Training | 5 seasons |
+| Holdout | 3 seasons |
+
+Evaluation on a single season, or on fewer than 200 driver-race rows, is not
+evidence.
+
+**IV.2a** IF fewer than eight seasons can be collected, THEN the shortfall SHALL
+be stated in the README and in every results file, and the minima SHALL NOT be
+quietly lowered to fit what was collected. A smaller corpus is a published
+limitation, never a silent redefinition.
 
 **IV.3** Reported metrics SHALL be accompanied by an uncertainty estimate
 (bootstrap confidence interval or across-fold standard deviation). A bare point
@@ -111,8 +138,13 @@ Brier score, each compared against a baseline probability model.
 **V.3** Stated intervals SHALL report empirical coverage. An interval labelled
 80% that contains the truth 55% of the time is a defect.
 
-**V.4** Uncalibrated probabilities SHALL NOT be surfaced in any user-facing
-output, including CLI tables and exported CSVs.
+**V.4** Probabilities whose calibration is unmeasured or failing MAY be
+displayed, and SHALL carry an unmissable `UNCALIBRATED` label wherever they
+appear — CLI tables, exported CSVs, plots, and documentation alike. The label
+SHALL be applied at the rendering layer, so that no call site can omit it.
+
+**V.5** Probabilities that are unmeasured or failing calibration SHALL NOT be
+used to support any performance claim, in the README or elsewhere.
 
 > **Rationale.** v0's simulator emitted confident-looking win probabilities to
 > four decimal places with no evidence they meant anything. Precision without
@@ -142,8 +174,22 @@ regenerate or documentedly reacquire.
 
 ## Article VII — Spec-Driven Development
 
-**VII.1** The order of work is **spec → plan → tasks → code**. Code that no task
-requires SHALL NOT be written.
+**VII.1** The order of work is **spec → plan → tasks → code**. **Production**
+code that no task requires SHALL NOT be written.
+
+**VII.1a** The following are exempt from VII.1 and may be written freely:
+
+- **Spikes** — throwaway code answering a factual question needed to write a
+  sensible requirement ("does FastF1 expose lap-1 position?"). Spikes live in
+  `spikes/`, are gitignored, and are never imported by production code.
+- **Support code** — test helpers, fixtures, dev scripts, profiling harnesses,
+  and diagnostics that serve a task without being shipped by it.
+- **Refactoring** of code already required by a task, where behaviour is
+  unchanged.
+
+The rule exists to stop unrequested *features* accreting, not to make
+investigation illegal. WHERE a spike reveals something that changes the
+requirements, the spec is amended per VII.3 and the spike is deleted.
 
 **VII.2** Every task SHALL cite the requirement ID(s) it satisfies. A task
 tracing to no requirement is out of scope by definition.
@@ -200,12 +246,54 @@ amended section, and SHALL require re-ratification of that section.
 
 ---
 
+## Article X — Race Randomness Must Be Modelled, Not Known
+
+Formula 1 outcomes are irreducibly stochastic. Retirements, safety cars, first-lap
+contact, and weather swings are not noise to be minimised away — they are part of
+the phenomenon being predicted, and a model that ignores them is wrong even when
+its point predictions look accurate.
+
+**X.1** The system SHALL explicitly model irreducible race randomness — at
+minimum: retirement, safety-car incidence, pace variability, and position-change
+volatility — as **distributions over outcomes**.
+
+**X.2** No prediction SHALL be published as a bare point estimate. Every
+predicted position SHALL carry a distribution or interval expressing its
+uncertainty.
+
+**X.3** Parameters governing randomness SHALL be estimated from **prior** races
+only, per III.3. Modelling that a car *might* retire is required; knowing that it
+*did* is prohibited.
+
+**X.4** Evaluation SHALL include at least one metric that rewards correctly
+stated uncertainty (Brier or log score), not rank accuracy alone. A system that
+nails the modal outcome while misrepresenting variance is not a good race model.
+
+**X.5** The system SHALL estimate and report the **irreducible noise floor** —
+the share of finishing-order variance that no pre-race information could
+explain. Model error SHALL be interpreted against that floor rather than against
+zero.
+
+> **Rationale.** Raised by the project owner: F1's inherent unpredictability
+> affects results, and the constitution addressed it only by prohibition. It said
+> what may not be known and nothing about what must be modelled. X.5 matters
+> most — without a noise floor, a model that is doing genuinely well against an
+> unpredictable sport is indistinguishable from one that is doing badly, and the
+> temptation to close that gap with leaked features becomes overwhelming. That is
+> precisely how v0 went wrong.
+
+---
+
 ## Amendments
 
 | Version | Date | Change | Reason |
 |---------|------|--------|--------|
 | 1.0.0 | 2026-08-15 | Initial ratified text, Articles I–VIII | — |
 | **1.1.0** | **2026-08-15** | **Added Article IX — Human Ratification** | Owner observed that the agent had authored a spec and begun implementing against it with no approval gate. v1.0.0 permitted this. IX.3 makes author-and-approver separation structural. |
+| **1.2.0** | **2026-08-15** | **V.4 softened**: uncalibrated probabilities may be displayed if labelled at the render layer. New V.5 bars them from supporting claims. | v1.1.0's V.4 barred display outright while FR-705 required labelled display — a direct contradiction in which FR-705 cited V.4 as its authority. Owner chose display-with-label. |
+| **1.2.0** | **2026-08-15** | **VII.1 narrowed to production code**; new VII.1a exempts spikes, support code, and behaviour-preserving refactors. | The rule banned investigation, not just unrequested features. Owner: "don't forbid writing supportive code if required." |
+| **1.2.0** | **2026-08-15** | **IV.2 raised**: 8-season corpus, 5 training, 3 holdout. New IV.2a requires publishing any shortfall rather than lowering the bar. | Owner judged the previous floor too small to learn from. Note: the old three-season figure was the *holdout* minimum, not a cap on training. |
+| **1.2.0** | **2026-08-15** | **New III.6** distinguishing leakage from stochasticity; **new Article X — Race Randomness Must Be Modelled, Not Known** | Owner observed Article III addressed F1's unpredictability only by prohibition. Article III was **not** loosened: supplying actual outcomes deletes uncertainty rather than modelling it. Instead the missing affirmative obligation was added, including X.5's irreducible noise floor. |
 
 ### Outstanding compliance debt
 

@@ -43,7 +43,7 @@ models, plots, data/output, docs, .vscode, .qodo, .sixth.
 | ☐ **T-103** | Implement resume-from-incomplete logic | FR-103 | Test: kill mid-run, rerun, verify no completed season refetched |
 | ☐ **T-104** | Per-race failure tolerance + failure summary | FR-104 | Injected session failure does not abort run; appears in summary |
 | ☐ **T-105** | Row-count sanity warnings | FR-106 | Season with >10% row deviation emits warning |
-| ☐ **T-106** | Run collection for 2018–2026 | FR-101 | ≥6 seasons present; per-season counts reported |
+| ☐ **T-106** | Run collection for 2018–2026 | FR-101 | **≥8 seasons** present; per-season counts reported; shortfall recorded if any (FR-501a) |
 | ☐ **T-107** | Resolve **OQ-2** (historical weather forecast availability) | FR-206 | Documented answer in spec; OQ-2 closed |
 
 **Exit gate:** AC-1. Also closes OQ-1 (holdout seasons become known).
@@ -118,7 +118,12 @@ it falls.
 | ☐ **T-506** | Brier scores vs two baselines | FR-703 | Against base rate and grid baseline |
 | ☐ **T-507** | Interval coverage measurement | FR-704 | Stated vs observed containment reported |
 | ☐ **T-508** | Resolve **OQ-3**, set calibration threshold | FR-705 | Threshold documented in spec |
-| ☐ **T-509** | UNCALIBRATED display gate | FR-705, D-7 | Enforced in render layer; test proves label appears |
+| ☐ **T-509** | UNCALIBRATED render-layer label | FR-705, D-7 | Label applied in render layer; test proves no call site can omit it |
+| ☐ **T-510** | Stochastic parameters from prior races only | FR-751 | Retirement, safety car, pace variance, position volatility all distributional |
+| ☐ **T-511** | Proper scoring rule in main evaluation | FR-753 | Brier or log score reported alongside rank metrics |
+| ☐ **T-512** | Estimate irreducible noise floor | FR-754, OQ-4 | Floor committed to `results/`; method documented |
+| ☐ **T-513** | Report model error relative to noise floor | FR-755 | Evaluation report and README both frame error against the floor |
+| ☐ **T-514** | Assert no bare point estimates | FR-752 | Test fails if any output path emits a position without an interval |
 
 **Exit gate:** AC-5, AC-6.
 
@@ -154,7 +159,8 @@ Every requirement maps to at least one task:
 | Model | FR-401..405 | T-401..405 |
 | Evaluation | FR-501..507 | T-305..311, T-406 |
 | Simulation | FR-601..605 | T-501..504 |
-| Calibration | FR-701..705 | T-505..509 |
+| Calibration | FR-701..706 | T-505..509 |
+| Race randomness (Art. X) | FR-751..755 | T-510..514 |
 | Interface | FR-801..804 | T-601..604 |
 | Docs | FR-901..904 | T-605..608 |
 | Non-functional | NFR-01..05 | T-004, T-207, T-609 |
