@@ -1,9 +1,27 @@
 # Spec 001 — Core Predictor
 
-**Status:** Draft
-**Author:** Shiva Kaushik
+**Status:** ☐ DRAFT — NOT RATIFIED. Implementation blocked per Constitution IX.1.
+**Drafted by:** Claude (agent). Per Constitution IX.3, the drafting agent may not ratify.
+**Ratified by:** _pending — Shiva Kaushik_
+**Ratified on:** _pending_
 **Created:** 2026-08-15
-**Governed by:** `.specify/memory/constitution.md` v1.0.0
+**Governed by:** `.specify/memory/constitution.md` v1.1.0
+
+> **Ratification checklist** — tick each section once read in full (IX.2):
+>
+> - [ ] §1 Problem statement — the question is the right one to ask
+> - [ ] §2 User stories
+> - [ ] §3.1 Data acquisition (FR-101..107)
+> - [ ] §3.2 Feature engineering (FR-201..208) — *the leakage rules*
+> - [ ] §3.3 Baselines (FR-301..305)
+> - [ ] §3.4 Model (FR-401..405)
+> - [ ] §3.5 Evaluation (FR-501..507) — *incl. choice of primary metric*
+> - [ ] §3.6–3.7 Simulation and calibration (FR-601..605, FR-701..705)
+> - [ ] §3.8–3.9 Interface and documentation (FR-801..804, FR-901..904)
+> - [ ] §4 Non-functional requirements
+> - [ ] §5 **Out of scope** — every deletion in P0 was justified from this list
+> - [ ] §6 Acceptance criteria — what "done" means
+> - [ ] §7 Open questions
 
 > This document states **what** the system must do and **why**. It contains no
 > implementation decisions — those live in `plan.md`. If you find yourself

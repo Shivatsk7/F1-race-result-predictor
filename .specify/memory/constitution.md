@@ -1,8 +1,8 @@
 # Project Constitution
 
 **Project:** Race Result Predictor
-**Version:** 1.0.0
-**Ratified:** 2026-08-15
+**Version:** 1.1.0
+**Ratified:** 2026-08-15 (v1.0.0) · Amended 2026-08-15 (v1.1.0)
 
 This document defines the non-negotiable rules of this project. Every spec, plan,
 and task must comply. Where a spec conflicts with this constitution, the
@@ -173,6 +173,44 @@ affiliation or endorsement.
 
 ---
 
+## Article IX — Human Ratification
+
+**IX.1** A spec SHALL carry `Status: Draft` until explicitly ratified by the
+project owner. Implementation against a Draft spec is prohibited.
+
+**IX.2** Ratification means the owner has read the spec in full. Approving a
+summary, an outline, or a set of scoping questions is **not** ratification.
+
+**IX.3** WHERE an agent drafts a spec, the drafting agent SHALL NOT also ratify
+it. Author and approver SHALL be different parties.
+
+**IX.4** Ratification SHALL be recorded in the spec's header with a date and the
+ratifying party's name.
+
+**IX.5** A material amendment to a ratified spec SHALL return it to Draft for the
+amended section, and SHALL require re-ratification of that section.
+
+> **Rationale.** Constitution v1.0.0 mandated the order *spec → plan → tasks →
+> code* but never required a human to approve the spec before implementation
+> began. An agent could therefore author the requirements, approve them
+> implicitly by proceeding, and implement against them — satisfying every stated
+> rule while removing the human from the only decision that matters. This
+> happened: Phase P0 executed against an unratified draft. A rule that permits
+> the thing it exists to prevent is a defective rule.
+
+---
+
 ## Amendments
 
-*None. This is the ratified 1.0.0 text.*
+| Version | Date | Change | Reason |
+|---------|------|--------|--------|
+| 1.0.0 | 2026-08-15 | Initial ratified text, Articles I–VIII | — |
+| **1.1.0** | **2026-08-15** | **Added Article IX — Human Ratification** | Owner observed that the agent had authored a spec and begun implementing against it with no approval gate. v1.0.0 permitted this. IX.3 makes author-and-approver separation structural. |
+
+### Outstanding compliance debt
+
+**Phase P0 (commit `920b7c8`) was executed against an unratified Draft spec**,
+which Article IX.1 now prohibits. This is recorded rather than quietly
+retro-approved. The work is deletion-only and fully recoverable at tag
+`v0-vibe-coded`; it is not re-litigated, but it does not count as precedent.
+Spec 001 requires ratification before Phase P1 begins.

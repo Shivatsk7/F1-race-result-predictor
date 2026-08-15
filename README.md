@@ -1,8 +1,20 @@
 # Race Result Predictor
 
-> **Status: mid-rebuild (Phase P0 complete).** This project is being rebuilt
-> spec-first. The README will carry the headline result once Phase P4 produces
-> it — see [`specs/001-core-predictor/`](specs/001-core-predictor/).
+> **Status: mid-rebuild (Phase P0 complete). Phase P1 is BLOCKED.**
+> Spec 001 is drafted but **not ratified**, and Constitution IX.1 prohibits
+> implementing against a Draft spec. The gate lifts when the owner has read
+> [`spec.md`](specs/001-core-predictor/spec.md) in full and ticked its
+> ratification checklist.
+>
+> This project is being rebuilt spec-first. The README will carry the headline
+> result once Phase P4 produces it.
+>
+> **Governing documents** (note: `.specify/` is a hidden directory — `Cmd+Shift+.`
+> in Finder, or use the links):
+> [constitution](.specify/memory/constitution.md) ·
+> [spec](specs/001-core-predictor/spec.md) ·
+> [plan](specs/001-core-predictor/plan.md) ·
+> [tasks](specs/001-core-predictor/tasks.md)
 >
 > Deliberately, there are **no performance claims on this page yet.** The
 > previous version of this README claimed numbers the code could not reproduce.
