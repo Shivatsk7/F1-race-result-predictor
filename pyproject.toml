@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "f1pred"
+version = "0.1.0.dev0"
+description = "Spec-driven F1 race result predictor with honest baseline evaluation"
+requires-python = ">=3.13"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# NFR-05: no pipeline stage except collection may touch the network.
+# Collection tests are marked and excluded from the default offline run.
+addopts = "-q --strict-markers -m 'not network'"
+markers = [
+    "network: requires network access (data collection only)",
+]

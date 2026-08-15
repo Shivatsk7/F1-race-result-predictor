@@ -1,11 +1,25 @@
-fastf1>=3.1.0
-pandas>=2.0.0
-numpy>=1.24.0
-scikit-learn>=1.3.0
-xgboost>=2.0.0
-matplotlib>=3.7.0
-seaborn>=0.12.0
-rich>=13.0.0
-click>=8.1.0
-joblib>=1.3.0
-pyarrow>=14.0.0
+# Pinned per plan.md §4 (NFR-02).
+# v0 floated every dependency with >= and silently drifted across three major
+# versions. It happened to survive; that was luck, not a strategy.
+
+# Data acquisition
+fastf1==3.8.2
+
+# Data handling
+pandas==3.0.2
+numpy==2.4.4
+pyarrow==23.0.1
+
+# Modelling
+xgboost==3.2.0
+scikit-learn==1.8.0
+scipy==1.17.1
+joblib==1.5.3
+
+# Reporting
+matplotlib==3.10.8
+rich==14.3.3
+click==8.3.2
+
+# Testing (NFR-03, NFR-04) — absent from v0, so its tests were never runnable
+pytest==9.1.1

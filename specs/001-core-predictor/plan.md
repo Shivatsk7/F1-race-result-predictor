@@ -203,7 +203,20 @@ that was luck, and luck is not a dependency strategy.
 Every existing file, with its fate and the justification. **Nothing is deleted
 for being ugly — only for tracing to no requirement.**
 
-### Port (logic survives, adapted to new structure)
+> **Amendment A-1 (2026-08-15).** All v0 source files are removed from the
+> working tree during P0, including those marked *Port* and *Rewrite* below.
+> Their content is preserved at tag `v0-vibe-coded` and retrieved on demand:
+>
+> ```bash
+> git show v0-vibe-coded:src/feature_engineer.py
+> ```
+>
+> *Reason:* the P0 exit gate requires a tree containing only planned files,
+> which conflicts with leaving v0 sources in place as porting material. Porting
+> from the tag keeps the tree clean and forces each ported line to be
+> deliberately reintroduced by a task, rather than surviving by inertia.
+
+### Port (logic survives, adapted to new structure — retrieved from tag per A-1)
 
 | File | Destination | Changes required |
 |------|-------------|------------------|

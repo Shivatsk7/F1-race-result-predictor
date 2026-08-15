@@ -1,11 +1,21 @@
+# Environment
 .venv/
 __pycache__/
 *.py[cod]
+.pytest_cache/
 
+# Collected race data is never committed (FR-107, Constitution VIII.2).
+# The repository ships the code to acquire data, not the data.
 data/fastf1_cache/
 data/raw/
 data/processed/
+
+# Trained artifacts are regenerable from committed code + documented collection
 models/
 plots/
+
+# NOTE: results/ is deliberately NOT ignored.
+# Every performance claim in the README must resolve to a committed
+# results file (FR-902, AC-7).
 
 .DS_Store

@@ -19,14 +19,18 @@ Status: ☐ todo · ◐ in progress · ☑ done · ⊘ dropped
 
 | ID | Task | Satisfies | Done when |
 |----|------|-----------|-----------|
-| ☐ **T-001** | Delete files listed in plan §5 "Delete" | Spec §5 | `git status` shows only planned deletions; tree matches plan §5 |
-| ☐ **T-002** | Move `data/input/2025_*.csv` → `tests/fixtures/` | FR-803 | Six fixtures relocated, referenced by no production code |
-| ☐ **T-003** | Create `src/f1pred/` package skeleton per plan §2 | NFR-02 | All directories exist with `__init__.py`; `import f1pred` succeeds |
-| ☐ **T-004** | Pin dependencies, add pytest | NFR-02, NFR-03 | `requirements.txt` fully pinned; `pytest` runs and collects 0 tests without error |
-| ☐ **T-005** | Update `.gitignore` for `results/` policy and stale paths | FR-107, FR-902 | Collected data ignored; `results/` **tracked** |
-| ☐ **T-006** | Commit the cull with rationale | VII.2 | Single commit referencing plan §5 |
+| ☑ **T-001** | Delete files listed in plan §5 "Delete" | Spec §5 | `git status` shows only planned deletions; tree matches plan §5 |
+| ☑ **T-002** | Move `data/input/2025_*.csv` → `tests/fixtures/` | FR-803 | Six fixtures relocated, referenced by no production code |
+| ☑ **T-003** | Create `src/f1pred/` package skeleton per plan §2 | NFR-02 | All directories exist with `__init__.py`; `import f1pred` succeeds |
+| ☑ **T-004** | Pin dependencies, add pytest | NFR-02, NFR-03 | `requirements.txt` fully pinned; `pytest` runs and collects 0 tests without error |
+| ☑ **T-005** | Update `.gitignore` for `results/` policy and stale paths | FR-107, FR-902 | Collected data ignored; `results/` **tracked** |
+| ☑ **T-006** | Commit the cull with rationale | VII.2 | Single commit referencing plan §5 |
 
 **Exit gate:** repository contains only what plan §5 retains. Nothing else.
+
+**P0 COMPLETE** (2026-08-15). Verified: `import f1pred` succeeds; `pytest`
+collects cleanly; tree matches plan §5 + §2. Deleted 24 files across src, tests,
+models, plots, data/output, docs, .vscode, .qodo, .sixth.
 
 ---
 
@@ -166,4 +170,5 @@ the spec is amended before the code diverges.*
 
 | Date | Task | Requirement | Change | Reason |
 |------|------|-------------|--------|--------|
-| — | — | — | — | — |
+| 2026-08-15 | T-003 | plan §2 | **Plan amendment A-2**: added `pyproject.toml` to the retained tree | Plan §2 omitted a build file, but T-003 requires the package be importable and installable. Standard src-layout packaging. |
+| 2026-08-15 | T-001 | plan §5 | **Plan amendment A-1**: v0 sources are deleted from the tree in P0 and ported from tag `v0-vibe-coded` on demand | Plan §5 implied Port/Rewrite files remain in the tree, contradicting P0's exit gate. Porting from the tag resolves it and enforces deliberate reintroduction. |

@@ -1,122 +1,88 @@
-# F1 Race Result Predictor
+# Race Result Predictor
 
-Train a track-aware machine learning model on historical F1 data and qualifying pace to predict race outcomes.
+> **Status: mid-rebuild (Phase P0 complete).** This project is being rebuilt
+> spec-first. The README will carry the headline result once Phase P4 produces
+> it — see [`specs/001-core-predictor/`](specs/001-core-predictor/).
+>
+> Deliberately, there are **no performance claims on this page yet.** The
+> previous version of this README claimed numbers the code could not reproduce.
+> Under [Constitution I.3](.specify/memory/constitution.md), a claim appears
+> here only once it resolves to a committed file in `results/`.
 
-## Features
+---
 
-- **Data Collection**: Automatically fetches historical F1 race and qualifying data (2018-2024) via FastF1
-- **Track Metadata Layer**:
-  - Street vs permanent vs hybrid circuits
-  - Overtaking difficulty, track-position importance, safety car risk
-  - Pit stop delta, tire degradation, and pace-profile priors
-  - Madrid-ready metadata for cold-start predictions on unseen tracks
-- **Feature Engineering**:
-  - Dynamic grid weighting by track profile
-  - Driver Elo-style race/quali ratings
-  - Team performance index plus recent form
-  - Driver and constructor circuit-history features
-  - Weather conditions (dry/wet/mixed)
-- **Chronological Evaluation**: Holds out the latest race weekends instead of randomly mixing races
-- **Ranking + Interval Model**: XGBoost race ranker plus auxiliary finish regressor for calibrated intervals
-- **Probabilistic Race Simulator**:
-  - Uses the trained model as a base pace model
-  - Adds track adjustment, grid anchoring, driver variability, overtakes, DNFs, and simplified strategy
-  - Produces expected finish, win/podium probabilities, confidence bands, and P1-P20 distributions
-- **Rich CLI**: Terminal workflow for collecting data, training, and predicting races
-- **Benchmark Suite**: Reports MAE, Top-3/Top-5 accuracy, and Spearman by track type
-- **Visualization**: Holdout-set feature importance, prediction accuracy, and error analysis plots
+## The question
 
-## Quick Start
+Formula 1 finishing order is largely set by qualifying. So any race-result model
+is competing against a signal anyone can read off the grid sheet for free.
 
-### 1. Install dependencies
+**Can a model that knows only pre-race information predict finishing order
+measurably better than the starting grid alone — and can it state its
+uncertainty in probabilities that are actually calibrated?**
 
-```bash
-pip install -r requirements.txt
-```
+A negative answer is a valid result and will be published as one.
 
-### 2. Run the demo (with synthetic data)
+## Why this was rebuilt
 
-```bash
-python demo.py
-```
+The v0 system (preserved at tag `v0-vibe-coded`) ran end to end and looked
+convincing. An audit found otherwise:
 
-### 3. Or use the CLI
+| Metric, held-out races | v0 model | Grid-order baseline |
+|---|---|---|
+| MAE | 3.675 | **3.550** |
+| Exact position | 15.0% | **17.5%** |
+| Within 2 positions | 42.5% | **55.0%** |
+| Top-3 hit rate | 50.0% | **66.7%** |
+| Spearman | **0.621** | 0.569 |
 
-```bash
-# Collect real F1 data (requires internet)
-python -m src.cli collect --start-year 2020 --end-year 2024
+It lost to a one-line baseline on five of six metrics. Two root causes:
 
-# Engineer features
-python -m src.cli engineer
+1. **Temporal leakage.** `weather_mixed` was the third most important feature
+   and was computed from the *actual weather of the race being predicted*.
+   Every reported number was inflated by knowing whether it rained.
+2. **A meaningless holdout.** Two races, forty rows. Every metric was
+   indistinguishable from noise.
 
-# Train the model
-python -m src.cli train
+Neither was a coding error. Both were process failures — nothing in the project
+made them detectable. The rebuild fixes the process, not just the code.
 
-# Predict a race
-python -m src.cli predict --year 2024 --round 5
+## How the rebuild prevents recurrence
 
-# Predict next race after qualifying data is available
-python -m src.cli predict
+| v0 failure | Structural control |
+|---|---|
+| Leaky feature sat undetected | Features declare input availability; the primary set is *derived*, not hand-listed (FR-201, D-1) |
+| Baseline never computed | Baselines share the model's evaluation code path and are mandatory output (FR-304, Constitution II) |
+| Forty-row holdout | Minimum three-season chronological holdout, bootstrap CIs on every metric (FR-501, FR-503) |
+| Uncalibrated probabilities shown | Reliability curves + Brier scores required; uncalibrated output is labelled at the render layer (FR-701, D-7) |
+| Collection died and lost 3 seasons | Per-season checkpointing; interrupted runs resume (FR-102, FR-103) |
+| README claimed unreproducible numbers | Every figure must cite a committed results file (FR-902) |
 
-# Predict from a manually prepared starting grid CSV
-python -m src.cli predict-grid --input data/input/2025_singapore_starting_grid.csv
-
-# Run 1000 probabilistic race simulations from a manually prepared grid
-python -m src.cli simulate-grid \
-  --input data/input/2025_singapore_starting_grid.csv \
-  --output data/output/2025_singapore_simulation.csv \
-  --simulations 1000
-
-# Show project info
-python -m src.cli info
-```
-
-## Workflow Artifacts
-
-- [2026 Miami Grand Prix prediction workflow](docs/workflows/2026-miami-grand-prix-prediction.md)
-
-## Project Structure
+## Project structure
 
 ```
-race result predictor/
-├── src/
-│   ├── __init__.py
-│   ├── config.py           # Configuration & constants
-│   ├── data_collector.py   # FastF1 data collection
-│   ├── feature_engineer.py # Feature engineering pipeline
-│   ├── model.py            # XGBoost model training & evaluation
-│   ├── race_simulator.py   # Monte Carlo race simulation layers
-│   ├── predict.py          # Race prediction module
-│   └── cli.py              # Rich CLI interface
-├── data/
-│   ├── raw/                # Raw collected data
-│   └── processed/          # Engineered features
-├── models/                 # Saved model artifacts
-├── plots/                  # Generated visualizations
-├── demo.py                 # Demo with synthetic data
-├── requirements.txt
-└── README.md
+.specify/memory/constitution.md   non-negotiable rules; specs must comply
+specs/001-core-predictor/
+  spec.md    WHAT and WHY  — 46 functional requirements
+  plan.md    HOW           — architecture and design decisions
+  tasks.md   ordered work  — every task traced to a requirement
+src/f1pred/                       implementation
+results/                          committed evaluation outputs
 ```
 
-## Model Performance
+Read the spec before the code. That is the point of it.
 
-| Metric | Value |
-|--------|-------|
-| Mean Absolute Error | Depends on held-out season/races |
-| Within 2 Positions | ~55% |
-| Within 3 Positions | ~70% |
-| Podium Prediction | ~85% |
+## Development method
 
-Performance varies based on the held-out race weekends, season characteristics, and whether qualifying data is available for the target race.
+Spec-driven: **spec → plan → tasks → code.** Code that no task requires does not
+get written. When implementation shows a spec is wrong, the spec is amended
+first and the change is logged in `tasks.md`.
 
-## How It Works
+## Data and licensing
 
-1. **Data Collection**: Historical race results, qualifying times, and weather data are collected via the FastF1 API
-2. **Feature Engineering**: Raw data is transformed into predictive features including rolling form, circuit-specific history, and current-grid context
-3. **Model Training**: An XGBoost ranker is trained per race weekend, alongside an auxiliary finish regressor for interval calibration
-4. **Prediction**: For upcoming races, qualifying results, track metadata, and historical form are fed into the trained model to generate ranked finish predictions and a calibrated interval
-5. **Simulation**: The deterministic prediction is converted into `pace_score`, then adjusted by track profile, grid weight, driver variability, stochastic DNFs, overtaking, safety cars, and simplified pit strategy across Monte Carlo runs
+Race data is obtained via [FastF1](https://github.com/theOehrly/Fast-F1), which
+sources from Formula 1's timing feeds. FastF1's MIT licence covers the software,
+not the data — so this repository ships the code to acquire data, never bulk
+data itself.
 
-## Data Source
-
-All F1 data is provided by [FastF1](https://github.com/theOehrly/Fast-F1), which sources data from the official F1 data stream.
+**This is a portfolio and research project.** It is not a commercial product and
+not betting advice. It is unaffiliated with and unendorsed by Formula 1.
