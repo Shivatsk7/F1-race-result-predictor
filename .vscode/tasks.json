@@ -1,0 +1,16 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"args": [
+				"demo.py"
+			],
+			"command": "${workspaceFolder}/.venv/bin/python",
+			"group": "build",
+			"isBackground": false,
+			"label": "Run Demo",
+			"problemMatcher": [],
+			"type": "shell"
+		}
+	]
+}

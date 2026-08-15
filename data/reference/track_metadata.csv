@@ -1,0 +1,33 @@
+alias,circuit_key,track_archetype,benchmark_group,circuit_type,is_street,is_temporary,is_permanent,is_hybrid,overtaking_difficulty,track_position_importance,safety_car_risk,pit_delta_index,tire_deg_index,avg_speed_index,high_downforce_bias,traction_bias,braking_severity,surface_evolution_rate,weather_volatility
+melbourne,melbourne,balanced,chaos,temporary,0,1,0,0,3,3,3,3,3,3,3,3,3,4,3
+shanghai,shanghai,power,power,permanent,0,0,1,0,2,2,2,3,3,4,2,3,4,2,2
+suzuka,suzuka,balanced,balanced,permanent,0,0,1,0,4,4,2,3,3,4,4,4,3,2,2
+sakhir,bahrain,power,power,permanent,0,0,1,0,2,2,2,3,5,4,2,4,4,2,2
+bahrain,bahrain,power,power,permanent,0,0,1,0,2,2,2,3,5,4,2,4,4,2,2
+jeddah,jeddah,street,chaos,street,1,0,0,0,4,4,4,3,2,5,2,3,4,3,2
+miami,miami,balanced,balanced,temporary,0,1,0,0,3,3,3,3,3,4,2,3,4,3,3
+imola,imola,high_grid,high_grid,permanent,0,0,1,0,4,4,3,3,3,3,4,3,3,2,2
+monaco,monaco,high_grid,high_grid,street,1,0,0,0,5,5,4,4,2,2,5,5,2,4,2
+circuit de monaco,monaco,high_grid,high_grid,street,1,0,0,0,5,5,4,4,2,2,5,5,2,4,2
+barcelona,barcelona,balanced,balanced,permanent,0,0,1,0,3,3,2,3,4,3,4,3,4,2,2
+montreal,montreal,chaos,chaos,temporary,0,1,0,0,3,3,5,3,2,4,2,4,5,4,3
+montréal,montreal,chaos,chaos,temporary,0,1,0,0,3,3,5,3,2,4,2,4,5,4,3
+spielberg,spielberg,power,power,permanent,0,0,1,0,2,2,3,2,3,4,2,3,4,2,2
+silverstone,silverstone,balanced,balanced,permanent,0,0,1,0,2,2,2,3,4,5,3,4,4,2,3
+spa-francorchamps,spa,power,power,permanent,0,0,1,0,2,2,3,3,3,5,3,4,5,2,4
+spa,spa,power,power,permanent,0,0,1,0,2,2,3,3,3,5,3,4,5,2,4
+budapest,budapest,high_grid,high_grid,permanent,0,0,1,0,4,4,3,3,4,2,5,4,3,2,3
+zandvoort,zandvoort,high_grid,high_grid,permanent,0,0,1,0,4,4,3,3,3,3,5,4,3,3,3
+monza,monza,power,power,permanent,0,0,1,0,1,2,2,3,2,5,1,2,5,2,2
+baku,baku,street,chaos,street,1,0,0,0,3,3,5,3,2,4,2,3,5,4,3
+marina bay,singapore,high_grid,high_grid,street,1,0,0,0,5,5,5,4,4,2,5,5,3,4,3
+singapore,singapore,high_grid,high_grid,street,1,0,0,0,5,5,5,4,4,2,5,5,3,4,3
+austin,austin,balanced,balanced,permanent,0,0,1,0,2,2,3,3,3,4,3,4,4,2,3
+mexico city,mexico_city,balanced,balanced,permanent,0,0,1,0,3,3,3,3,2,4,2,3,4,2,2
+sao paulo,sao_paulo,chaos,chaos,permanent,0,0,1,0,3,3,4,2,3,4,3,4,4,3,4
+interlagos,sao_paulo,chaos,chaos,permanent,0,0,1,0,3,3,4,2,3,4,3,4,4,3,4
+las vegas,las_vegas,power,power,street,1,0,0,0,2,2,4,3,1,5,1,2,5,4,1
+lusail,lusail,power,power,permanent,0,0,1,0,2,2,2,3,5,4,3,4,4,2,2
+abu dhabi,abu_dhabi,balanced,balanced,permanent,0,0,1,0,3,3,2,3,2,3,3,3,4,2,1
+madrid,madrid,street,balanced,hybrid,1,0,0,1,4,4,4,3,3,4,3,4,4,4,2
+madring,madrid,street,balanced,hybrid,1,0,0,1,4,4,4,3,3,4,3,4,4,4,2
