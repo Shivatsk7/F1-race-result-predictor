@@ -258,6 +258,12 @@ set on Python 3.13, and `pip check` passes.
 | CLI | click 8.4.2 + rich 15.0.0 | v0's choice, works well |
 | Tests | pytest 9.1.1 | absent from v0's venv — its tests were never runnable |
 
+**Reference machine (NFR-01).** Timing budgets are meaningless without one.
+The declared reference is the development machine: Apple Silicon, macOS 25.6,
+Python 3.13.5. NFR-01's five-minute budget and NFR-04's sixty-second test budget
+are measured here, and every results file records the measured wall-clock time
+so a reader on different hardware can scale rather than guess.
+
 **Dependencies are pinned**, not floated. v0 used `>=` throughout and drifted to
 pandas 3 / numpy 2.4 / xgboost 3.2. It happened to survive; that was luck, and
 luck is not a dependency strategy.

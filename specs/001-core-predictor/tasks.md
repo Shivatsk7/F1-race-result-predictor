@@ -38,7 +38,10 @@ models, plots, data/output, docs, .vscode, .qodo, .sixth.
 
 | ID | Task | Satisfies | Done when |
 |----|------|-----------|-----------|
-| ☐ **T-101** | Define canonical row schema + validator in `data/schema.py` | FR-105, FR-803 | Schema rejects missing/mistyped columns; unit-tested |
+| ☐ **T-099** | **Spike — pre-2018 results availability (OQ-7)** | OQ-7, FR-101 | Documented answer on whether results/qualifying data predates 2018 and through which backend. Runs **before T-106**. Spike deleted after; finding recorded in spec. |
+| ☐ **T-101** | Define canonical row schema + validator in `data/schema.py` | FR-002, FR-003, FR-105, FR-108, FR-803 | Schema rejects missing/mistyped columns; carries `status`, `laps_completed`, `classified_position`, `weekend_format`; unit-tested |
+| ☐ **T-101a** | Implement the FR-001 target construction | FR-001, AC-15 | Finishers in official order, retirements by laps descending, DSQ last, ties broken by grid; unit-tested against a hand-built race with all four cases |
+| ☐ **T-101b** | Circuit attribute table | FR-109 | Every circuit in the corpus has type and overtaking tier; a missing entry raises |
 | ☐ **T-102** | Implement per-season checkpoint write/read | FR-102 | `season_YYYY.parquet` written after each season; second run refetches nothing |
 | ☐ **T-103** | Implement resume-from-incomplete logic | FR-103 | Test: kill mid-run, rerun, verify no completed season refetched |
 | ☐ **T-104** | Per-race failure tolerance + failure summary | FR-104 | Injected session failure does not abort run; appears in summary |
@@ -70,6 +73,8 @@ nothing downstream should be built before its answer is known.
 | ☐ **T-209** | Oracle feature set (post-race included) | FR-207 | Selectable, labelled; cannot be used by default path |
 | ☐ **T-210** | Regime table + `regime_id` / `seasons_since_regime_start` features | FR-210, D-10 | Five-row declared table; both features registered `PRE_RACE`; 2026 row present so the table needs no edit when it completes |
 | ☐ **T-211** | Relative-feature constraint in the registry | FR-209, D-10 | Every historical-performance feature declares `relative=True` or carries a written justification; static check scans the field in the same pass as the leakage check |
+| ☐ **T-212** | Sprint result as `PRE_RACE` feature | FR-211, FR-108 | Registered pre-race; explicit null on conventional weekends, never imputed; leakage checks pass |
+| ☐ **T-213** | Cold-start fallbacks + `LOW_INFORMATION` flag | FR-212 | Declared fallbacks documented and not field-mean; rookie/new-team row produces a flagged prediction rather than a null or a crash |
 
 **Exit gate:** AC-2. T-207 is the gate's gate — an untested test is not a control.
 
@@ -82,12 +87,13 @@ nothing downstream should be built before its answer is known.
 | ☐ **T-301** | Define `Predictor` protocol | D-3, FR-304 | Baselines and model are interchangeable in evaluation |
 | ☐ **T-302** | Grid-order baseline | FR-301 | Implemented, unit-tested |
 | ☐ **T-303** | Standings-order baseline | FR-302 | Implemented, unit-tested |
-| ☐ **T-304** | Random-order control | FR-303 | Seeded, reproducible |
+| ☐ **T-304** | Random-order control | FR-303 | Seeded, reproducible; mean over ≥1000 orderings with its own CI, never a single draw |
+| ☐ **T-304a** | Pin the primary metric in code | FR-500 | One definition, imported everywhere; no call site re-specifies which metric gates a claim |
 | ☐ **T-305** | `ChronologicalSplit` object, fed by `CorpusWindow` | FR-403, FR-501, D-4, D-9 | No API anywhere accepts a random split; split consumes a resolved window, never a literal season list |
 | ☐ **T-306** | Metric battery | FR-502 | All **nine** metrics enumerated in FR-502 implemented and tested |
 | ☐ **T-307** | Race-level bootstrap CIs | FR-503, D-5 | CIs on every metric; resamples races not rows |
 | ☐ **T-308** | Paired delta CIs vs grid baseline | FR-504 | Delta CI computed within replicates |
-| ☐ **T-309** | Segmentation by season and circuit type | FR-505 | Report breaks out both |
+| ☐ **T-309** | Segmentation by season, circuit type, overtaking tier | FR-505, FR-109 | Report breaks out all three |
 | ☐ **T-310** | JSON results emission | FR-506, FR-510 | Machine-readable file written to `results/`, recording `W` and the resolved season list |
 | ☐ **T-311** | Explicit "does not beat baseline" verdict | FR-507, FR-305 | Verdict line rendered prominently, both directions; baselines appear in the main report body alongside the model, never in a footnote or appendix |
 
@@ -108,7 +114,7 @@ so the bar is set before there is any temptation to move it.
 | ☐ **T-406** | **Run the headline evaluation** | AC-4 | Model vs grid baseline with delta CI, committed to `results/` |
 | ☐ **T-407** | Oracle-variant comparison | FR-207 | Quantifies how much v0's leak inflated its numbers |
 | ☐ **T-408** | Recency weighting with configurable decay | FR-406, D-10 | `sample_weight` applied; decay persisted as a hyperparameter; zero decay reproduces uniform weighting bit-for-bit |
-| ☐ **T-409** | **Regulation-transfer experiment** | FR-511, FR-512, AC-12 | Train ≤2021 → test 2022 vs train ≤2020 → test 2021; penalty reported at two decay settings; committed to `results/` labelled `n=1` |
+| ☐ **T-409** | **Regulation-transfer experiment** | FR-511, FR-511a, FR-512, AC-12 | Train ≤2021 → test 2022 vs train ≤2020 → test 2021; penalty at two decay settings; committed to `results/` labelled `n=1` **and** `DIAGNOSTIC`, with actual training-season counts stated. Withdraw the FR-511a exemption if OQ-7 extended the corpus. |
 
 **Exit gate:** AC-4, AC-12. The headline answer exists and is committed,
 whichever way it falls — as does the measured cost of a regulation reset.
@@ -145,12 +151,14 @@ whichever way it falls — as does the measured cost of a regulation reset.
 | ☐ **T-601** | CLI command surface | FR-801 | Six commands present and functional |
 | ☐ **T-602** | Actionable missing-artifact errors | FR-802 | Each error names the producing command |
 | ☐ **T-603** | Grid CSV schema validation, all errors at once | FR-803 | Multi-error fixture reports every violation |
-| ☐ **T-604** | Precision rules on numeric output | FR-804 | No probability printed to more digits than justified |
+| ☐ **T-604** | Precision rules on numeric output | FR-804 | Probabilities ≤2 dp; no metric rendered to more dp than its CI half-width supports; both rules unit-tested |
 | ☐ **T-605** | README headline result first | FR-901 | Result above feature list |
 | ☐ **T-606** | Every number traceable to `results/` | FR-902 | Each figure cites its file |
 | ☐ **T-607** | Document the v0 leakage defect and its controls | FR-903 | Section exists; references T-205..207 |
 | ☐ **T-608** | Non-commercial framing + data provenance | FR-904, FR-905 | Both stated in README; all four provenance points of FR-905 present |
 | ☐ **T-609** | Offline test-suite timing check | NFR-04, NFR-05 | Full suite <60s, no network |
+| ☐ **T-610** | Record wall-clock timings against the reference machine | NFR-01 | Evaluation runtime measured and written into the results file; reference machine named in plan §4 |
+| ☐ **T-611** | Within-regime caveat on the headline result | OQ-1, FR-901 | README states the holdout sits inside one regulation regime wherever the headline number appears |
 
 **Exit gate:** AC-7, AC-8. Spec 001 complete.
 
@@ -162,19 +170,20 @@ Every requirement maps to at least one task:
 
 | Group | Requirements | Covered by |
 |-------|-------------|------------|
-| Data | FR-101..107 | T-101..106, T-106a, T-005 |
-| Features | FR-201..210 | T-201..211 |
+| **Target variable** | FR-001..003 | T-101, T-101a |
+| Data | FR-101..109 | T-099, T-101, T-101b, T-102..106, T-106a, T-005 |
+| Features | FR-201..212 | T-201..213 |
 | Baselines | FR-301..305 | T-301..304, T-310, T-311 |
 | Model | FR-401..406 | T-401..405, T-408 |
-| Evaluation | FR-501..507 | T-305..311, T-406 |
+| Evaluation | FR-500..507 | T-304a, T-305..311, T-406 |
 | Corpus window | FR-508..510 | T-108, T-305, T-310 |
-| Regulation robustness | FR-209, FR-210, FR-406, FR-511, FR-512 | T-210, T-211, T-408, T-409 |
+| Regulation robustness | FR-209, FR-210, FR-406, FR-511, FR-511a, FR-512 | T-210, T-211, T-408, T-409 |
 | Simulation | FR-601..605 | T-501..504 |
 | Calibration | FR-701..706 | T-505..509 |
 | Race randomness (Art. X) | FR-751..755 | T-510..514 |
 | Interface | FR-801..804 | T-601..604 |
-| Docs | FR-901..905 | T-605..608 |
-| Non-functional | NFR-01..07 | T-004, T-100, T-207, T-609 |
+| Docs | FR-901..905 | T-605..608, T-611 |
+| Non-functional | NFR-01..07 | T-004, T-100, T-207, T-609, T-610 |
 
 **No orphan requirements. No orphan tasks.**
 
@@ -187,6 +196,12 @@ the spec is amended before the code diverges.*
 
 | Date | Task | Requirement | Change | Reason |
 |------|------|-------------|--------|--------|
+| 2026-08-20 | T-101a | spec §3.0 | **New §3.0, FR-001..003**: target variable defined as classified finishing position, retirements ordered by laps completed, DSQ last; `status`/`laps_completed`/`classified_position` retained | Adversarial review found the spec never defined what it predicts. Every metric, the noise floor, and the retirement model depended on an undefined target. Owner chose official-classification ordering. |
+| 2026-08-20 | T-409 | FR-511a | **New FR-511a**: transfer experiment exempt from the IV.2 training minimum, labelled DIAGNOSTIC, barred from headline claims | FR-511 as written mandated 4- and 3-season training arms against FR-501's 5-season floor — a hard contradiction introduced the same day. Owner chose an explicit carve-out over dropping the experiment. |
+| 2026-08-20 | T-101, T-212 | FR-108, FR-211 | **New FR-108, FR-211**: weekend format recorded; sprint results admitted as PRE_RACE | The corpus spans three weekend formats (none / sprint-sets-grid 2021–22 / sprint-standalone 2023+) and "qualifying result" silently meant different things across them. Sprint results are pre-race knowable and admissible. |
+| 2026-08-20 | T-304a | FR-500 | **New FR-500**: primary metric given a requirement ID | FR-507 and FR-511 both gated on "the primary metric" while it was defined only in unnumbered prose — untraceable and ungateable. |
+| 2026-08-20 | T-099 | OQ-7 | **New OQ-7 + spike T-099**: does FastF1 serve results data before 2018? | The 2018 floor may bind only on session/timing data. If results reach earlier, OQ-5's zero margin dissolves, FR-511 rises to n=3, and FR-511a can be withdrawn. Sequenced before T-106. |
+| 2026-08-20 | T-101b, T-213, T-304, T-604, T-610, T-611 | FR-109, FR-212, FR-303, FR-804, NFR-01, OQ-1 | Unfalsifiable requirements made checkable; cold start defined; random control averaged over ≥1000 draws; new AC-13..16; user stories traced | Review flagged "developer laptop", "precision justified by its uncertainty", and undefined "circuit type" as VII.4 violations; §3.8 and most of §3.9 had no acceptance criterion; US-1..5 traced to nothing. |
 | 2026-08-20 | T-210, T-211, T-408, T-409 | spec §3.2, §3.4, §3.5, §5 | **New FR-209, FR-210, FR-406, FR-511, FR-512**; new AC-12; new plan D-10; **§5 exclusion narrowed** | Owner: the model must be at least somewhat ready for regulation changes. Split into the impossible half (predicting an unraced regime — still excluded) and the tractable half (surviving one — now in scope via relative features, recency weighting, and a measured transfer penalty). Corpus contains one major reset (2022), so FR-511 is explicitly `n=1`. |
 | 2026-08-20 | — | spec §3.5 | **New FR-508..510**: fixed-width rolling corpus window, completed seasons only, `W` configurable. New AC-11, new plan D-9. | Owner decision: the corpus should advance by one season at both ends as each season completes, rather than naming a fixed season list. Also settles whether the in-progress 2026 season is admissible — it is not. |
 | 2026-08-20 | — | spec §3.6 | **FR-602 amended**: added safety-car incidence | FR-602 predated Article X and listed three stochastic factors where X.1 and FR-751 require four. Direct internal contradiction. |
