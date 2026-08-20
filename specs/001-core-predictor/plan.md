@@ -178,6 +178,31 @@ calibration is measured and passes threshold, every probability the CLI prints
 carries an `UNCALIBRATED` label. The gate is enforced in the render layer, so it
 cannot be forgotten at a call site.
 
+### D-9 — Corpus window resolved at run time, never hard-coded
+**Forced by:** FR-508, FR-509, FR-510, Constitution IV.2
+
+`ChronologicalSplit` (D-4) does not receive a literal season list. It receives a
+`CorpusWindow` that resolves itself from what is on disk:
+
+```python
+CorpusWindow(width=8, as_of=date.today())
+    -> completed seasons only, newest W, oldest dropped
+```
+
+A season is *completed* when its final round's race date is in the past. This
+makes FR-508's advance automatic — no code or config edit occurs at a season
+boundary, the window simply resolves differently — and makes FR-509 structural,
+since an in-progress season cannot satisfy the completeness test.
+
+`width` defaults to 8 and is overridable, per FR-510, so the recency-versus-
+volume trade-off can be measured rather than assumed. The resolved season list,
+not just the width, is written into every results file: `W=8` means different
+things in different years and a bare width would not identify the run.
+
+**Rejected alternative:** a `SEASONS = [2018, ..., 2025]` constant. It is correct
+for exactly one year, silently wrong afterwards, and offers no way to distinguish
+"deliberately narrow corpus" from "nobody updated the list."
+
 ---
 
 ## 4. Technology

@@ -14,6 +14,10 @@ data/processed/
 models/
 plots/
 
+# Spikes are throwaway investigation code (Constitution VII.1a). They are never
+# committed and never imported by production code.
+spikes/
+
 # NOTE: results/ is deliberately NOT ignored.
 # Every performance claim in the README must resolve to a committed
 # results file (FR-902, AC-7).

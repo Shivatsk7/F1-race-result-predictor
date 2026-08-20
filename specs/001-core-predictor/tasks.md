@@ -43,10 +43,15 @@ models, plots, data/output, docs, .vscode, .qodo, .sixth.
 | ☐ **T-103** | Implement resume-from-incomplete logic | FR-103 | Test: kill mid-run, rerun, verify no completed season refetched |
 | ☐ **T-104** | Per-race failure tolerance + failure summary | FR-104 | Injected session failure does not abort run; appears in summary |
 | ☐ **T-105** | Row-count sanity warnings | FR-106 | Season with >10% row deviation emits warning |
-| ☐ **T-106** | Run collection for 2018–2026 | FR-101 | **≥8 seasons** present; per-season counts reported; shortfall recorded if any (FR-501a) |
+| ☐ **T-100** | Phase-entry dependency check | NFR-06, NFR-07 | `pip check` exits 0; pinned set re-verified against the index; audit date updated in `requirements.txt`. **Repeats at the start of every phase.** |
+| ☐ **T-106** | Run collection for the 8 completed seasons 2018–2025 | FR-101, FR-509 | **≥8 seasons** present; per-season counts reported; shortfall recorded if any (FR-501a). 2026 excluded — in progress. |
+| ☐ **T-106a** | Resolve **OQ-5** and report margin | FR-101, FR-501a | Explicit statement of how many of the 8 collected cleanly, and whether the IV.2 floor is met |
 | ☐ **T-107** | Resolve **OQ-2** (historical weather forecast availability) | FR-206 | Documented answer in spec; OQ-2 closed |
+| ☐ **T-108** | Implement `CorpusWindow` resolution | FR-508, FR-509, FR-510, D-9 | Completed-season test implemented; `W` configurable; in-progress season provably cannot enter; unit-tested with a frozen clock either side of a season boundary |
 
-**Exit gate:** AC-1. Also closes OQ-1 (holdout seasons become known).
+**Exit gate:** AC-1, AC-11. Also closes OQ-1 (holdout seasons become known) and
+OQ-5. **T-106 runs early** — it answers the project's highest-severity risk, and
+nothing downstream should be built before its answer is known.
 
 ---
 
@@ -76,13 +81,13 @@ models, plots, data/output, docs, .vscode, .qodo, .sixth.
 | ☐ **T-302** | Grid-order baseline | FR-301 | Implemented, unit-tested |
 | ☐ **T-303** | Standings-order baseline | FR-302 | Implemented, unit-tested |
 | ☐ **T-304** | Random-order control | FR-303 | Seeded, reproducible |
-| ☐ **T-305** | `ChronologicalSplit` object | FR-403, FR-501, D-4 | No API anywhere accepts a random split |
-| ☐ **T-306** | Metric battery | FR-502 | All eight metrics implemented and tested |
+| ☐ **T-305** | `ChronologicalSplit` object, fed by `CorpusWindow` | FR-403, FR-501, D-4, D-9 | No API anywhere accepts a random split; split consumes a resolved window, never a literal season list |
+| ☐ **T-306** | Metric battery | FR-502 | All **nine** metrics enumerated in FR-502 implemented and tested |
 | ☐ **T-307** | Race-level bootstrap CIs | FR-503, D-5 | CIs on every metric; resamples races not rows |
 | ☐ **T-308** | Paired delta CIs vs grid baseline | FR-504 | Delta CI computed within replicates |
 | ☐ **T-309** | Segmentation by season and circuit type | FR-505 | Report breaks out both |
-| ☐ **T-310** | JSON results emission | FR-506 | Machine-readable file written to `results/` |
-| ☐ **T-311** | Explicit "does not beat baseline" verdict | FR-507 | Verdict line rendered prominently, both directions |
+| ☐ **T-310** | JSON results emission | FR-506, FR-510 | Machine-readable file written to `results/`, recording `W` and the resolved season list |
+| ☐ **T-311** | Explicit "does not beat baseline" verdict | FR-507, FR-305 | Verdict line rendered prominently, both directions; baselines appear in the main report body alongside the model, never in a footnote or appendix |
 
 **Exit gate:** AC-3. **Baselines are evaluated here, before the model exists** —
 so the bar is set before there is any temptation to move it.
@@ -96,7 +101,7 @@ so the bar is set before there is any temptation to move it.
 | ☐ **T-401** | Port XGBoost ranker to `models/ranker.py` | FR-401 | Produces within-race ranking |
 | ☐ **T-402** | Point prediction + interval | FR-402 | Both emitted per driver |
 | ☐ **T-403** | Training respects chronological boundary | FR-403 | Uses `ChronologicalSplit`; test asserts no holdout row seen |
-| ☐ **T-404** | Model metadata recording | FR-404 | All seven fields persisted incl. code commit |
+| ☐ **T-404** | Model metadata recording | FR-404 | All **six** fields enumerated in FR-404 persisted, incl. code commit |
 | ☐ **T-405** | Reproducibility test | FR-405 | Same seed + data ⇒ identical predictions |
 | ☐ **T-406** | **Run the headline evaluation** | AC-4 | Model vs grid baseline with delta CI, committed to `results/` |
 | ☐ **T-407** | Oracle-variant comparison | FR-207 | Quantifies how much v0's leak inflated its numbers |
@@ -118,7 +123,7 @@ it falls.
 | ☐ **T-506** | Brier scores vs two baselines | FR-703 | Against base rate and grid baseline |
 | ☐ **T-507** | Interval coverage measurement | FR-704 | Stated vs observed containment reported |
 | ☐ **T-508** | Resolve **OQ-3**, set calibration threshold | FR-705 | Threshold documented in spec |
-| ☐ **T-509** | UNCALIBRATED render-layer label | FR-705, D-7 | Label applied in render layer; test proves no call site can omit it |
+| ☐ **T-509** | UNCALIBRATED render-layer label | FR-705, FR-706, D-7 | Label applied in render layer; test proves no call site can omit it; no README or results-file claim rests on an unlabelled probability |
 | ☐ **T-510** | Stochastic parameters from prior races only | FR-751 | Retirement, safety car, pace variance, position volatility all distributional |
 | ☐ **T-511** | Proper scoring rule in main evaluation | FR-753 | Brier or log score reported alongside rank metrics |
 | ☐ **T-512** | Estimate irreducible noise floor | FR-754, OQ-4 | Floor committed to `results/`; method documented |
@@ -140,7 +145,7 @@ it falls.
 | ☐ **T-605** | README headline result first | FR-901 | Result above feature list |
 | ☐ **T-606** | Every number traceable to `results/` | FR-902 | Each figure cites its file |
 | ☐ **T-607** | Document the v0 leakage defect and its controls | FR-903 | Section exists; references T-205..207 |
-| ☐ **T-608** | Non-commercial framing + data provenance | FR-904, VIII.1..3 | Stated in README |
+| ☐ **T-608** | Non-commercial framing + data provenance | FR-904, FR-905 | Both stated in README; all four provenance points of FR-905 present |
 | ☐ **T-609** | Offline test-suite timing check | NFR-04, NFR-05 | Full suite <60s, no network |
 
 **Exit gate:** AC-7, AC-8. Spec 001 complete.
@@ -153,17 +158,18 @@ Every requirement maps to at least one task:
 
 | Group | Requirements | Covered by |
 |-------|-------------|------------|
-| Data | FR-101..107 | T-101..106, T-005 |
+| Data | FR-101..107 | T-101..106, T-106a, T-005 |
 | Features | FR-201..208 | T-201..209 |
 | Baselines | FR-301..305 | T-301..304, T-310 |
 | Model | FR-401..405 | T-401..405 |
 | Evaluation | FR-501..507 | T-305..311, T-406 |
+| Corpus window | FR-508..510 | T-108, T-305, T-310 |
 | Simulation | FR-601..605 | T-501..504 |
 | Calibration | FR-701..706 | T-505..509 |
 | Race randomness (Art. X) | FR-751..755 | T-510..514 |
 | Interface | FR-801..804 | T-601..604 |
-| Docs | FR-901..904 | T-605..608 |
-| Non-functional | NFR-01..05 | T-004, T-207, T-609 |
+| Docs | FR-901..905 | T-605..608 |
+| Non-functional | NFR-01..07 | T-004, T-100, T-207, T-609 |
 
 **No orphan requirements. No orphan tasks.**
 
@@ -176,5 +182,11 @@ the spec is amended before the code diverges.*
 
 | Date | Task | Requirement | Change | Reason |
 |------|------|-------------|--------|--------|
+| 2026-08-20 | — | spec §3.5 | **New FR-508..510**: fixed-width rolling corpus window, completed seasons only, `W` configurable. New AC-11, new plan D-9. | Owner decision: the corpus should advance by one season at both ends as each season completes, rather than naming a fixed season list. Also settles whether the in-progress 2026 season is admissible — it is not. |
+| 2026-08-20 | — | spec §3.6 | **FR-602 amended**: added safety-car incidence | FR-602 predated Article X and listed three stochastic factors where X.1 and FR-751 require four. Direct internal contradiction. |
+| 2026-08-20 | — | spec §3.9 | **New FR-905**: data provenance and licensing in README | T-608 cited Constitution VIII.1..3 directly because no requirement implemented it — a task reaching past the spec, which VII.2 exists to prevent. |
+| 2026-08-20 | T-100 | spec §4 | **NFR-06, NFR-07 given a task**; traceability table corrected to NFR-01..07 | Both were added during the 2026-08-16 dependency audit but never propagated to tasks.md, whose table still read NFR-01..05 while asserting "no orphan requirements". |
+| 2026-08-20 | T-306, T-404 | FR-502, FR-404 | Requirement lists **explicitly enumerated**; task counts corrected 8→9 and 7→6 | Both "done when" clauses counted items that the requirements did not enumerate, so neither was objectively checkable — a VII.4 violation. |
+| 2026-08-20 | — | §7 | **OQ-5 severity raised; new OQ-6** (regime-awareness and choice of `W`) | FastF1 coverage begins in 2018, making 2018–2025 exactly the eight-season IV.2 floor with zero margin. Recorded as the project's highest-severity risk rather than discovered during collection. |
 | 2026-08-15 | T-003 | plan §2 | **Plan amendment A-2**: added `pyproject.toml` to the retained tree | Plan §2 omitted a build file, but T-003 requires the package be importable and installable. Standard src-layout packaging. |
 | 2026-08-15 | T-001 | plan §5 | **Plan amendment A-1**: v0 sources are deleted from the tree in P0 and ported from tag `v0-vibe-coded` on demand | Plan §5 implied Port/Rewrite files remain in the tree, contradicting P0's exit gate. Porting from the tag resolves it and enforces deliberate reintroduction. |

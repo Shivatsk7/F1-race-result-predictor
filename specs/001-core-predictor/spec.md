@@ -15,7 +15,7 @@
 > - [ ] §3.2 Feature engineering (FR-201..208) — *the leakage rules*
 > - [ ] §3.3 Baselines (FR-301..305)
 > - [ ] §3.4 Model (FR-401..405)
-> - [ ] §3.5 Evaluation (FR-501..507) — *incl. choice of primary metric*
+> - [ ] §3.5 Evaluation (FR-501..510) — *incl. choice of primary metric and the rolling corpus window*
 > - [ ] §3.6–3.7 Simulation and calibration (FR-601..605, FR-701..706)
 > - [ ] §3.7a **Race randomness** (FR-751..755) — *Article X: noise floor, proper scoring*
 > - [ ] §3.8–3.9 Interface and documentation (FR-801..804, FR-901..904)
@@ -86,7 +86,7 @@ without running anything.
 
 | ID | Requirement |
 |----|-------------|
-| **FR-101** | The system SHALL collect race results, qualifying results, and session metadata for a configurable, contiguous range of seasons, targeting **at least eight seasons** per Constitution IV.2. |
+| **FR-101** | The system SHALL collect race results, qualifying results, and session metadata for a configurable, contiguous range of **completed** seasons, targeting **at least eight** per Constitution IV.2 and resolving to the window of FR-508. |
 | **FR-102** | The system SHALL persist a per-season checkpoint after each season completes, and SHALL NOT refetch any season for which a valid checkpoint exists. |
 | **FR-103** | WHEN collection is interrupted, THE SYSTEM SHALL, on the next run, resume from the first incomplete season without refetching completed seasons. |
 | **FR-104** | WHEN a single race session fails to load, THE SYSTEM SHALL record the failure, continue collecting remaining races, and report all failures in a summary at completion. |
@@ -124,32 +124,45 @@ without running anything.
 | **FR-401** | The system SHALL train a model producing a ranking over drivers within each race. |
 | **FR-402** | The system SHALL produce, per driver, a point prediction of finishing position and a prediction interval. |
 | **FR-403** | Training SHALL use only races chronologically prior to the evaluation holdout. |
-| **FR-404** | Every persisted model SHALL record training date range, row count, feature list and their availability declarations, hyperparameters, code commit, and evaluation metrics. |
+| **FR-404** | Every persisted model SHALL record exactly these six fields: (1) training date range, (2) training row count, (3) feature list with each feature's availability declaration, (4) hyperparameters, (5) code commit, (6) evaluation metrics. |
 | **FR-405** | Training SHALL be reproducible: identical data plus identical seed yields identical model predictions. |
 
 ### 3.5 Evaluation (FR-5xx)
 
 | ID | Requirement |
 |----|-------------|
-| **FR-501** | Evaluation SHALL use a chronological split over a corpus of **≥8 seasons**: **≥5 seasons training, ≥3 seasons holdout** (Constitution IV.2). |
+| **FR-501** | Evaluation SHALL use a chronological split over the corpus window defined in FR-508, of **≥8 seasons**: **≥5 seasons training, ≥3 seasons holdout** (Constitution IV.2). |
 | **FR-501a** | IF fewer than 8 seasons are collected, THEN the shortfall SHALL be recorded in every results file and in the README, and the minima SHALL NOT be lowered to fit (Constitution IV.2a). |
-| **FR-502** | Evaluation SHALL report, for the model and every baseline: MAE, exact-position accuracy, within-1/2/3 accuracy, Spearman correlation, top-3 and top-5 set accuracy, and podium-set accuracy. |
+| **FR-502** | Evaluation SHALL report, for the model and every baseline, exactly these nine metrics: (1) MAE, (2) exact-position accuracy, (3) within-1 accuracy, (4) within-2 accuracy, (5) within-3 accuracy, (6) Spearman correlation, (7) top-3 set accuracy, (8) top-5 set accuracy, (9) podium-set accuracy. |
 | **FR-503** | Every reported metric SHALL carry a bootstrap 95% confidence interval. |
 | **FR-504** | Evaluation SHALL report the model-minus-grid-baseline delta per metric, with a confidence interval on the delta. |
 | **FR-505** | Evaluation SHALL segment results by season and by circuit type, so that aggregate performance cannot conceal systematic failure. |
 | **FR-506** | Evaluation SHALL emit a machine-readable results file alongside the human-readable report. |
 | **FR-507** | IF the model does not beat the grid baseline on the primary metric with a confidence interval excluding zero, THEN the evaluation output SHALL state this explicitly and prominently. |
+| **FR-508** | The corpus SHALL be a **fixed-width rolling window** of the `W` most recently completed seasons. WHEN a new season completes, the window SHALL advance by one season at **both** ends — the newly completed season enters, the oldest leaves — and all reported results SHALL be regenerated rather than carried forward. |
+| **FR-509** | The window SHALL admit **completed seasons only**. An in-progress season SHALL NOT enter the training or evaluation corpus, and its partial row count SHALL NOT trigger the FR-106 deviation warning. An in-progress season MAY still be a *prediction target* under FR-801; being predictable and being admissible to the corpus are distinct roles. |
+| **FR-510** | `W` SHALL be a configurable parameter with a documented default, never a constant embedded in code, and its value SHALL be recorded in every results file alongside the concrete season list the window resolved to. |
 
 **Primary metric:** Spearman rank correlation between predicted and actual
 finishing order, averaged per race. Chosen because the task is fundamentally
 ordinal, and because position-difference metrics are dominated by DNF noise.
+
+**On the rolling window (FR-508..510).** F1 relevance decays: 2018 cars, tyres,
+and driver line-ups may actively mislead a prediction made years later. Dropping
+the oldest season as a new one arrives is therefore a modelling decision, not
+merely bookkeeping. But whether recency beats volume is an *empirical* question,
+which is why FR-510 forbids hard-coding `W` — a fixed constant would foreclose
+ever measuring the trade-off. Note two present-day consequences: with 2018 the
+earliest season FastF1 covers, an 8-wide window is **pinned** until the 2026
+season completes, and a window that always drops its oldest season never
+accumulates margin above the Constitution IV.2 floor (see OQ-6).
 
 ### 3.6 Race Simulation (FR-6xx)
 
 | ID | Requirement |
 |----|-------------|
 | **FR-601** | The system SHALL convert model output into a Monte Carlo simulation over race outcomes, producing a full finishing-position distribution per driver. |
-| **FR-602** | The simulation SHALL model, at minimum: pace uncertainty, stochastic retirement, and position-change dynamics conditioned on circuit overtaking difficulty. |
+| **FR-602** | The simulation SHALL model, at minimum: pace uncertainty, stochastic retirement, **safety-car incidence**, and position-change dynamics conditioned on circuit overtaking difficulty. The four factors here SHALL match the four required by FR-751 and Constitution X.1. |
 | **FR-603** | The simulation SHALL emit win, podium, and points-finish probabilities per driver. |
 | **FR-604** | Simulation SHALL be deterministic given a seed. |
 | **FR-605** | Per-driver probabilities across all finishing positions SHALL sum to 1.0 within a tolerance of 1e-6. |
@@ -200,6 +213,7 @@ of a chaotic sport could exist.
 | **FR-902** | Every performance number in documentation SHALL be traceable to a committed results file. |
 | **FR-903** | The README SHALL document the leakage defect found in v0 and the structural controls now preventing it. |
 | **FR-904** | The README SHALL state the project's non-commercial, portfolio framing per Constitution I.2. |
+| **FR-905** | The README SHALL state the data's provenance and licensing position: that race data is obtained via FastF1 from Formula 1's timing feeds, that FastF1's MIT licence covers the software and not the data, that this repository ships the code to acquire data rather than the data itself, and that no Formula 1 trademark is used in a way implying affiliation or endorsement (Constitution VIII.1..3). |
 
 ---
 
@@ -247,6 +261,7 @@ This spec is satisfied when all of the following hold:
 - [ ] **AC-8** Full test suite passes offline in under 60 seconds. *(NFR-04, NFR-05)*
 - [ ] **AC-9** The irreducible noise floor is estimated, committed to `results/`, and model error is reported relative to it. *(FR-754, FR-755)*
 - [ ] **AC-10** No prediction anywhere in the system is emitted as a bare point estimate. *(FR-752)*
+- [ ] **AC-11** The corpus window is resolved from completed seasons at run time, `W` is configurable, and every results file records both `W` and the concrete season list used. Advancing the system clock past a season boundary changes the window without a code edit. *(FR-508..510)*
 
 ---
 
@@ -258,4 +273,5 @@ This spec is satisfied when all of the following hold:
 | **OQ-2** | Is a pre-race weather forecast source obtainable for historical races? If not, FR-206 forces dropping weather from the primary set entirely. | FR-206 | Investigate during Phase 1; dropping weather is the acceptable fallback. |
 | **OQ-3** | What is the documented calibration-error threshold for FR-705? | FR-705 | Set empirically once first reliability curves exist; must be fixed before any public claim. |
 | **OQ-4** | Which estimator for the irreducible noise floor? Near-identical-race variance, DNF-bound decomposition, or both? | FR-754 | Decide in P5 with real data; both are cheap, so likely both with the wider bound reported. |
-| **OQ-5** | Can 8 seasons actually be collected, given FastF1 coverage for 2018–19? | FR-101, FR-501a | Answered by T-106. If not, IV.2a governs: publish the shortfall. |
+| **OQ-5** | Can 8 seasons actually be collected, given FastF1 coverage for 2018–19? **This is the project's highest-severity open risk**: FastF1 timing coverage begins in 2018, so 2018–2025 is *exactly* eight complete seasons and there is zero margin. A single failed season puts the project below its own Constitution IV.2 floor. | FR-101, FR-501a | Answered by T-106, which runs early in P1 precisely so the answer arrives before anything is built on it. If short, IV.2a governs: publish the shortfall, do not lower the bar. |
+| **OQ-6** | Given zero margin (OQ-5) and F1's regulation resets — 2022 (ground effect) and 2026 (new power units, active aero) — should the corpus window be regime-aware, and should `W` default to 8 or wider? | FR-508, FR-510, §5 | Decide once T-106 reports what actually collected. Three options: (a) keep `W`=8 and accept a mixed-regime corpus, (b) widen `W` beyond 8 as seasons accrue to build margin, (c) treat 2022+ as a separate regime and accept a smaller, cleaner corpus with a published IV.2a shortfall. Note (c) conflicts with §5's exclusion of regulation-change modelling; choosing it would require amending §5. |
