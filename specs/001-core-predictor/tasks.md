@@ -68,6 +68,8 @@ nothing downstream should be built before its answer is known.
 | ☐ **T-207** | **Negative control test** | NFR-03, D-2 | A deliberately leaky feature makes T-205 *and* T-206 fail |
 | ☐ **T-208** | Determinism test for feature build | FR-208 | Two builds byte-identical |
 | ☐ **T-209** | Oracle feature set (post-race included) | FR-207 | Selectable, labelled; cannot be used by default path |
+| ☐ **T-210** | Regime table + `regime_id` / `seasons_since_regime_start` features | FR-210, D-10 | Five-row declared table; both features registered `PRE_RACE`; 2026 row present so the table needs no edit when it completes |
+| ☐ **T-211** | Relative-feature constraint in the registry | FR-209, D-10 | Every historical-performance feature declares `relative=True` or carries a written justification; static check scans the field in the same pass as the leakage check |
 
 **Exit gate:** AC-2. T-207 is the gate's gate — an untested test is not a control.
 
@@ -105,9 +107,11 @@ so the bar is set before there is any temptation to move it.
 | ☐ **T-405** | Reproducibility test | FR-405 | Same seed + data ⇒ identical predictions |
 | ☐ **T-406** | **Run the headline evaluation** | AC-4 | Model vs grid baseline with delta CI, committed to `results/` |
 | ☐ **T-407** | Oracle-variant comparison | FR-207 | Quantifies how much v0's leak inflated its numbers |
+| ☐ **T-408** | Recency weighting with configurable decay | FR-406, D-10 | `sample_weight` applied; decay persisted as a hyperparameter; zero decay reproduces uniform weighting bit-for-bit |
+| ☐ **T-409** | **Regulation-transfer experiment** | FR-511, FR-512, AC-12 | Train ≤2021 → test 2022 vs train ≤2020 → test 2021; penalty reported at two decay settings; committed to `results/` labelled `n=1` |
 
-**Exit gate:** AC-4. The headline answer exists and is committed, whichever way
-it falls.
+**Exit gate:** AC-4, AC-12. The headline answer exists and is committed,
+whichever way it falls — as does the measured cost of a regulation reset.
 
 ---
 
@@ -159,11 +163,12 @@ Every requirement maps to at least one task:
 | Group | Requirements | Covered by |
 |-------|-------------|------------|
 | Data | FR-101..107 | T-101..106, T-106a, T-005 |
-| Features | FR-201..208 | T-201..209 |
-| Baselines | FR-301..305 | T-301..304, T-310 |
-| Model | FR-401..405 | T-401..405 |
+| Features | FR-201..210 | T-201..211 |
+| Baselines | FR-301..305 | T-301..304, T-310, T-311 |
+| Model | FR-401..406 | T-401..405, T-408 |
 | Evaluation | FR-501..507 | T-305..311, T-406 |
 | Corpus window | FR-508..510 | T-108, T-305, T-310 |
+| Regulation robustness | FR-209, FR-210, FR-406, FR-511, FR-512 | T-210, T-211, T-408, T-409 |
 | Simulation | FR-601..605 | T-501..504 |
 | Calibration | FR-701..706 | T-505..509 |
 | Race randomness (Art. X) | FR-751..755 | T-510..514 |
@@ -182,6 +187,7 @@ the spec is amended before the code diverges.*
 
 | Date | Task | Requirement | Change | Reason |
 |------|------|-------------|--------|--------|
+| 2026-08-20 | T-210, T-211, T-408, T-409 | spec §3.2, §3.4, §3.5, §5 | **New FR-209, FR-210, FR-406, FR-511, FR-512**; new AC-12; new plan D-10; **§5 exclusion narrowed** | Owner: the model must be at least somewhat ready for regulation changes. Split into the impossible half (predicting an unraced regime — still excluded) and the tractable half (surviving one — now in scope via relative features, recency weighting, and a measured transfer penalty). Corpus contains one major reset (2022), so FR-511 is explicitly `n=1`. |
 | 2026-08-20 | — | spec §3.5 | **New FR-508..510**: fixed-width rolling corpus window, completed seasons only, `W` configurable. New AC-11, new plan D-9. | Owner decision: the corpus should advance by one season at both ends as each season completes, rather than naming a fixed season list. Also settles whether the in-progress 2026 season is admissible — it is not. |
 | 2026-08-20 | — | spec §3.6 | **FR-602 amended**: added safety-car incidence | FR-602 predated Article X and listed three stochastic factors where X.1 and FR-751 require four. Direct internal contradiction. |
 | 2026-08-20 | — | spec §3.9 | **New FR-905**: data provenance and licensing in README | T-608 cited Constitution VIII.1..3 directly because no requirement implemented it — a task reaching past the spec, which VII.2 exists to prevent. |

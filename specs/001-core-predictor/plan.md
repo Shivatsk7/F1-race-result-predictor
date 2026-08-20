@@ -203,6 +203,43 @@ things in different years and a bare width would not identify the run.
 for exactly one year, silently wrong afterwards, and offers no way to distinguish
 "deliberately narrow corpus" from "nobody updated the list."
 
+### D-10 — Regulation regimes as declared data
+**Forced by:** FR-209, FR-210, FR-406, FR-511, FR-512
+
+Regime boundaries are a hand-maintained table, because F1's regulation cycle is
+irregular and nothing in the data announces a reset:
+
+| Start | Severity | Change |
+|-------|----------|--------|
+| 2014 | major | V6 hybrid power units |
+| 2017 | major | wider cars and tyres |
+| 2019 | moderate | front-wing simplification |
+| 2022 | major | ground effect, full chassis reset |
+| 2026 | major | new power units, active aero, smaller cars |
+
+Only **2022** falls inside the 2018–2025 corpus as a major reset, which is why
+FR-511 is `n=1`. The table extends past the corpus deliberately: 2026 is present
+so that when it becomes a completed season, the transfer experiment gains its
+second observation with no code change.
+
+Three mechanisms hang off this table:
+
+1. **`regime_id` and `seasons_since_regime_start`** as `PRE_RACE` features — both
+   are knowable before a season begins, so III.1 is satisfied trivially.
+2. **Recency weighting** — `sample_weight = exp(-decay * seasons_ago)`, passed to
+   XGBoost, decay recorded as a hyperparameter. Zero decay reproduces uniform
+   weighting exactly, so FR-512's comparison is a parameter sweep rather than a
+   second code path.
+3. **The relative-feature constraint (FR-209)** is enforced through the D-1
+   registry: each historical-performance feature declares `relative=True` or
+   carries a written justification for why it cannot be. The static check that
+   already scans for `POST_RACE` leakage scans this field in the same pass.
+
+**Rejected alternative:** inferring regime boundaries by change-point detection
+on lap times. It would be a nice trick, it would occasionally be wrong, and the
+correct answer is a five-row table that any F1 follower can verify by eye.
+Detecting what you already know is complexity with no payoff.
+
 ---
 
 ## 4. Technology

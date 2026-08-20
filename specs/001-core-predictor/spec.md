@@ -12,10 +12,10 @@
 > - [ ] §1 Problem statement — the question is the right one to ask
 > - [ ] §2 User stories
 > - [ ] §3.1 Data acquisition (FR-101..107)
-> - [ ] §3.2 Feature engineering (FR-201..208) — *the leakage rules*
+> - [ ] §3.2 Feature engineering (FR-201..210) — *the leakage rules; regime-relative features*
 > - [ ] §3.3 Baselines (FR-301..305)
-> - [ ] §3.4 Model (FR-401..405)
-> - [ ] §3.5 Evaluation (FR-501..510) — *incl. choice of primary metric and the rolling corpus window*
+> - [ ] §3.4 Model (FR-401..406)
+> - [ ] §3.5 Evaluation (FR-501..512) — *primary metric, rolling corpus window, regulation-transfer experiment*
 > - [ ] §3.6–3.7 Simulation and calibration (FR-601..605, FR-701..706)
 > - [ ] §3.7a **Race randomness** (FR-751..755) — *Article X: noise floor, proper scoring*
 > - [ ] §3.8–3.9 Interface and documentation (FR-801..804, FR-901..904)
@@ -106,6 +106,8 @@ without running anything.
 | **FR-206** | WHERE weather is used, the primary feature set SHALL use only pre-race forecast or climatological priors; actual observed race weather is inadmissible per Constitution III.2. |
 | **FR-207** | The system SHALL support an explicitly labelled **oracle feature set** including post-race features, usable only for upper-bound analysis. |
 | **FR-208** | Feature engineering SHALL be deterministic: identical input data yields byte-identical output. |
+| **FR-209** | WHERE a feature summarises historical performance — team pace, driver form, reliability — it SHALL be expressed **relative to the contemporaneous field** (rank, percentile, or within-season z-score) rather than as an absolute quantity, so that its meaning survives a regulation reset. A feature that cannot be expressed relatively SHALL declare that limitation in the registry, and the declaration SHALL be machine-readable. |
+| **FR-210** | The system SHALL maintain a **declared table of regulation regimes** — start season and severity — and SHALL expose regime identity and seasons-elapsed-since-regime-start as `PRE_RACE` features. Regime boundaries SHALL be declared data, never inferred from the calendar: F1 regulation cycles are irregular and no fixed period is correct. |
 
 ### 3.3 Baselines (FR-3xx)
 
@@ -126,6 +128,7 @@ without running anything.
 | **FR-403** | Training SHALL use only races chronologically prior to the evaluation holdout. |
 | **FR-404** | Every persisted model SHALL record exactly these six fields: (1) training date range, (2) training row count, (3) feature list with each feature's availability declaration, (4) hyperparameters, (5) code commit, (6) evaluation metrics. |
 | **FR-405** | Training SHALL be reproducible: identical data plus identical seed yields identical model predictions. |
+| **FR-406** | Training SHALL support **recency weighting** of training rows via a configurable decay parameter, recorded among the hyperparameters of FR-404. Uniform weighting (zero decay) SHALL remain expressible, so the weighting's effect can be measured rather than assumed. |
 
 ### 3.5 Evaluation (FR-5xx)
 
@@ -142,6 +145,8 @@ without running anything.
 | **FR-508** | The corpus SHALL be a **fixed-width rolling window** of the `W` most recently completed seasons. WHEN a new season completes, the window SHALL advance by one season at **both** ends — the newly completed season enters, the oldest leaves — and all reported results SHALL be regenerated rather than carried forward. |
 | **FR-509** | The window SHALL admit **completed seasons only**. An in-progress season SHALL NOT enter the training or evaluation corpus, and its partial row count SHALL NOT trigger the FR-106 deviation warning. An in-progress season MAY still be a *prediction target* under FR-801; being predictable and being admissible to the corpus are distinct roles. |
 | **FR-510** | `W` SHALL be a configurable parameter with a documented default, never a constant embedded in code, and its value SHALL be recorded in every results file alongside the concrete season list the window resolved to. |
+| **FR-511** | Evaluation SHALL include a **regulation-transfer experiment** quantifying what a regime change costs: the primary metric for a model trained on all seasons strictly prior to a reset season and evaluated on that reset season, compared against the identical protocol applied to a non-reset season. The difference SHALL be reported as the **measured regime-transfer penalty**, with the number of transitions observed stated alongside it. |
+| **FR-512** | The regulation-transfer experiment SHALL be run at both zero and non-zero recency decay (FR-406), so that any claimed robustness benefit is measured rather than asserted. |
 
 **Primary metric:** Spearman rank correlation between predicted and actual
 finishing order, averaged per race. Chosen because the task is fundamentally
@@ -156,6 +161,29 @@ ever measuring the trade-off. Note two present-day consequences: with 2018 the
 earliest season FastF1 covers, an 8-wide window is **pinned** until the 2026
 season completes, and a window that always drops its oldest season never
 accumulates margin above the Constitution IV.2 floor (see OQ-6).
+
+**On regulation robustness (FR-209, FR-210, FR-406, FR-511, FR-512).** Two
+different problems hide behind "handle regulation changes", and only one is
+solvable. *Predicting a new regime* — what the 2026 cars will actually do — is
+impossible: no data exists, and any claim to the contrary would be fabrication
+of exactly the kind Article I exists to prevent. *Surviving a new regime* —
+degrading gracefully, knowing you have degraded, and recovering quickly — is
+tractable. This spec pursues only the second.
+
+The mechanism is FR-209. At a reset, absolute pace is destroyed: a 2021
+constructor's average finishing position says nothing about its 2022 car. But
+relative structure persists, because "P3 on the grid finishes near P3" is a fact
+about track position and overtaking difficulty, not about which car is quick.
+A feature written as `team_avg_finish = 4.2` dies at a reset; the same feature
+written as `team_rank_in_field = 2` survives it. This is a constraint on how
+features are written, not additional machinery.
+
+**Limitation, stated up front.** The 2018–2025 corpus contains exactly **one**
+major regulation transition (2022, ground effect). FR-511 therefore rests on a
+single observation. It SHALL be reported as one observation and never
+generalised into a rate or a law. A single measured number with an honest `n=1`
+attached is still worth far more than an unmeasured assurance that the model
+"handles" regulation changes.
 
 ### 3.6 Race Simulation (FR-6xx)
 
@@ -241,7 +269,8 @@ Explicitly excluded. Each entry is a deliberate decision, not an oversight.
 | Live timing or in-race prediction | Large scope increase; does not serve the headline question. |
 | Web UI or hosted service | Portfolio value is in the analysis, not the frontend. |
 | Telemetry-derived features (long-run pace, tyre stints) | Genuinely predictive, but multiplies collection cost. Recorded as a future spec, not this one. |
-| Driver-transfer and regulation-change modelling | Insufficient data per regime to learn from. |
+| Driver-transfer modelling | Insufficient data per driver move to learn from. |
+| Predicting the *effects* of an unseen regulation regime | No data exists for a regime that has not been raced. Forecasting what 2026's cars will do would be fabrication, not modelling. **Note the narrower boundary:** regime *robustness* — relative features, recency weighting, and measuring the transfer penalty — is **in scope** per FR-209, FR-210, FR-406, FR-511. What is excluded is learning regime-specific dynamics from a regime with no races in it. |
 | Synthetic-data demo mode | Demonstrates nothing about real performance and previously masked the absence of real data. |
 | Per-race bespoke models | v0 shipped a `chinese_gp_predictor`; single-race models cannot be validated. |
 
@@ -262,6 +291,7 @@ This spec is satisfied when all of the following hold:
 - [ ] **AC-9** The irreducible noise floor is estimated, committed to `results/`, and model error is reported relative to it. *(FR-754, FR-755)*
 - [ ] **AC-10** No prediction anywhere in the system is emitted as a bare point estimate. *(FR-752)*
 - [ ] **AC-11** The corpus window is resolved from completed seasons at run time, `W` is configurable, and every results file records both `W` and the concrete season list used. Advancing the system clock past a season boundary changes the window without a code edit. *(FR-508..510)*
+- [ ] **AC-12** The regime table is declared data, every historical-performance feature is either regime-relative or declares why it cannot be, and the measured regime-transfer penalty for 2022 is committed to `results/` at two decay settings, labelled `n=1`. *(FR-209, FR-210, FR-406, FR-511, FR-512)*
 
 ---
 
