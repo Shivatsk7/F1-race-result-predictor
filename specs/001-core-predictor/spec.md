@@ -11,8 +11,8 @@
 >
 > - [ ] §1 Problem statement — the question is the right one to ask
 > - [ ] §2 User stories and their traceability map
-> - [ ] §3.0 **Target variable** (FR-001..003) — *what a DNF scores; read this first*
-> - [ ] §3.1 Data acquisition (FR-101..109) — *incl. sprint weekend formats*
+> - [ ] §3.0 **Target variable** (FR-001..003a) — *what a DNF scores; read this first*
+> - [ ] §3.1 Data acquisition (FR-101..111) — *sprint formats; pagination and retry*
 > - [ ] §3.2 Feature engineering (FR-201..212) — *the leakage rules; regime-relative features; cold start*
 > - [ ] §3.3 Baselines (FR-301..305)
 > - [ ] §3.4 Model (FR-401..406)
@@ -23,7 +23,8 @@
 > - [ ] §4 Non-functional requirements
 > - [ ] §5 **Out of scope** — every deletion in P0 was justified from this list
 > - [ ] §6 Acceptance criteria — what "done" means
-> - [ ] §7 Open questions
+> - [ ] §7 Open questions — **OQ-6 needs your decision before collection starts**
+> - [ ] §7.1 **T-099 spike finding** — *why OQ-5 and OQ-7 are now closed*
 
 > This document states **what** the system must do and **why**. It contains no
 > implementation decisions — those live in `plan.md`. If you find yourself
@@ -85,7 +86,7 @@ to requirements and to an acceptance criterion that proves it:
 
 | Story | Served by | Proven by |
 |-------|-----------|-----------|
-| US-1 Reproducible dataset | FR-101..109, FR-508..510 | AC-1, AC-11 |
+| US-1 Reproducible dataset | FR-001..003a, FR-101..111, FR-508..510 | AC-1, AC-11, AC-15, AC-17 |
 | US-2 Honest evaluation | FR-500..507, FR-301..305 | AC-3, AC-4 |
 | US-3 Calibrated probabilities | FR-701..706, FR-751..755 | AC-5, AC-6, AC-9 |
 | US-4 Pre-race prediction | FR-801..804, FR-212, FR-402 | **AC-13** |
@@ -104,8 +105,10 @@ are meaningless without it.*
 | ID | Requirement |
 |----|-------------|
 | **FR-001** | The prediction target SHALL be **classified finishing position**, constructed as: (1) classified finishers in official finishing order, then (2) retirements ordered by laps completed descending — a later retirement scores better than an earlier one — then (3) disqualified entrants last. Ties SHALL be broken deterministically by starting grid position. |
-| **FR-002** | The unit of analysis SHALL be the **driver-race row**, for every driver who took the start. Entrants who did not start SHALL be excluded, and every exclusion SHALL be recorded with its reason. |
-| **FR-003** | Every row SHALL retain `status` (FINISHED / RETIRED / DISQUALIFIED), `laps_completed`, and `classified_position` as separate stored fields, so that metrics can be recomputed under an alternative target definition **without recollecting data**. |
+| **FR-001a** | WHERE the data source already publishes an official finishing order that encodes the FR-001 rule, the system SHALL **validate** that order against FR-001 rather than trusting it, and SHALL record every disagreement as a data-quality finding. A source ordering that agrees is used; one that disagrees is a defect to be investigated, not silently overridden. |
+| **FR-002** | The unit of analysis SHALL be the **driver-race row**, for every driver who took the start. Entrants who did not start SHALL be excluded, and every exclusion SHALL be recorded with its reason. Non-start SHALL be determined by the source's explicit withdrawal marker, **never** by inferring it from zero laps completed: a lap-1 retirement and a car that never started both complete zero laps, and conflating them would delete real races from the corpus. |
+| **FR-003** | Every row SHALL retain, as separate stored fields: the source's **raw status string verbatim**, a derived **classification outcome** (`CLASSIFIED` / `NOT_CLASSIFIED` / `DISQUALIFIED` / `WITHDRAWN`), `laps_completed`, and `classified_position` — so that metrics can be recomputed under an alternative target definition **without recollecting data**. The raw status SHALL NOT be collapsed into a small enum at collection time; it is a high-cardinality field (~30 distinct values per season) and its detail is the input to FR-752's retirement-cause analysis. |
+| **FR-003a** | The system SHALL NOT treat "did not finish" and "not classified" as the same condition. A car that retires late having completed enough race distance is still classified and still holds a finishing position. The classification outcome of FR-003 SHALL be derived from the source's position sentinel, not from the status string. |
 
 **Why this definition.** It matches how F1 itself classifies a race, keeps every
 starter in every race so field size is constant, and gives retirement an ordered
@@ -127,8 +130,10 @@ rather than re-argued.
 | **FR-105** | The system SHALL record, for every collected row, the season, round, and race date, sufficient to establish strict chronological ordering. |
 | **FR-106** | The system SHALL report collected row counts per season, and SHALL emit a warning WHERE a season's row count deviates from the expected race-count × entry-count by more than 10%. |
 | **FR-107** | The system SHALL NOT commit collected race data to version control. |
-| **FR-108** | Every collected race SHALL record its **weekend format** as one of `CONVENTIONAL`, `SPRINT_SETS_GRID`, or `SPRINT_STANDALONE`. The system SHALL NOT treat "qualifying result" as a single concept across the corpus: the session that sets the Grand Prix grid differs by format, and the field that records the grid SHALL be the grid actually started from, never inferred from a qualifying classification. |
+| **FR-108** | Every collected race SHALL record its **weekend format** as one of `CONVENTIONAL`, `SPRINT_SETS_GRID`, or `SPRINT_STANDALONE`, **and** SHALL retain the source's raw format string alongside it. The mapping SHALL be declared data: the upstream vocabulary is larger than this enum and has changed three times (`sprint` 2021–22, `sprint_shootout` 2023, `sprint_qualifying` 2024–25, all but the first being `SPRINT_STANDALONE`), so an unrecognised raw value SHALL be an error rather than a silent fallback to `CONVENTIONAL`. The system SHALL NOT treat "qualifying result" as a single concept across the corpus: the session that sets the Grand Prix grid differs by format, and the field that records the grid SHALL be the grid actually started from, never inferred from a qualifying classification. |
 | **FR-109** | Circuit attributes used by FR-505 and FR-602 — at minimum **circuit type** (street / permanent / hybrid) and **overtaking-difficulty tier** — SHALL be maintained as declared data alongside the regime table of FR-210, not inferred at run time. Every circuit in the corpus SHALL have an entry, and a missing entry SHALL be an error rather than a default. |
+| **FR-110** | WHERE the upstream API paginates, the system SHALL verify every response against the total-result count the API reports, and SHALL page to exhaustion before treating a season as collected. A truncated page SHALL be an error. A paginated request that returns fewer records than the API says exist looks identical to a complete small season, so completeness SHALL be asserted from the reported total, never inferred from a successful HTTP response. |
+| **FR-111** | The system SHALL retry transient network failures with exponential backoff, and SHALL distinguish transient failure from genuine absence of data. Exhausting retries SHALL be reported under FR-104; it SHALL NOT be recorded as a session that does not exist. |
 
 ### 3.2 Feature Engineering (FR-2xx)
 
@@ -353,8 +358,9 @@ This spec is satisfied when all of the following hold:
 - [ ] **AC-12** The regime table is declared data, every historical-performance feature is either regime-relative or declares why it cannot be, and the measured regime-transfer penalty for 2022 is committed to `results/` at two decay settings, labelled `n=1` and `DIAGNOSTIC`. *(FR-209, FR-210, FR-406, FR-511, FR-511a, FR-512)*
 - [ ] **AC-13** `predict-from-grid` accepts a documented CSV for an upcoming race and returns ranked predictions with intervals; a malformed CSV reports every violation at once; a missing upstream artifact names the command that produces it; and an entry with no prior history is served a declared fallback and flagged `LOW_INFORMATION`. *(FR-801..804, FR-212, US-4)*
 - [ ] **AC-14** The README states the v0 leakage defect and its controls, the non-commercial framing, and the full data-provenance position. *(FR-903, FR-904, FR-905, US-5)*
-- [ ] **AC-15** The target variable is implemented per FR-001, and `status`, `laps_completed`, and `classified_position` are all retained, such that switching to an alternative target definition requires no recollection. *(FR-001..003)*
+- [ ] **AC-15** The target variable is implemented per FR-001 and **validated against the source's own ordering**, with disagreements reported; raw status, classification outcome, `laps_completed`, and `classified_position` are all retained, such that switching to an alternative target definition requires no recollection. A withdrawn entrant is excluded and a zero-lap retirement is kept. *(FR-001..003a)*
 - [ ] **AC-16** Weekend format is recorded for every race, sprint results are admitted as a `PRE_RACE` feature with explicit nulls on conventional weekends, and every circuit has a declared type and overtaking tier. *(FR-108, FR-109, FR-211)*
+- [ ] **AC-17** Collection is provably complete, not merely successful: every season is paged to exhaustion and asserted against the API's reported total, an unrecognised weekend-format value raises rather than defaulting, and a simulated transient timeout is retried rather than recorded as missing data. *(FR-108, FR-110, FR-111)*
 
 ---
 
@@ -366,6 +372,62 @@ This spec is satisfied when all of the following hold:
 | **OQ-2** | Is a pre-race weather forecast source obtainable for historical races? If not, FR-206 forces dropping weather from the primary set entirely. | FR-206 | Investigate during Phase 1; dropping weather is the acceptable fallback. |
 | **OQ-3** | What is the documented calibration-error threshold for FR-705? | FR-705 | Set empirically once first reliability curves exist; must be fixed before any public claim. |
 | **OQ-4** | Which estimator for the irreducible noise floor? Near-identical-race variance, DNF-bound decomposition, or both? | FR-754 | Decide in P5 with real data; both are cheap, so likely both with the wider bound reported. |
-| **OQ-5** | Can 8 seasons actually be collected, given FastF1 coverage for 2018–19? **This is the project's highest-severity open risk**: FastF1 timing coverage begins in 2018, so 2018–2025 is *exactly* eight complete seasons and there is zero margin. A single failed season puts the project below its own Constitution IV.2 floor. | FR-101, FR-501a | Answered by T-106, which runs early in P1 precisely so the answer arrives before anything is built on it. If short, IV.2a governs: publish the shortfall, do not lower the bar. |
-| **OQ-6** | Given zero margin (OQ-5) and F1's regulation resets — 2022 (ground effect) and 2026 (new power units, active aero) — should the corpus window be regime-aware, and should `W` default to 8 or wider? | FR-508, FR-510, §5 | Decide once T-106 reports what actually collected. Three options: (a) keep `W`=8 and accept a mixed-regime corpus, (b) widen `W` beyond 8 as seasons accrue to build margin, (c) treat 2022+ as a separate regime and accept a smaller, cleaner corpus with a published IV.2a shortfall. Option (c) is compatible with §5 as narrowed — §5 now excludes only *predicting an unraced regime*, not restricting the corpus to one — but it trades corpus size for regime purity and would likely trigger IV.2a. |
-| **OQ-7** | **Does FastF1 serve race results, qualifying results, and standings for seasons before 2018?** The 2018 floor is believed to bind on session/timing/telemetry data, not on results data, which historically came via the Ergast-compatible backend and reaches back decades. If results data extends earlier, OQ-5's zero-margin problem dissolves, FR-511 rises from n=1 to n=3 (2014 hybrid, 2017 aero, 2022 ground effect), and FR-511a's IV.2 exemption can be withdrawn. **Counterweight:** Ergast was retired after 2024 and its successor is jolpica-f1, which plan D-8 rejected as a direct dependency — so the backend question must be answered, not assumed. | FR-101, FR-511, FR-511a, OQ-5, OQ-6 | Resolved by a spike (T-099) under Constitution VII.1a, run **before** T-106. Highest expected value per hour in the project: one afternoon either removes the project's largest risk or confirms the 8-season plan. |
+| **OQ-5** | ~~Can 8 seasons actually be collected, given FastF1 coverage for 2018–19?~~ **RESOLVED 2026-08-24 by T-099.** The zero-margin problem was an artefact of a false premise. FastF1's 2018 floor binds on lap and telemetry data only; results, qualifying, standings, and schedule are served by the Ergast-compatible backend and were verified working back to 1996. The corpus is not capped at 8 seasons. What replaces this risk is a *choice*, now tracked as OQ-6. | FR-101, FR-501a | Closed. No IV.2a shortfall is expected. |
+| **OQ-6** | **How far back should the corpus start?** T-099 removed the availability constraint, so this is now a modelling judgement with a real trade-off: older seasons buy margin and regulation-transfer observations, but describe cars decreasingly like the ones being predicted. Three candidates, with the FR-501 five-season training minimum applied to each reset: **(a) 2018** — 8 seasons, zero margin, FR-511 `n=1`, FR-511a exemption required. **(b) 2014** — 12 seasons, aligns the corpus start to the V6 hybrid era, FR-511 `n=1` compliant (2022) plus 2017 as a diagnostic. **(c) 2006** — 20 seasons, aligns to the introduction of knockout qualifying (the earliest season whose grid-formation features are comparable to today's), FR-511 `n=3` fully compliant (2014, 2017, 2022) and **FR-511a withdrawn entirely**. Note (c) admits the refuelling era (to 2009) and a tyre war, which FR-210's regime table must then declare. | FR-508, FR-510, FR-511a, §5 | **Owner decision, required before T-106.** Not resolvable from data alone — it trades corpus size against corpus relevance. |
+| **OQ-7** | ~~Does FastF1 serve race results, qualifying, and standings before 2018?~~ **RESOLVED 2026-08-24 by T-099: yes.** Verified against the live API: race results, qualifying, standings, and schedule return complete, fully-populated rows for every season probed from 1996 to 2025, including the `grid`, `laps`, `status`, and classified-position fields FR-001 and FR-003 require. `get_session(...).load(laps=False, telemetry=False)` also succeeds pre-2018 — the documented 2018 floor is a *timing-data* floor, not a results floor. Backend confirmed by reading the shipped source: fastf1 3.8.3 sets `BASE_URL = 'https://api.jolpi.ca/ergast/f1'`, so the project depends on jolpica **transitively through fastf1**, which is consistent with plan D-8's rejection of a *direct* dependency. See §7.1 for the full finding and the six defects it exposed. | FR-101, FR-511, FR-511a, OQ-5, OQ-6 | Closed. Feeds OQ-6, which is now the live question. |
+
+---
+
+### 7.1 T-099 Spike Finding — Pre-2018 Data Availability (OQ-7)
+
+*Run 2026-08-24 against the live API, fastf1 3.8.3. Spike code deleted per
+Constitution VII.1a; this section is its surviving output.*
+
+**The headline: the premise behind OQ-5 was wrong.** FastF1's widely-cited "2018
+floor" applies to lap timing and telemetry. Results data does not share it.
+
+| Probe | Seasons tested | Result |
+|-------|----------------|--------|
+| Race results | 1996–2025 | Complete. `position`, `positionText`, `grid`, `laps`, `status` populated on every row, zero nulls |
+| Qualifying results | 1996–2025 | Available throughout; **format differs** — see below |
+| Driver standings | 1996–2025 | Complete |
+| Race schedule | 1996–2025 | Complete |
+| Sprint results | 2021–2025 | Correct once paginated: 3 sprints in 2021–22, 6 in 2023–25 |
+| `get_session().load(laps=False, telemetry=False)` | 1996–2017 | **Succeeds.** Returns `ClassifiedPosition`, `GridPosition`, `Status`, `Laps`, `Q1..Q3` |
+
+**Qualifying format is the real constraint on corpus depth**, not availability.
+Knockout qualifying (Q1/Q2/Q3) begins in **2006**. 2005 has Q1/Q2 only; 1996–2003
+expose a single Q1 column under several incompatible formats. Any corpus starting
+before 2006 inherits a grid-formation process unlike the modern one — which is
+what makes OQ-6 a judgement rather than a lookup.
+
+**Six defects this exposed**, all now closed in §3.0 and §3.1:
+
+1. **FR-002 was unimplementable.** "Drivers who took the start" had no
+   discriminator: a withdrawn car and a lap-1 collision both show zero laps. The
+   source marks withdrawal explicitly (`W`); 2010 had 4 such rows, 2014 had 3.
+   Inferring from lap count would have silently deleted real lap-1 retirements.
+2. **FR-003's three-value status enum was far too coarse.** The real field carries
+   ~30 distinct values per season. Collapsing at collection time destroys exactly
+   the detail FR-752 needs. FR-003 now stores the raw string verbatim.
+3. **"Not finished" ≠ "not classified"** (new FR-003a). Bahrain 2022: Pérez and
+   Verstappen both stopped with fuel-pressure failures and were still classified
+   18th and 19th. A `status == "Finished"` test would have mislabelled them.
+4. **FR-001 is mostly already satisfied by the source** (new FR-001a). The
+   official `Position` field already orders retirements by distance and places
+   DSQ last — verified on Australia 2014 (8 retirements incl. a disqualification)
+   and Australia 2016. T-101a therefore *validates* rather than constructs. This
+   is recorded as an assumption to check, not a fact to trust.
+5. **Silent pagination truncation** (new FR-110). The API caps `limit` at 100
+   server-side; requesting 1000 returns 100 without error. This spike's own first
+   pass reported 2 sprint races in 2023 instead of 6 and looked entirely
+   successful. A season fetch that ignores the reported total will quietly
+   collect a fifth of the data.
+6. **Transient timeouts are real** (new FR-111). The 5-second default tripped
+   3 times across ~90 requests, then 0/8 on immediate retry. Without backoff,
+   FR-104 would record a live session as a permanently failed one.
+
+**Consequences.** OQ-5 closes with no IV.2a shortfall in prospect. FR-511's
+`n=1` and FR-511a's IV.2 exemption are no longer forced by the data — whether
+they survive now depends entirely on the OQ-6 corpus-start decision, which is
+the owner's to make.

@@ -38,14 +38,18 @@ models, plots, data/output, docs, .vscode, .qodo, .sixth.
 
 | ID | Task | Satisfies | Done when |
 |----|------|-----------|-----------|
-| ☐ **T-099** | **Spike — pre-2018 results availability (OQ-7)** | OQ-7, FR-101 | Documented answer on whether results/qualifying data predates 2018 and through which backend. Runs **before T-106**. Spike deleted after; finding recorded in spec. |
+| ☑ **T-099** | **Spike — pre-2018 results availability (OQ-7)** | OQ-7, FR-101 | **DONE 2026-08-24.** Answer: yes, back to 1996. Finding recorded in spec §7.1; spike deleted. Closed OQ-5, opened the OQ-6 corpus-start decision, and exposed six defects now closed as FR-001a, FR-003, FR-003a, FR-108, FR-110, FR-111. |
 | ☐ **T-101** | Define canonical row schema + validator in `data/schema.py` | FR-002, FR-003, FR-105, FR-108, FR-803 | Schema rejects missing/mistyped columns; carries `status`, `laps_completed`, `classified_position`, `weekend_format`; unit-tested |
 | ☐ **T-101a** | Implement the FR-001 target construction | FR-001, AC-15 | Finishers in official order, retirements by laps descending, DSQ last, ties broken by grid; unit-tested against a hand-built race with all four cases |
 | ☐ **T-101b** | Circuit attribute table | FR-109 | Every circuit in the corpus has type and overtaking tier; a missing entry raises |
+| ☐ **T-101c** | Validate source ordering against FR-001 | FR-001a | Every race's official order is checked against the FR-001 rule; disagreements are reported, not overridden. Regression test on Australia 2014 (8 retirements incl. a DSQ) and Australia 2016 |
+| ☐ **T-101d** | Withdrawal vs. lap-1 retirement discrimination | FR-002, FR-003a | Withdrawn entrants excluded via the source's explicit marker; a zero-lap *retirement* is retained. Test asserts Australia 2016 keeps 21 starters and drops exactly 1 withdrawal |
 | ☐ **T-102** | Implement per-season checkpoint write/read | FR-102 | `season_YYYY.parquet` written after each season; second run refetches nothing |
 | ☐ **T-103** | Implement resume-from-incomplete logic | FR-103 | Test: kill mid-run, rerun, verify no completed season refetched |
 | ☐ **T-104** | Per-race failure tolerance + failure summary | FR-104 | Injected session failure does not abort run; appears in summary |
 | ☐ **T-105** | Row-count sanity warnings | FR-106 | Season with >10% row deviation emits warning |
+| ☐ **T-105a** | Pagination completeness assertion | FR-110 | Collector pages to exhaustion and asserts against the API's reported total; a truncated season raises. Test: 2023 yields 6 sprint races, not 2 |
+| ☐ **T-105b** | Transient-failure retry with backoff | FR-111 | Retries on timeout; exhausted retries surface via FR-104 and are never recorded as absent data |
 | ☐ **T-100** | Phase-entry dependency check | NFR-06, NFR-07 | `pip check` exits 0; pinned set re-verified against the index; audit date updated in `requirements.txt`. **Repeats at the start of every phase.** |
 | ☐ **T-106** | Run collection for the 8 completed seasons 2018–2025 | FR-101, FR-509 | **≥8 seasons** present; per-season counts reported; shortfall recorded if any (FR-501a). 2026 excluded — in progress. |
 | ☐ **T-106a** | Resolve **OQ-5** and report margin | FR-101, FR-501a | Explicit statement of how many of the 8 collected cleanly, and whether the IV.2 floor is met |
@@ -171,7 +175,8 @@ Every requirement maps to at least one task:
 | Group | Requirements | Covered by |
 |-------|-------------|------------|
 | **Target variable** | FR-001..003 | T-101, T-101a |
-| Data | FR-101..109 | T-099, T-101, T-101b, T-102..106, T-106a, T-005 |
+| Target variable | FR-001..003a | T-101a, T-101c, T-101d |
+| Data | FR-101..111 | T-099, T-101, T-101b, T-102..106, T-105a, T-105b, T-106a, T-005 |
 | Features | FR-201..212 | T-201..213 |
 | Baselines | FR-301..305 | T-301..304, T-310, T-311 |
 | Model | FR-401..406 | T-401..405, T-408 |
@@ -211,3 +216,4 @@ the spec is amended before the code diverges.*
 | 2026-08-20 | — | §7 | **OQ-5 severity raised; new OQ-6** (regime-awareness and choice of `W`) | FastF1 coverage begins in 2018, making 2018–2025 exactly the eight-season IV.2 floor with zero margin. Recorded as the project's highest-severity risk rather than discovered during collection. |
 | 2026-08-15 | T-003 | plan §2 | **Plan amendment A-2**: added `pyproject.toml` to the retained tree | Plan §2 omitted a build file, but T-003 requires the package be importable and installable. Standard src-layout packaging. |
 | 2026-08-15 | T-001 | plan §5 | **Plan amendment A-1**: v0 sources are deleted from the tree in P0 and ported from tag `v0-vibe-coded` on demand | Plan §5 implied Port/Rewrite files remain in the tree, contradicting P0's exit gate. Porting from the tag resolves it and enforces deliberate reintroduction. |
+| 2026-08-24 | T-099 | OQ-5, OQ-6, OQ-7, FR-001a, FR-003, FR-003a, FR-108, FR-110, FR-111 | **Spike T-099 executed.** OQ-7 and OQ-5 closed; OQ-6 reframed as the corpus-start decision; six defects closed; new §7.1 records the finding. | Results data reaches back to 1996, so the 2018 floor never bound the corpus. Probing the real payload also showed FR-002 was unimplementable, FR-003's status enum was far too coarse, "not finished" is not "not classified", pagination truncates silently, and the default timeout trips intermittently. |
