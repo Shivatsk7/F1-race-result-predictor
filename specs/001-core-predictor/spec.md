@@ -1,9 +1,9 @@
 # Spec 001 — Core Predictor
 
-**Status:** ☐ DRAFT — NOT RATIFIED. Implementation blocked per Constitution IX.1.
+**Status:** ☑ RATIFIED — implementation permitted per Constitution IX.1.
 **Drafted by:** Claude (agent). Per Constitution IX.3, the drafting agent may not ratify.
-**Ratified by:** _pending — Shiva Kaushik_
-**Ratified on:** _pending_
+**Ratified by:** — Shiva Kaushik - Done
+**Ratified on:** - 2026-08-25
 **Created:** 2026-08-15
 **Governed by:** `.specify/memory/constitution.md` v1.3.0
 
@@ -14,19 +14,19 @@
 > - [x] §1 Problem statement — the question is the right one to ask
 > - [x] §2 User stories and their traceability map
 > - [x] §3.0 **Target variable** (FR-001..003a) — *what a DNF scores; read this first*
-> - [ ] §3.1 Data acquisition (FR-101..111, FR-104a..c) — *sprint formats; pagination and retry*
-> - [ ] §3.2 Feature engineering (FR-201..218) — *leakage rules; regime-relative features; cold start; **telemetry group and transfer robustness***
+> - [x] §3.1 Data acquisition (FR-101..111, FR-104a..c) — *sprint formats; pagination and retry*
+> - [x] §3.2 Feature engineering (FR-201..218) — *leakage rules; regime-relative features; cold start; **telemetry group and transfer robustness***
 > - [x] §3.3 Baselines (FR-301..305)
 > - [x] §3.4 Model (FR-401..406)
-> - [ ] §3.5 Evaluation (FR-500..512) — *primary metric; **16-season window from 2010**; regulation-transfer experiment, `n=2`*
-> - [ ] §3.6–3.7 Simulation and calibration (FR-601..605, FR-701..706)
-> - [ ] §3.7a **Race randomness** (FR-751..755, FR-751a) — *Article X: noise floor, proper scoring*
+> - [x] §3.5 Evaluation (FR-500..512) — *primary metric; **16-season window from 2010**; regulation-transfer experiment, `n=2`*
+> - [x] §3.6–3.7 Simulation and calibration (FR-601..605, FR-701..706)
+> - [x] §3.7a **Race randomness** (FR-751..755, FR-751a) — *Article X: noise floor, proper scoring*
 > - [x] §3.8–3.9 Interface and documentation (FR-801..804, FR-901..905)
 > - [x] §4 Non-functional requirements
-> - [ ] §5 **Out of scope** — every deletion in P0 was justified from this list
-> - [ ] §6 Acceptance criteria — what "done" means
-> - [ ] §7 Open questions — *OQ-5, OQ-6, OQ-7 all closed; OQ-1..4 resolve from data*
-> - [ ] §7.1 **T-099 spike finding** — *why OQ-5 and OQ-7 are now closed*
+> - [x] §5 **Out of scope** — every deletion in P0 was justified from this list
+> - [x] §6 Acceptance criteria — what "done" means
+> - [x] §7 Open questions — *OQ-5, OQ-6, OQ-7 all closed; OQ-1..4 resolve from data*
+> - [x] §7.1 **T-099 spike finding** — *why OQ-5 and OQ-7 are now closed*
 
 > This document states **what** the system must do and **why**. It contains no
 > implementation decisions — those live in `plan.md`. If you find yourself
