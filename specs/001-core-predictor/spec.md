@@ -5,25 +5,27 @@
 **Ratified by:** _pending — Shiva Kaushik_
 **Ratified on:** _pending_
 **Created:** 2026-08-15
-**Governed by:** `.specify/memory/constitution.md` v1.2.0
+**Governed by:** `.specify/memory/constitution.md` v1.3.0
 
-> **Ratification checklist** — tick each section once read in full (IX.2):
+> **Ratification checklist** — tick each section once read in full (IX.2).
+> Ticked entries were verified byte-identical to the text read on 2026-08-25.
+> Unticked entries changed after that read and need re-reading before signing.
 >
-> - [#] §1 Problem statement — the question is the right one to ask
-> - [ ] §2 User stories and their traceability map
-> - [ ] §3.0 **Target variable** (FR-001..003a) — *what a DNF scores; read this first*
-> - [ ] §3.1 Data acquisition (FR-101..111) — *sprint formats; pagination and retry*
-> - [ ] §3.2 Feature engineering (FR-201..216) — *the leakage rules; regime-relative features; cold start*
-> - [ ] §3.3 Baselines (FR-301..305)
-> - [ ] §3.4 Model (FR-401..406)
-> - [ ] §3.5 Evaluation (FR-500..512) — *primary metric, rolling corpus window, regulation-transfer diagnostic and its IV.2 exemption*
+> - [x] §1 Problem statement — the question is the right one to ask
+> - [x] §2 User stories and their traceability map
+> - [x] §3.0 **Target variable** (FR-001..003a) — *what a DNF scores; read this first*
+> - [ ] §3.1 Data acquisition (FR-101..111, FR-104a..c) — *sprint formats; pagination and retry*
+> - [ ] §3.2 Feature engineering (FR-201..218) — *leakage rules; regime-relative features; cold start; **telemetry group and transfer robustness***
+> - [x] §3.3 Baselines (FR-301..305)
+> - [x] §3.4 Model (FR-401..406)
+> - [ ] §3.5 Evaluation (FR-500..512) — *primary metric; **16-season window from 2010**; regulation-transfer experiment, `n=2`*
 > - [ ] §3.6–3.7 Simulation and calibration (FR-601..605, FR-701..706)
-> - [ ] §3.7a **Race randomness** (FR-751..755) — *Article X: noise floor, proper scoring*
-> - [ ] §3.8–3.9 Interface and documentation (FR-801..804, FR-901..905)
-> - [ ] §4 Non-functional requirements
+> - [ ] §3.7a **Race randomness** (FR-751..755, FR-751a) — *Article X: noise floor, proper scoring*
+> - [x] §3.8–3.9 Interface and documentation (FR-801..804, FR-901..905)
+> - [x] §4 Non-functional requirements
 > - [ ] §5 **Out of scope** — every deletion in P0 was justified from this list
 > - [ ] §6 Acceptance criteria — what "done" means
-> - [ ] §7 Open questions — *OQ-5, OQ-6, OQ-7 closed; OQ-1..4 resolve from data*
+> - [ ] §7 Open questions — *OQ-5, OQ-6, OQ-7 all closed; OQ-1..4 resolve from data*
 > - [ ] §7.1 **T-099 spike finding** — *why OQ-5 and OQ-7 are now closed*
 
 > This document states **what** the system must do and **why**. It contains no
@@ -127,6 +129,9 @@ rather than re-argued.
 | **FR-102** | The system SHALL persist a per-season checkpoint after each season completes, and SHALL NOT refetch any season for which a valid checkpoint exists. |
 | **FR-103** | WHEN collection is interrupted, THE SYSTEM SHALL, on the next run, resume from the first incomplete season without refetching completed seasons. |
 | **FR-104** | WHEN a single race session fails to load, THE SYSTEM SHALL record the failure, continue collecting remaining races, and report all failures in a summary at completion. |
+| **FR-104a** | A race whose collection fails SHALL be **excluded whole**, never stored partially. A partially collected race silently shrinks a field, which corrupts every field-relative feature of FR-209. |
+| **FR-104b** | A failed race SHALL remain a **gap, not a deletion**: it SHALL be recorded in a failure manifest with season, round, date, and reason; the manifest SHALL be written alongside the data and reproduced in every results file. Rolling features of FR-203 SHALL treat a failed race as absent rather than as a race that never happened, and SHALL retain the count of races each feature was actually computed over. |
+| **FR-104c** | Collection SHALL abort, rather than continue, IF failures exceed a documented threshold within a season or across the run. Continuing past widespread failure yields a corpus that looks complete and is not. The threshold SHALL be configurable with a documented default and SHALL be recorded in the failure manifest. |
 | **FR-105** | The system SHALL record, for every collected row, the season, round, and race date, sufficient to establish strict chronological ordering. |
 | **FR-106** | The system SHALL report collected row counts per season, and SHALL emit a warning WHERE a season's row count deviates from the expected race-count × entry-count by more than 10%. |
 | **FR-107** | The system SHALL NOT commit collected race data to version control. |
@@ -156,6 +161,9 @@ rather than re-argued.
 | **FR-214** | Telemetry-derived features SHALL be **explicitly null for seasons the telemetry source does not cover** (before 2018), and the null SHALL never be imputed. Their coverage SHALL be reported per season alongside the corpus resolution of FR-510. |
 | **FR-215** | Because FR-214 leaves telemetry features undefined for roughly half the corpus, they SHALL NOT enter the primary feature set of FR-202. Their value SHALL be measured as a **separate arm** — the primary model versus the primary model plus telemetry, on the telemetry-covered seasons only — and any benefit SHALL be reported with the reduced season count stated alongside it. |
 | **FR-216** | WHERE a driver changes constructor between races, constructor-derived rolling features SHALL NOT carry the previous constructor's history across the move; they SHALL be recomputed against the new constructor or take the FR-212 fallback where no history exists. Driver-derived features SHALL carry across unchanged. Every transfer SHALL be recorded, and the first race after a transfer SHALL be flagged `POST_TRANSFER` in all output. |
+
+| **FR-217** | WHERE a driver has no prior history in the corpus, the system MAY supplement FR-212's fallbacks with **junior-formula results** from a declared external source, subject to every following condition: (1) each record SHALL carry an event date and SHALL be admitted only IF that date precedes the race being predicted; (2) records without a usable date SHALL be discarded, never estimated; (3) the source, retrieval date, and licence SHALL be recorded under FR-905; (4) retrieved data SHALL be cached and version-pinned, so that FR-208's determinism survives a source that changes underneath the project. |
+| **FR-218** | Junior-formula features SHALL be declared `PRE_RACE`, SHALL be null for drivers with no such history, and rows relying on them SHALL retain the `LOW_INFORMATION` flag of FR-212. The leakage check of FR-205 SHALL be extended to fail IF any admitted record's event date is on or after the race date. |
 
 ### 3.3 Baselines (FR-3xx)
 
@@ -377,6 +385,8 @@ This spec is satisfied when all of the following hold:
 - [ ] **AC-18** All five randomness factors are modelled as distributions, and weather appears in the primary set only as a pre-race forecast or prior while observed weather appears only in the oracle set. *(FR-751, FR-751a, FR-602, FR-206)*
 - [ ] **AC-19** Telemetry features form a named group, are explicitly null before 2018 with per-season coverage reported, are absent from the primary feature set, and their benefit is measured as a separate arm with its reduced season count stated. *(FR-213, FR-214, FR-215)*
 - [ ] **AC-20** A driver changing constructor mid-corpus does not inherit the old constructor's rolling features, the transfer is recorded, and the next race is flagged `POST_TRANSFER`. Regression test on a known mid-corpus move. *(FR-216)*
+- [ ] **AC-21** A failed race is excluded whole, appears in the failure manifest reproduced in results files, is treated as absent by rolling features, and a run exceeding the failure threshold aborts. *(FR-104, FR-104a, FR-104b, FR-104c)*
+- [ ] **AC-22** A junior-formula record dated on or after the race being predicted causes the leakage check to fail; undated records are discarded; source, retrieval date and licence appear in the README; a re-run from cache reproduces byte-identical features. *(FR-217, FR-218, FR-208)*
 
 ---
 

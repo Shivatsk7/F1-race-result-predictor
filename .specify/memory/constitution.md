@@ -1,8 +1,8 @@
 # Project Constitution
 
 **Project:** Race Result Predictor
-**Version:** 1.2.0
-**Ratified:** 2026-08-15 (v1.0.0) · Amended 2026-08-15 (v1.1.0, v1.2.0)
+**Version:** 1.3.0
+**Ratified:** 2026-08-15 (v1.0.0) · Amended 2026-08-15 (v1.1.0, v1.2.0), 2026-08-25 (v1.3.0)
 
 This document defines the non-negotiable rules of this project. Every spec, plan,
 and task must comply. Where a spec conflicts with this constitution, the
@@ -254,8 +254,15 @@ the phenomenon being predicted, and a model that ignores them is wrong even when
 its point predictions look accurate.
 
 **X.1** The system SHALL explicitly model irreducible race randomness — at
-minimum: retirement, safety-car incidence, pace variability, and position-change
-volatility — as **distributions over outcomes**.
+minimum: retirement, safety-car incidence, pace variability, position-change
+volatility, and **weather-condition volatility** — as **distributions over
+outcomes**.
+
+**X.1a** Weather occupies two distinct roles and they SHALL NOT be conflated. As
+an *input*, only a pre-race forecast or climatological prior is admissible
+(III.2). As a *source of randomness*, race-day conditions SHALL be modelled as a
+distribution under X.1. Observed race weather is inadmissible in both roles.
+Modelling that it might rain is required; knowing that it did is prohibited.
 
 **X.2** No prediction SHALL be published as a bare point estimate. Every
 predicted position SHALL carry a distribution or interval expressing its
@@ -294,6 +301,8 @@ zero.
 | **1.2.0** | **2026-08-15** | **VII.1 narrowed to production code**; new VII.1a exempts spikes, support code, and behaviour-preserving refactors. | The rule banned investigation, not just unrequested features. Owner: "don't forbid writing supportive code if required." |
 | **1.2.0** | **2026-08-15** | **IV.2 raised**: 8-season corpus, 5 training, 3 holdout. New IV.2a requires publishing any shortfall rather than lowering the bar. | Owner judged the previous floor too small to learn from. Note: the old three-season figure was the *holdout* minimum, not a cap on training. |
 | **1.2.0** | **2026-08-15** | **New III.6** distinguishing leakage from stochasticity; **new Article X — Race Randomness Must Be Modelled, Not Known** | Owner observed Article III addressed F1's unpredictability only by prohibition. Article III was **not** loosened: supplying actual outcomes deletes uncertainty rather than modelling it. Instead the missing affirmative obligation was added, including X.5's irreducible noise floor. |
+
+| **1.3.0** | **2026-08-25** | **X.1 extended**: weather-condition volatility added as a fifth required randomness factor. New X.1a separating weather's input role from its randomness role. | Owner observed that FR-751..755 never mentioned weather. Article X's own rationale named "weather swings" as irreducible randomness, but X.1's enumerated minimum omitted it, and the spec inherited the omission. |
 
 ### Outstanding compliance debt
 
