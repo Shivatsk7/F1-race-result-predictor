@@ -9,7 +9,7 @@
 
 > **Ratification checklist** — tick each section once read in full (IX.2):
 >
-> - [ ] §1 Problem statement — the question is the right one to ask
+> - [#] §1 Problem statement — the question is the right one to ask
 > - [ ] §2 User stories and their traceability map
 > - [ ] §3.0 **Target variable** (FR-001..003a) — *what a DNF scores; read this first*
 > - [ ] §3.1 Data acquisition (FR-101..111) — *sprint formats; pagination and retry*
@@ -23,7 +23,7 @@
 > - [ ] §4 Non-functional requirements
 > - [ ] §5 **Out of scope** — every deletion in P0 was justified from this list
 > - [ ] §6 Acceptance criteria — what "done" means
-> - [ ] §7 Open questions — **OQ-6 needs your decision before collection starts**
+> - [ ] §7 Open questions — *OQ-5, OQ-6, OQ-7 closed; OQ-1..4 resolve from data*
 > - [ ] §7.1 **T-099 spike finding** — *why OQ-5 and OQ-7 are now closed*
 
 > This document states **what** the system must do and **why**. It contains no
@@ -186,11 +186,11 @@ rather than re-argued.
 | **FR-505** | Evaluation SHALL segment results by season, by circuit type, and by overtaking-difficulty tier as declared in FR-109, so that aggregate performance cannot conceal systematic failure. |
 | **FR-506** | Evaluation SHALL emit a machine-readable results file alongside the human-readable report. |
 | **FR-507** | IF the model does not beat the grid baseline on the primary metric with a confidence interval excluding zero, THEN the evaluation output SHALL state this explicitly and prominently. |
-| **FR-508** | The corpus SHALL be a **fixed-width rolling window** of the `W` most recently completed seasons. WHEN a new season completes, the window SHALL advance by one season at **both** ends — the newly completed season enters, the oldest leaves — and all reported results SHALL be regenerated rather than carried forward. |
+| **FR-508** | The corpus SHALL be a **fixed-width rolling window** of the `W` most recently completed seasons, with a default width of **16**, resolving to 2010–2025 as of the 2025 season. WHEN a new season completes, the window SHALL advance by one season at **both** ends — the newly completed season enters, the oldest leaves — and all reported results SHALL be regenerated rather than carried forward. |
 | **FR-509** | The window SHALL admit **completed seasons only**. An in-progress season SHALL NOT enter the training or evaluation corpus, and its partial row count SHALL NOT trigger the FR-106 deviation warning. An in-progress season MAY still be a *prediction target* under FR-801; being predictable and being admissible to the corpus are distinct roles. |
-| **FR-510** | `W` SHALL be a configurable parameter with a documented default, never a constant embedded in code, and its value SHALL be recorded in every results file alongside the concrete season list the window resolved to. **`W` SHALL NOT resolve below 8** for any reported result; a configuration attempting it SHALL fail loudly rather than silently producing a sub-constitutional corpus. The sole exception is the FR-511 diagnostic. |
-| **FR-511** | Evaluation SHALL include a **regulation-transfer experiment** quantifying what a regime change costs: the primary metric (FR-500) for a model trained on all seasons strictly prior to a reset season and evaluated on that reset season, compared against the identical protocol applied to **the season immediately preceding that reset**. The difference SHALL be reported as the **measured regime-transfer penalty**, with the number of transitions observed stated alongside it. |
-| **FR-511a** | The FR-511 experiment is a **diagnostic and is exempt from the FR-501 training-season minimum**, because training strictly prior to a reset inside an 8-season corpus cannot reach 5 seasons. It SHALL report its actual training-season count, SHALL be labelled `DIAGNOSTIC` in `results/`, and SHALL NOT support any headline claim. Constitution IV.2 continues to govern every reported result; this requirement narrows where it binds, it does not weaken it. |
+| **FR-510** | `W` SHALL be a configurable parameter with a documented default, never a constant embedded in code, and its value SHALL be recorded in every results file alongside the concrete season list the window resolved to. **`W` SHALL NOT resolve below 8** for any reported result; a configuration attempting it SHALL fail loudly rather than silently producing a sub-constitutional corpus. |
+| **FR-511** | Evaluation SHALL include a **regulation-transfer experiment** quantifying what a regime change costs: the primary metric (FR-500) for a model trained on all seasons strictly prior to a reset season and evaluated on that reset season, compared against the identical protocol applied to **the season immediately preceding that reset**. The difference SHALL be reported as the **measured regime-transfer penalty**, with the number of transitions observed stated alongside it. The experiment SHALL run over the **full collected archive rather than the FR-508 rolling window**: it is a diagnostic about regulatory history, not about present-day relevance, and binding it to a window that advances yearly would silently destroy observations as they age out. |
+| **FR-511a** | The FR-511 experiment SHALL report its **actual training-season count per transition**, and SHALL evaluate each transition against the FR-501 five-season minimum independently. A transition meeting the minimum is a compliant result. A transition falling short SHALL be labelled `DIAGNOSTIC` in `results/` and SHALL NOT support any headline claim. **No blanket exemption from Constitution IV.2 is granted or implied** — the 2010 corpus start removed the need for one. This requirement exists so that a future narrowing of the corpus cannot reintroduce the conflict unnoticed. |
 | **FR-512** | The regulation-transfer experiment SHALL be run at both zero and non-zero recency decay (FR-406), so that any claimed robustness benefit is measured rather than asserted. |
 
 **Why Spearman is the primary metric (FR-500).** The task is fundamentally
@@ -205,10 +205,10 @@ and driver line-ups may actively mislead a prediction made years later. Dropping
 the oldest season as a new one arrives is therefore a modelling decision, not
 merely bookkeeping. But whether recency beats volume is an *empirical* question,
 which is why FR-510 forbids hard-coding `W` — a fixed constant would foreclose
-ever measuring the trade-off. Note two present-day consequences: with 2018 the
-earliest season FastF1 covers, an 8-wide window is **pinned** until the 2026
-season completes, and a window that always drops its oldest season never
-accumulates margin above the Constitution IV.2 floor (see OQ-6).
+ever measuring the trade-off. The window is 16 wide by default,
+resolving to 2010–2025, and it does advance at both ends: when 2026 completes,
+2010 leaves. Note the consequence this has for FR-511, which is why that
+experiment is deliberately **not** bound to the window — see below.
 
 **On regulation robustness (FR-209, FR-210, FR-406, FR-511, FR-512).** Two
 different problems hide behind "handle regulation changes", and only one is
@@ -226,28 +226,35 @@ A feature written as `team_avg_finish = 4.2` dies at a reset; the same feature
 written as `team_rank_in_field = 2` survives it. This is a constraint on how
 features are written, not additional machinery.
 
-**Limitation, stated up front.** The 2018–2025 corpus contains exactly **one**
-major regulation transition (2022, ground effect). FR-511 therefore rests on a
-single observation. It SHALL be reported as one observation and never
-generalised into a rate or a law. A single measured number with an honest `n=1`
-attached is still worth far more than an unmeasured assurance that the model
-"handles" regulation changes.
-
-The experiment concretely resolves to:
+**How many transitions, and how compliant.** The 2010–2025 archive spans three
+declared resets. Each is tested independently and each stands or falls on its
+own training-season count:
 
 ```
-reset arm       train 2018-2021 -> test 2022   (4 training seasons)
-comparator arm  train 2018-2020 -> test 2021   (3 training seasons)
-penalty         = comparator Spearman - reset Spearman
+2014  V6 hybrid       train 2010-2013 -> test 2014   (4 seasons)  DIAGNOSTIC
+2017  wider cars      train 2010-2016 -> test 2017   (7 seasons)  compliant
+2022  ground effect   train 2010-2021 -> test 2022  (12 seasons)  compliant
+
+comparator arm, e.g. for 2022:
+      train 2010-2020 -> test 2021  (11 seasons)
+penalty = comparator Spearman - reset Spearman
 ```
 
-Both arms fall below Constitution IV.2's five-season training minimum, which is
-unavoidable: no 8-season corpus can put five training seasons strictly before a
-reset that sits in its middle. FR-511a grants the exemption explicitly and
-confines it to a `DIAGNOSTIC`-labelled artifact rather than letting the conflict
-be discovered and quietly rationalised during implementation. **If OQ-7 resolves
-favourably and the corpus extends before 2018, this exemption becomes
-unnecessary and SHALL be withdrawn** — the preferred outcome.
+So FR-511 rests on **two compliant observations plus one diagnostic**, and no
+blanket IV.2 exemption is required. `n=2` is still small and SHALL be reported
+as two observations, never generalised into a rate or a law — but it is twice
+what the 2018 corpus could offer, and it is honestly compliant rather than
+carved out.
+
+**Why FR-511 is not bound to the rolling window.** A 16-wide window advancing
+yearly would eventually push each reset out of reach. The 2017 transition needs
+five training seasons before it, so it survives only while the corpus starts at
+or before 2012 — that is, through the 2027 season. From 2028 the window would
+begin at 2013 and 2017 would silently drop to `DIAGNOSTIC`, taking the count
+back to `n=1` with nothing in the output to explain why. Running the experiment
+over the full collected archive rather than the window makes the observation
+count **stable and growing** instead of quietly decaying, and costs nothing:
+the seasons are already on disk.
 
 ### 3.6 Race Simulation (FR-6xx)
 
@@ -355,7 +362,7 @@ This spec is satisfied when all of the following hold:
 - [ ] **AC-9** The irreducible noise floor is estimated, committed to `results/`, and model error is reported relative to it. *(FR-754, FR-755)*
 - [ ] **AC-10** No prediction anywhere in the system is emitted as a bare point estimate. *(FR-752)*
 - [ ] **AC-11** The corpus window is resolved from completed seasons at run time, `W` is configurable, and every results file records both `W` and the concrete season list used. Advancing the system clock past a season boundary changes the window without a code edit. *(FR-508..510)*
-- [ ] **AC-12** The regime table is declared data, every historical-performance feature is either regime-relative or declares why it cannot be, and the measured regime-transfer penalty for 2022 is committed to `results/` at two decay settings, labelled `n=1` and `DIAGNOSTIC`. *(FR-209, FR-210, FR-406, FR-511, FR-511a, FR-512)*
+- [ ] **AC-12** The regime table is declared data, every historical-performance feature is either regime-relative or declares why it cannot be, and the measured regime-transfer penalty is committed to `results/` for **2014, 2017 and 2022** at two decay settings — each carrying its actual training-season count, with 2014 labelled `DIAGNOSTIC` and the headline stated as `n=2`. *(FR-209, FR-210, FR-406, FR-511, FR-511a, FR-512)*
 - [ ] **AC-13** `predict-from-grid` accepts a documented CSV for an upcoming race and returns ranked predictions with intervals; a malformed CSV reports every violation at once; a missing upstream artifact names the command that produces it; and an entry with no prior history is served a declared fallback and flagged `LOW_INFORMATION`. *(FR-801..804, FR-212, US-4)*
 - [ ] **AC-14** The README states the v0 leakage defect and its controls, the non-commercial framing, and the full data-provenance position. *(FR-903, FR-904, FR-905, US-5)*
 - [ ] **AC-15** The target variable is implemented per FR-001 and **validated against the source's own ordering**, with disagreements reported; raw status, classification outcome, `laps_completed`, and `classified_position` are all retained, such that switching to an alternative target definition requires no recollection. A withdrawn entrant is excluded and a zero-lap retirement is kept. *(FR-001..003a)*
@@ -373,7 +380,7 @@ This spec is satisfied when all of the following hold:
 | **OQ-3** | What is the documented calibration-error threshold for FR-705? | FR-705 | Set empirically once first reliability curves exist; must be fixed before any public claim. |
 | **OQ-4** | Which estimator for the irreducible noise floor? Near-identical-race variance, DNF-bound decomposition, or both? | FR-754 | Decide in P5 with real data; both are cheap, so likely both with the wider bound reported. |
 | **OQ-5** | ~~Can 8 seasons actually be collected, given FastF1 coverage for 2018–19?~~ **RESOLVED 2026-08-24 by T-099.** The zero-margin problem was an artefact of a false premise. FastF1's 2018 floor binds on lap and telemetry data only; results, qualifying, standings, and schedule are served by the Ergast-compatible backend and were verified working back to 1996. The corpus is not capped at 8 seasons. What replaces this risk is a *choice*, now tracked as OQ-6. | FR-101, FR-501a | Closed. No IV.2a shortfall is expected. |
-| **OQ-6** | **How far back should the corpus start?** T-099 removed the availability constraint, so this is now a modelling judgement with a real trade-off: older seasons buy margin and regulation-transfer observations, but describe cars decreasingly like the ones being predicted. Three candidates, with the FR-501 five-season training minimum applied to each reset: **(a) 2018** — 8 seasons, zero margin, FR-511 `n=1`, FR-511a exemption required. **(b) 2014** — 12 seasons, aligns the corpus start to the V6 hybrid era, FR-511 `n=1` compliant (2022) plus 2017 as a diagnostic. **(c) 2006** — 20 seasons, aligns to the introduction of knockout qualifying (the earliest season whose grid-formation features are comparable to today's), FR-511 `n=3` fully compliant (2014, 2017, 2022) and **FR-511a withdrawn entirely**. Note (c) admits the refuelling era (to 2009) and a tyre war, which FR-210's regime table must then declare. | FR-508, FR-510, FR-511a, §5 | **Owner decision, required before T-106.** Not resolvable from data alone — it trades corpus size against corpus relevance. |
+| **OQ-6** | ~~How far back should the corpus start?~~ **RESOLVED 2026-08-25 by the owner: 2010.** The first season after the refuelling ban, so every grid in the corpus was set on low fuel and means what a modern grid means — which matters because §1's whole question is whether a model can beat the grid. A 2006 start would have bought a third transition at the cost of four seasons (2006–09) whose Q3 ran on race fuel, contaminating the baseline the project is measured against. 2010 gives a 16-season corpus, FR-511 `n=2` compliant (2017, 2022) plus 2014 as a diagnostic, and retires the FR-511a exemption. | FR-508, FR-510, FR-511a | Closed. `W` default is now 16; FR-210's regime table gains a 2010 row. |
 | **OQ-7** | ~~Does FastF1 serve race results, qualifying, and standings before 2018?~~ **RESOLVED 2026-08-24 by T-099: yes.** Verified against the live API: race results, qualifying, standings, and schedule return complete, fully-populated rows for every season probed from 1996 to 2025, including the `grid`, `laps`, `status`, and classified-position fields FR-001 and FR-003 require. `get_session(...).load(laps=False, telemetry=False)` also succeeds pre-2018 — the documented 2018 floor is a *timing-data* floor, not a results floor. Backend confirmed by reading the shipped source: fastf1 3.8.3 sets `BASE_URL = 'https://api.jolpi.ca/ergast/f1'`, so the project depends on jolpica **transitively through fastf1**, which is consistent with plan D-8's rejection of a *direct* dependency. See §7.1 for the full finding and the six defects it exposed. | FR-101, FR-511, FR-511a, OQ-5, OQ-6 | Closed. Feeds OQ-6, which is now the live question. |
 
 ---
@@ -399,7 +406,9 @@ floor" applies to lap timing and telemetry. Results data does not share it.
 Knockout qualifying (Q1/Q2/Q3) begins in **2006**. 2005 has Q1/Q2 only; 1996–2003
 expose a single Q1 column under several incompatible formats. Any corpus starting
 before 2006 inherits a grid-formation process unlike the modern one — which is
-what makes OQ-6 a judgement rather than a lookup.
+what made OQ-6 a judgement rather than a lookup. **Resolved: the corpus starts
+in 2010**, the first post-refuelling season, so the whole corpus shares one
+low-fuel qualifying convention.
 
 **Six defects this exposed**, all now closed in §3.0 and §3.1:
 
@@ -427,7 +436,7 @@ what makes OQ-6 a judgement rather than a lookup.
    3 times across ~90 requests, then 0/8 on immediate retry. Without backoff,
    FR-104 would record a live session as a permanently failed one.
 
-**Consequences.** OQ-5 closes with no IV.2a shortfall in prospect. FR-511's
-`n=1` and FR-511a's IV.2 exemption are no longer forced by the data — whether
-they survive now depends entirely on the OQ-6 corpus-start decision, which is
-the owner's to make.
+**Consequences.** OQ-5 closes with no IV.2a shortfall in prospect. OQ-6 was
+settled by the owner on 2026-08-25 in favour of a **2010 start**: 16 seasons,
+FR-511 at `n=2` compliant plus one diagnostic, and FR-511a's blanket IV.2
+exemption withdrawn.

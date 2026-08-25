@@ -185,7 +185,7 @@ cannot be forgotten at a call site.
 `CorpusWindow` that resolves itself from what is on disk:
 
 ```python
-CorpusWindow(width=8, as_of=date.today())
+CorpusWindow(width=16, as_of=date.today())
     -> completed seasons only, newest W, oldest dropped
 ```
 
@@ -194,12 +194,17 @@ makes FR-508's advance automatic — no code or config edit occurs at a season
 boundary, the window simply resolves differently — and makes FR-509 structural,
 since an in-progress season cannot satisfy the completeness test.
 
-`width` defaults to 8 and is overridable, per FR-510, so the recency-versus-
-volume trade-off can be measured rather than assumed. The resolved season list,
-not just the width, is written into every results file: `W=8` means different
-things in different years and a bare width would not identify the run.
+`width` defaults to **16** — resolving to 2010–2025, per the owner's OQ-6
+decision — and is overridable, per FR-510, so the recency-versus-volume trade-off
+can be measured rather than assumed. The resolved season list, not just the
+width, is written into every results file: `W=16` means different things in
+different years and a bare width would not identify the run.
 
-**Rejected alternative:** a `SEASONS = [2018, ..., 2025]` constant. It is correct
+The FR-511 transfer experiment does **not** take a `CorpusWindow`. It reads the
+full collected archive, so that ageing seasons out of the evaluation window
+cannot silently reduce the number of transitions observed.
+
+**Rejected alternative:** a `SEASONS = [2010, ..., 2025]` constant. It is correct
 for exactly one year, silently wrong afterwards, and offers no way to distinguish
 "deliberately narrow corpus" from "nobody updated the list."
 
@@ -211,16 +216,21 @@ irregular and nothing in the data announces a reset:
 
 | Start | Severity | Change |
 |-------|----------|--------|
+| 2010 | major | refuelling banned; low-fuel Q3 — the corpus start |
+| 2011 | moderate | DRS introduced; control tyre supplier change |
 | 2014 | major | V6 hybrid power units |
 | 2017 | major | wider cars and tyres |
 | 2019 | moderate | front-wing simplification |
 | 2022 | major | ground effect, full chassis reset |
 | 2026 | major | new power units, active aero, smaller cars |
 
-Only **2022** falls inside the 2018–2025 corpus as a major reset, which is why
-FR-511 is `n=1`. The table extends past the corpus deliberately: 2026 is present
-so that when it becomes a completed season, the transfer experiment gains its
-second observation with no code change.
+Three major resets fall inside the 2010–2025 archive — 2014, 2017, 2022 — of
+which **2017 and 2022** clear FR-501's five-season training minimum and 2014 does
+not, giving FR-511 `n=2` compliant plus one diagnostic. The 2010 row is both a
+regime boundary and the corpus start, so no transition is testable at it. The
+table extends past the archive deliberately: 2026 is present so that when it
+becomes a completed season, the experiment gains a further observation with no
+code change.
 
 Three mechanisms hang off this table:
 

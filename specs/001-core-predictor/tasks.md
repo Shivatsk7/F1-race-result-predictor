@@ -51,10 +51,10 @@ models, plots, data/output, docs, .vscode, .qodo, .sixth.
 | ☐ **T-105a** | Pagination completeness assertion | FR-110 | Collector pages to exhaustion and asserts against the API's reported total; a truncated season raises. Test: 2023 yields 6 sprint races, not 2 |
 | ☐ **T-105b** | Transient-failure retry with backoff | FR-111 | Retries on timeout; exhausted retries surface via FR-104 and are never recorded as absent data |
 | ☐ **T-100** | Phase-entry dependency check | NFR-06, NFR-07 | `pip check` exits 0; pinned set re-verified against the index; audit date updated in `requirements.txt`. **Repeats at the start of every phase.** |
-| ☐ **T-106** | Run collection for the 8 completed seasons 2018–2025 | FR-101, FR-509 | **≥8 seasons** present; per-season counts reported; shortfall recorded if any (FR-501a). 2026 excluded — in progress. |
+| ☐ **T-106** | Run collection for the 16 completed seasons 2010–2025 | FR-101, FR-509 | **16 seasons** present (OQ-6 resolved: 2010 start); per-season counts reported; shortfall recorded if any (FR-501a). 2026 excluded — in progress. |
 | ☐ **T-106a** | Resolve **OQ-5** and report margin | FR-101, FR-501a | Explicit statement of how many of the 8 collected cleanly, and whether the IV.2 floor is met |
 | ☐ **T-107** | Resolve **OQ-2** (historical weather forecast availability) | FR-206 | Documented answer in spec; OQ-2 closed |
-| ☐ **T-108** | Implement `CorpusWindow` resolution | FR-508, FR-509, FR-510, D-9 | Completed-season test implemented; `W` configurable; in-progress season provably cannot enter; unit-tested with a frozen clock either side of a season boundary |
+| ☐ **T-108** | Implement `CorpusWindow` resolution | FR-508, FR-509, FR-510, D-9 | Completed-season test implemented; `W` defaults to 16 and is configurable; resolves to 2010–2025 as of 2025; in-progress season provably cannot enter; unit-tested with a frozen clock either side of a season boundary |
 
 **Exit gate:** AC-1, AC-11. Also closes OQ-1 (holdout seasons become known) and
 OQ-5. **T-106 runs early** — it answers the project's highest-severity risk, and
@@ -118,7 +118,7 @@ so the bar is set before there is any temptation to move it.
 | ☐ **T-406** | **Run the headline evaluation** | AC-4 | Model vs grid baseline with delta CI, committed to `results/` |
 | ☐ **T-407** | Oracle-variant comparison | FR-207 | Quantifies how much v0's leak inflated its numbers |
 | ☐ **T-408** | Recency weighting with configurable decay | FR-406, D-10 | `sample_weight` applied; decay persisted as a hyperparameter; zero decay reproduces uniform weighting bit-for-bit |
-| ☐ **T-409** | **Regulation-transfer experiment** | FR-511, FR-511a, FR-512, AC-12 | Train ≤2021 → test 2022 vs train ≤2020 → test 2021; penalty at two decay settings; committed to `results/` labelled `n=1` **and** `DIAGNOSTIC`, with actual training-season counts stated. Withdraw the FR-511a exemption if OQ-7 extended the corpus. |
+| ☐ **T-409** | **Regulation-transfer experiment** | FR-511, FR-511a, FR-512, AC-12 | Run over the **full archive, not the FR-508 window**, for all three resets (2014, 2017, 2022) against their preceding-season comparators; penalty at two decay settings; each result carries its actual training-season count; 2014 labelled `DIAGNOSTIC`, headline stated as `n=2`. |
 
 **Exit gate:** AC-4, AC-12. The headline answer exists and is committed,
 whichever way it falls — as does the measured cost of a regulation reset.
@@ -217,3 +217,4 @@ the spec is amended before the code diverges.*
 | 2026-08-15 | T-003 | plan §2 | **Plan amendment A-2**: added `pyproject.toml` to the retained tree | Plan §2 omitted a build file, but T-003 requires the package be importable and installable. Standard src-layout packaging. |
 | 2026-08-15 | T-001 | plan §5 | **Plan amendment A-1**: v0 sources are deleted from the tree in P0 and ported from tag `v0-vibe-coded` on demand | Plan §5 implied Port/Rewrite files remain in the tree, contradicting P0's exit gate. Porting from the tag resolves it and enforces deliberate reintroduction. |
 | 2026-08-24 | T-099 | OQ-5, OQ-6, OQ-7, FR-001a, FR-003, FR-003a, FR-108, FR-110, FR-111 | **Spike T-099 executed.** OQ-7 and OQ-5 closed; OQ-6 reframed as the corpus-start decision; six defects closed; new §7.1 records the finding. | Results data reaches back to 1996, so the 2018 floor never bound the corpus. Probing the real payload also showed FR-002 was unimplementable, FR-003's status enum was far too coarse, "not finished" is not "not classified", pagination truncates silently, and the default timeout trips intermittently. |
+| 2026-08-25 | T-106, T-108, T-409 | OQ-6, FR-508, FR-510, FR-511, FR-511a, AC-12, D-9, D-10 | **OQ-6 resolved by the owner: corpus starts 2010.** `W` default 8 → 16. FR-511 runs over the full archive rather than the rolling window, covering 2014/2017/2022. FR-511a's blanket IV.2 exemption withdrawn. Regime table gains 2010 and 2011 rows. | 2010 is the first post-refuelling season, so every grid in the corpus was set on low fuel — necessary because §1's question is whether a model beats the grid, and 2006–09 Q3 ran on race fuel. Binding FR-511 to the window would have let the 2017 observation age out silently in 2028, so the experiment reads the archive instead. |
