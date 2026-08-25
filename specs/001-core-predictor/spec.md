@@ -13,7 +13,7 @@
 > - [ ] §2 User stories and their traceability map
 > - [ ] §3.0 **Target variable** (FR-001..003a) — *what a DNF scores; read this first*
 > - [ ] §3.1 Data acquisition (FR-101..111) — *sprint formats; pagination and retry*
-> - [ ] §3.2 Feature engineering (FR-201..212) — *the leakage rules; regime-relative features; cold start*
+> - [ ] §3.2 Feature engineering (FR-201..216) — *the leakage rules; regime-relative features; cold start*
 > - [ ] §3.3 Baselines (FR-301..305)
 > - [ ] §3.4 Model (FR-401..406)
 > - [ ] §3.5 Evaluation (FR-500..512) — *primary metric, rolling corpus window, regulation-transfer diagnostic and its IV.2 exemption*
@@ -151,6 +151,11 @@ rather than re-argued.
 | **FR-210** | The system SHALL maintain a **declared table of regulation regimes** — start season and severity — and SHALL expose regime identity and seasons-elapsed-since-regime-start as `PRE_RACE` features. Regime boundaries SHALL be declared data, never inferred from the calendar: F1 regulation cycles are irregular and no fixed period is correct. |
 | **FR-211** | WHERE a sprint race precedes the Grand Prix, its result SHALL be admissible as a `PRE_RACE` feature: it is knowable before lights out and therefore satisfies Constitution III.1. The feature SHALL be null-valued for conventional weekends, and the null SHALL be explicit rather than imputed with a neutral value that would misrepresent a sprint that never happened. |
 | **FR-212** | WHERE a driver or constructor has no prior-race history in the corpus — a rookie, a new team, or the first race of a returning entrant — rolling features SHALL take **declared fallback values** rather than silently propagating nulls, and the affected prediction SHALL be flagged `LOW_INFORMATION` in all output. The fallback values SHALL be documented and SHALL NOT be the field mean, which would assert average competitiveness the system has no evidence for. |
+
+| **FR-213** | The system SHALL support a **telemetry-derived feature group** — at minimum long-run practice pace and tyre-stint characteristics — drawn only from sessions preceding the race, and SHALL declare it as a named group distinct from the primary feature set. |
+| **FR-214** | Telemetry-derived features SHALL be **explicitly null for seasons the telemetry source does not cover** (before 2018), and the null SHALL never be imputed. Their coverage SHALL be reported per season alongside the corpus resolution of FR-510. |
+| **FR-215** | Because FR-214 leaves telemetry features undefined for roughly half the corpus, they SHALL NOT enter the primary feature set of FR-202. Their value SHALL be measured as a **separate arm** — the primary model versus the primary model plus telemetry, on the telemetry-covered seasons only — and any benefit SHALL be reported with the reduced season count stated alongside it. |
+| **FR-216** | WHERE a driver changes constructor between races, constructor-derived rolling features SHALL NOT carry the previous constructor's history across the move; they SHALL be recomputed against the new constructor or take the FR-212 fallback where no history exists. Driver-derived features SHALL carry across unchanged. Every transfer SHALL be recorded, and the first race after a transfer SHALL be flagged `POST_TRANSFER` in all output. |
 
 ### 3.3 Baselines (FR-3xx)
 
@@ -338,10 +343,10 @@ Explicitly excluded. Each entry is a deliberate decision, not an oversight.
 | Item | Reason |
 |------|--------|
 | Betting odds comparison / edge detection | Constitution I.2. Requires licensed odds data and lands in gambling regulation. |
-| Live timing or in-race prediction | Large scope increase; does not serve the headline question. |
+| Live timing or in-race prediction | Answers a different question. §1 asks what is predictable *before lights out*; an in-race model consumes lap-by-lap data the pre-race model cannot have, so it cannot improve the number this project is measured on. Recorded as a candidate for spec 002. |
 | Web UI or hosted service | Portfolio value is in the analysis, not the frontend. |
-| Telemetry-derived features (long-run pace, tyre stints) | Genuinely predictive, but multiplies collection cost. Recorded as a future spec, not this one. |
-| Driver-transfer modelling | Insufficient data per driver move to learn from. |
+| ~~Telemetry-derived features~~ | **Moved in scope 2026-08-25** (FR-213..215). Constrained: telemetry coverage begins in 2018, so these features cover half the 2010–2025 corpus and are barred from the primary feature set. |
+| Driver-transfer *effect* modelling | Insufficient data per move to learn how much a transfer helps or hurts. **Narrower boundary:** transfer *robustness* — not carrying a driver's old team's form across a move — is **in scope** per FR-216. |
 | Predicting the *effects* of an unseen regulation regime | No data exists for a regime that has not been raced. Forecasting what 2026's cars will do would be fabrication, not modelling. **Note the narrower boundary:** regime *robustness* — relative features, recency weighting, and measuring the transfer penalty — is **in scope** per FR-209, FR-210, FR-406, FR-511. What is excluded is learning regime-specific dynamics from a regime with no races in it. |
 | Synthetic-data demo mode | Demonstrates nothing about real performance and previously masked the absence of real data. |
 | Per-race bespoke models | v0 shipped a `chinese_gp_predictor`; single-race models cannot be validated. |
@@ -370,6 +375,8 @@ This spec is satisfied when all of the following hold:
 - [ ] **AC-16** Weekend format is recorded for every race, sprint results are admitted as a `PRE_RACE` feature with explicit nulls on conventional weekends, and every circuit has a declared type and overtaking tier. *(FR-108, FR-109, FR-211)*
 - [ ] **AC-17** Collection is provably complete, not merely successful: every season is paged to exhaustion and asserted against the API's reported total, an unrecognised weekend-format value raises rather than defaulting, and a simulated transient timeout is retried rather than recorded as missing data. *(FR-108, FR-110, FR-111)*
 - [ ] **AC-18** All five randomness factors are modelled as distributions, and weather appears in the primary set only as a pre-race forecast or prior while observed weather appears only in the oracle set. *(FR-751, FR-751a, FR-602, FR-206)*
+- [ ] **AC-19** Telemetry features form a named group, are explicitly null before 2018 with per-season coverage reported, are absent from the primary feature set, and their benefit is measured as a separate arm with its reduced season count stated. *(FR-213, FR-214, FR-215)*
+- [ ] **AC-20** A driver changing constructor mid-corpus does not inherit the old constructor's rolling features, the transfer is recorded, and the next race is flagged `POST_TRANSFER`. Regression test on a known mid-corpus move. *(FR-216)*
 
 ---
 

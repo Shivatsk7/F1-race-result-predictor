@@ -79,6 +79,10 @@ nothing downstream should be built before its answer is known.
 | ☐ **T-211** | Relative-feature constraint in the registry | FR-209, D-10 | Every historical-performance feature declares `relative=True` or carries a written justification; static check scans the field in the same pass as the leakage check |
 | ☐ **T-212** | Sprint result as `PRE_RACE` feature | FR-211, FR-108 | Registered pre-race; explicit null on conventional weekends, never imputed; leakage checks pass |
 | ☐ **T-213** | Cold-start fallbacks + `LOW_INFORMATION` flag | FR-212 | Declared fallbacks documented and not field-mean; rookie/new-team row produces a flagged prediction rather than a null or a crash |
+| ☐ **T-214** | Telemetry collection for covered seasons | FR-213, FR-214 | Practice long-run pace and tyre-stint data collected for 2018+; per-season coverage reported; pre-2018 rows explicitly null, never imputed |
+| ☐ **T-215** | Telemetry feature group, excluded from primary set | FR-213, FR-215, AC-19 | Named group in the registry; leakage/registry test fails if any telemetry feature reaches the primary set |
+| ☐ **T-216** | Telemetry benefit as a separate arm | FR-215, AC-19 | Primary vs primary+telemetry on telemetry-covered seasons only; delta with CI; reduced season count stated in the results file |
+| ☐ **T-217** | Driver-transfer robustness | FR-216, AC-20 | Constructor rolling features reset on a move, driver features carry across, transfer recorded, next race flagged `POST_TRANSFER`; regression test on a known mid-corpus transfer |
 
 **Exit gate:** AC-2. T-207 is the gate's gate — an untested test is not a control.
 
@@ -178,7 +182,7 @@ Every requirement maps to at least one task:
 | **Target variable** | FR-001..003 | T-101, T-101a |
 | Target variable | FR-001..003a | T-101a, T-101c, T-101d |
 | Data | FR-101..111 | T-099, T-101, T-101b, T-102..106, T-105a, T-105b, T-106a, T-005 |
-| Features | FR-201..212 | T-201..213 |
+| Features | FR-201..216 | T-201..217 |
 | Baselines | FR-301..305 | T-301..304, T-310, T-311 |
 | Model | FR-401..406 | T-401..405, T-408 |
 | Evaluation | FR-500..507 | T-304a, T-305..311, T-406 |
@@ -220,3 +224,4 @@ the spec is amended before the code diverges.*
 | 2026-08-24 | T-099 | OQ-5, OQ-6, OQ-7, FR-001a, FR-003, FR-003a, FR-108, FR-110, FR-111 | **Spike T-099 executed.** OQ-7 and OQ-5 closed; OQ-6 reframed as the corpus-start decision; six defects closed; new §7.1 records the finding. | Results data reaches back to 1996, so the 2018 floor never bound the corpus. Probing the real payload also showed FR-002 was unimplementable, FR-003's status enum was far too coarse, "not finished" is not "not classified", pagination truncates silently, and the default timeout trips intermittently. |
 | 2026-08-25 | T-106, T-108, T-409 | OQ-6, FR-508, FR-510, FR-511, FR-511a, AC-12, D-9, D-10 | **OQ-6 resolved by the owner: corpus starts 2010.** `W` default 8 → 16. FR-511 runs over the full archive rather than the rolling window, covering 2014/2017/2022. FR-511a's blanket IV.2 exemption withdrawn. Regime table gains 2010 and 2011 rows. | 2010 is the first post-refuelling season, so every grid in the corpus was set on low fuel — necessary because §1's question is whether a model beats the grid, and 2006–09 Q3 ran on race fuel. Binding FR-511 to the window would have let the 2017 observation age out silently in 2028, so the experiment reads the archive instead. |
 | 2026-08-25 | T-510, T-510a | FR-602, FR-751, FR-751a, AC-18 | **Weather added as a fifth randomness factor**; new FR-751a separates weather's feature role from its simulation role | Owner flagged that FR-751..755 never mentions weather. Article X's own rationale names "weather swings" as irreducible randomness, but X.1's enumerated minimum omits it and FR-751 and FR-602 inherited the omission. **Constitution X.1 needs the same amendment — owner action, not the agent's.** |
+| 2026-08-25 | T-214..217 | §5, FR-213..216, AC-19, AC-20 | **Telemetry features and driver-transfer robustness moved into scope**; live/in-race prediction stays excluded | Owner: these improve accuracy. Telemetry does, but its source starts in 2018 while the corpus starts in 2010, so it is a separate arm on half the corpus rather than a primary feature. Transfers were excluded for the wrong reason — learning transfer *effects* needs data we lack, but not carrying a driver's old constructor form across a move is a correctness fix. Live prediction consumes in-race data the pre-race model cannot have, so it cannot move the headline metric; recorded as a candidate spec 002. |
