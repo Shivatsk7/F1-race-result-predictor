@@ -23,3 +23,7 @@ spikes/
 # results file (FR-902, AC-7).
 
 .DS_Store
+
+# graphify knowledge-graph output is generated from the tree it describes.
+# It is regenerable, churns on every rebuild, and is not project source.
+graphify-out/

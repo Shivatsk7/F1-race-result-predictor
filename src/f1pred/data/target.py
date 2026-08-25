@@ -1,8 +1,9 @@
-"""The prediction target (FR-001, FR-001a, FR-002, FR-003a).
+"""The prediction target (FR-001, FR-001a, FR-001b, FR-002, FR-003a).
 
 FR-001 orders a race as: classified finishers in official order, then
-retirements by laps completed descending, then disqualified entrants last, ties
-broken by starting grid position.
+retirements by laps completed descending, then disqualified entrants last.
+FR-001b breaks remaining ties by track position on the final completed lap,
+falling back to starting grid position only where that signal is missing.
 
 The T-099 spike found that the source's own `position` field already encodes
 this rule. FR-001a therefore makes this module a *validator* rather than a
@@ -22,6 +23,15 @@ from f1pred.data.schema import (
     ClassificationOutcome,
     SchemaError,
 )
+
+#: Optional column carrying track position on the final completed lap (FR-001b).
+#: Absent for races where laps completed left no tie, since fetching it costs
+#: roughly eleven extra requests per race.
+FINAL_LAP_POSITION_COLUMN: str = "final_lap_position"
+
+#: Sorts behind any real position, so rows lacking the signal fall through to
+#: the grid tie-break rather than jumping the queue.
+_NO_FINAL_LAP_POSITION: int = 10_000
 
 #: Sort rank by outcome. Lower sorts earlier (better finishing position).
 _OUTCOME_RANK: dict[ClassificationOutcome, int] = {
@@ -107,6 +117,17 @@ def compute_order(race: pd.DataFrame) -> pd.Series:
             f"non-starters must be removed before ordering (FR-002)"
         )
 
+    # FR-001b: retirements tied on laps completed are separated by track
+    # position on their final completed lap. Grid position is the last resort
+    # only — it is unrelated to how the race had actually unfolded, and it
+    # reverses the official order in real cases (Australia 2016).
+    if FINAL_LAP_POSITION_COLUMN in race.columns:
+        final_lap_pos = pd.to_numeric(
+            race[FINAL_LAP_POSITION_COLUMN], errors="coerce"
+        ).fillna(_NO_FINAL_LAP_POSITION)
+    else:
+        final_lap_pos = pd.Series(_NO_FINAL_LAP_POSITION, index=race.index)
+
     keys = pd.DataFrame(
         {
             "outcome_rank": outcomes.map(_OUTCOME_RANK),
@@ -116,13 +137,15 @@ def compute_order(race: pd.DataFrame) -> pd.Series:
                 outcomes == ClassificationOutcome.CLASSIFIED,
                 -race["laps_completed"],
             ),
+            "final_lap_position": final_lap_pos,
             "grid": race["grid_position"],
         },
         index=race.index,
     )
 
     ordered_index = keys.sort_values(
-        ["outcome_rank", "within_group", "grid"], kind="mergesort"
+        ["outcome_rank", "within_group", "final_lap_position", "grid"],
+        kind="mergesort",
     ).index
     return pd.Series(range(1, len(ordered_index) + 1), index=ordered_index, name="target_position").reindex(race.index)
 
@@ -136,6 +159,56 @@ def build_target(df: pd.DataFrame) -> pd.DataFrame:
         positions.loc[race.index] = compute_order(race)
     out["target_position"] = positions
     return out
+
+
+def races_needing_final_lap_position(df: pd.DataFrame) -> list[tuple[int, int]]:
+    """Races where laps completed leaves retirements tied (FR-001b).
+
+    Collection uses this to fetch the lap-times detail only where it changes an
+    answer. Fetching it for every race would cost roughly eleven extra requests
+    per race across the whole corpus, to break ties that mostly do not exist.
+    """
+    starters, _ = drop_non_starters(df)
+    retired = starters[
+        starters["classification_outcome"]
+        == ClassificationOutcome.NOT_CLASSIFIED.value
+    ]
+    if retired.empty:
+        return []
+
+    needed: list[tuple[int, int]] = []
+    for (season, rnd), race in retired.groupby(["season", "round"], sort=True):
+        counts = race["laps_completed"].value_counts()
+        if (counts > 1).any():
+            needed.append((int(season), int(rnd)))
+    return needed
+
+
+def grid_resolved_rows(df: pd.DataFrame) -> pd.DataFrame:
+    """Rows whose ordering fell through to the grid tie-break (FR-001b).
+
+    FR-001b requires these be flagged: they are ordered by a signal unrelated to
+    how the race had unfolded, so their position is the weakest in the corpus.
+    """
+    starters, _ = drop_non_starters(df)
+    retired = starters[
+        starters["classification_outcome"]
+        == ClassificationOutcome.NOT_CLASSIFIED.value
+    ]
+    if retired.empty:
+        return retired
+
+    flagged = []
+    for _, race in retired.groupby(["season", "round"], sort=True):
+        tied_laps = race["laps_completed"].value_counts()
+        tied_laps = set(tied_laps[tied_laps > 1].index)
+        if not tied_laps:
+            continue
+        candidates = race[race["laps_completed"].isin(tied_laps)]
+        if FINAL_LAP_POSITION_COLUMN in candidates.columns:
+            candidates = candidates[candidates[FINAL_LAP_POSITION_COLUMN].isna()]
+        flagged.append(candidates)
+    return pd.concat(flagged) if flagged else retired.iloc[0:0]
 
 
 def validate_against_source(df: pd.DataFrame) -> ValidationReport:
@@ -168,10 +241,13 @@ def validate_against_source(df: pd.DataFrame) -> ValidationReport:
 
 
 __all__ = [
+    "FINAL_LAP_POSITION_COLUMN",
     "OrderingDisagreement",
     "ValidationReport",
     "build_target",
     "compute_order",
     "drop_non_starters",
+    "grid_resolved_rows",
+    "races_needing_final_lap_position",
     "validate_against_source",
 ]

@@ -7,9 +7,12 @@ import pytest
 
 from f1pred.data.schema import ClassificationOutcome, SchemaError, classify
 from f1pred.data.target import (
+    FINAL_LAP_POSITION_COLUMN,
     build_target,
     compute_order,
     drop_non_starters,
+    grid_resolved_rows,
+    races_needing_final_lap_position,
     validate_against_source,
 )
 from tests.fixtures.races import australia_2014, australia_2016, bahrain_2022_tail
@@ -133,23 +136,24 @@ class TestSourceValidation:
         assert report.races_in_agreement == 1
         assert "agrees" in report.summary()
 
-    def test_australia_2016_disagreement_is_reported_not_corrected(self):
-        # Gutierrez and Alonso both retired on lap 16. The source places
-        # Gutierrez ahead; the FR-001 grid tie-break places Alonso ahead.
-        # FR-001a requires this be surfaced, not papered over.
+    def test_australia_2016_agrees_once_the_tie_is_broken_properly(self):
+        # Gutierrez and Alonso both retired on lap 16 after colliding. With
+        # FR-001b's final-lap track position (12 and 13) the computed order
+        # reproduces the official one.
         report = validate_against_source(australia_2016())
-        assert not report.agrees
-        assert report.races_in_disagreement == 1
-        drivers = {d.driver_id for d in report.disagreements}
-        assert drivers == {"gutierrez", "alonso"}
+        assert report.agrees, report.summary()
 
-    def test_disagreement_records_both_positions(self):
-        report = validate_against_source(australia_2016())
+    def test_grid_fallback_alone_would_disagree(self):
+        # Why FR-001b exists: drop the finer signal and the grid tie-break
+        # reverses the official order for exactly these two drivers.
+        df = australia_2016()
+        df[FINAL_LAP_POSITION_COLUMN] = pd.NA
+        report = validate_against_source(df)
+        assert not report.agrees
+        assert {d.driver_id for d in report.disagreements} == {"gutierrez", "alonso"}
         by_driver = {d.driver_id: d for d in report.disagreements}
         assert by_driver["alonso"].source_position == 21
         assert by_driver["alonso"].computed_position == 20
-        assert by_driver["gutierrez"].source_position == 20
-        assert by_driver["gutierrez"].computed_position == 21
 
     def test_source_column_is_left_untouched(self):
         df = australia_2016()
@@ -183,3 +187,32 @@ class TestClassifySentinels:
     def test_empty_raises(self):
         with pytest.raises(SchemaError, match="empty positionText"):
             classify("  ")
+
+
+class TestFinalLapTieBreak:
+    """FR-001b — the finer signal, and where it is needed."""
+
+    def test_tie_break_puts_the_better_track_position_ahead(self):
+        starters, _ = drop_non_starters(australia_2016())
+        out = starters.assign(pos=compute_order(starters))
+        by_driver = dict(zip(out["driver_id"], out["pos"]))
+        # Gutierrez held P12 on lap 16, Alonso P13.
+        assert by_driver["gutierrez"] < by_driver["alonso"]
+
+    def test_only_tied_races_need_the_extra_fetch(self):
+        # Australia 2016 has a lap-16 tie; Australia 2014's only tie is at zero
+        # laps, which also counts. Both need it; a race with no tie does not.
+        assert races_needing_final_lap_position(australia_2016()) == [(2016, 1)]
+        assert races_needing_final_lap_position(australia_2014()) == [(2014, 1)]
+        assert races_needing_final_lap_position(bahrain_2022_tail()) == []
+
+    def test_rows_left_to_the_grid_fallback_are_flagged(self):
+        # Australia 2014 ties at zero laps with no final-lap signal, so those
+        # two rows are ordered by the weakest available signal and must be
+        # visible as such.
+        flagged = grid_resolved_rows(australia_2014())
+        assert sorted(flagged["driver_id"]) == ["kobayashi", "massa"]
+
+    def test_resolved_ties_are_not_flagged(self):
+        flagged = grid_resolved_rows(australia_2016())
+        assert flagged.empty

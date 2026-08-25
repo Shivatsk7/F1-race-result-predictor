@@ -147,12 +147,17 @@ RACE_ROW_SCHEMA: Final[dict[str, str]] = {
     "status_raw": "string",
     "laps_completed": "int64",
     "points": "float64",
+    # FR-001b tie-break. Deliberately sparse: populated only for races where
+    # laps completed left retirements tied, because collecting it costs roughly
+    # eleven extra requests per race.
+    "final_lap_position": "Int64",
 }
 
-#: Columns that may never be null. `driver_code` is exempt: some historical
-#: entries genuinely have no three-letter code.
+#: Columns that may never be null. `driver_code` is exempt because some
+#: historical entries genuinely have no three-letter code; `final_lap_position`
+#: because it is fetched only where a tie needs breaking.
 NON_NULL_COLUMNS: Final[frozenset[str]] = frozenset(
-    set(RACE_ROW_SCHEMA) - {"driver_code", "points"}
+    set(RACE_ROW_SCHEMA) - {"driver_code", "points", "final_lap_position"}
 )
 
 #: FR-105: these together identify a row uniquely.

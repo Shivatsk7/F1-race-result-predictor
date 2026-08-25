@@ -13,7 +13,7 @@
 >
 > - [x] §1 Problem statement — the question is the right one to ask
 > - [x] §2 User stories and their traceability map
-> - [x] §3.0 **Target variable** (FR-001..003a) — *what a DNF scores; read this first*
+> - [ ] §3.0 **Target variable** (FR-001..003a) *(amended 2026-08-25: FR-001b)* — *what a DNF scores; read this first*
 > - [x] §3.1 Data acquisition (FR-101..111, FR-104a..c) — *sprint formats; pagination and retry*
 > - [x] §3.2 Feature engineering (FR-201..218) — *leakage rules; regime-relative features; cold start; **telemetry group and transfer robustness***
 > - [x] §3.3 Baselines (FR-301..305)
@@ -106,15 +106,22 @@ are meaningless without it.*
 
 | ID | Requirement |
 |----|-------------|
-| **FR-001** | The prediction target SHALL be **classified finishing position**, constructed as: (1) classified finishers in official finishing order, then (2) retirements ordered by laps completed descending — a later retirement scores better than an earlier one — then (3) disqualified entrants last. Ties SHALL be broken deterministically by starting grid position. |
+| **FR-001** | The prediction target SHALL be **classified finishing position**, constructed as: (1) classified finishers in official finishing order, then (2) retirements ordered by laps completed descending — a later retirement scores better than an earlier one — then (3) disqualified entrants last. |
 | **FR-001a** | WHERE the data source already publishes an official finishing order that encodes the FR-001 rule, the system SHALL **validate** that order against FR-001 rather than trusting it, and SHALL record every disagreement as a data-quality finding. A source ordering that agrees is used; one that disagrees is a defect to be investigated, not silently overridden. |
+| **FR-001b** | Retirements tied on laps completed SHALL be ordered by **track position on their final completed lap**, ascending. Starting grid position SHALL be used only where that signal is unavailable, and any row so resolved SHALL be flagged. Two cars that collide with each other retire on the same lap, so laps completed cannot separate them; grid position is unrelated to how the race had actually unfolded by that point and reverses the official order in real cases. |
 | **FR-002** | The unit of analysis SHALL be the **driver-race row**, for every driver who took the start. Entrants who did not start SHALL be excluded, and every exclusion SHALL be recorded with its reason. Non-start SHALL be determined by the source's explicit withdrawal marker, **never** by inferring it from zero laps completed: a lap-1 retirement and a car that never started both complete zero laps, and conflating them would delete real races from the corpus. |
 | **FR-003** | Every row SHALL retain, as separate stored fields: the source's **raw status string verbatim**, a derived **classification outcome** (`CLASSIFIED` / `NOT_CLASSIFIED` / `DISQUALIFIED` / `WITHDRAWN`), `laps_completed`, and `classified_position` — so that metrics can be recomputed under an alternative target definition **without recollecting data**. The raw status SHALL NOT be collapsed into a small enum at collection time; it is a high-cardinality field (~30 distinct values per season) and its detail is the input to FR-752's retirement-cause analysis. |
 | **FR-003a** | The system SHALL NOT treat "did not finish" and "not classified" as the same condition. A car that retires late having completed enough race distance is still classified and still holds a finishing position. The classification outcome of FR-003 SHALL be derived from the source's position sentinel, not from the status string. |
 
 **Why this definition.** It matches how F1 itself classifies a race, keeps every
 starter in every race so field size is constant, and gives retirement an ordered
-position rather than a sentinel value that would fabricate ties. Its known cost:
+position rather than a sentinel value that would fabricate ties. FR-001b's
+tie-break is not a detail: implementation found that a grid-position tie-break
+disagreed with the official classification of Australia 2016, where Gutiérrez
+and Alonso retired on the same lap after colliding. Final-lap track position
+reproduces the official order there, and is available from the lap-times
+endpoint across the whole corpus. Because that data is expensive to collect, it
+SHALL be fetched only for races where laps completed actually leaves a tie. Its known cost:
 a lap-1 collision scores near-worst even for a genuinely fast car. That cost is
 accepted deliberately — it is *real* prediction error caused by *real* race
 randomness, which is exactly what FR-754's noise floor exists to quantify.
@@ -379,7 +386,7 @@ This spec is satisfied when all of the following hold:
 - [ ] **AC-12** The regime table is declared data, every historical-performance feature is either regime-relative or declares why it cannot be, and the measured regime-transfer penalty is committed to `results/` for **2014, 2017 and 2022** at two decay settings — each carrying its actual training-season count, with 2014 labelled `DIAGNOSTIC` and the headline stated as `n=2`. *(FR-209, FR-210, FR-406, FR-511, FR-511a, FR-512)*
 - [ ] **AC-13** `predict-from-grid` accepts a documented CSV for an upcoming race and returns ranked predictions with intervals; a malformed CSV reports every violation at once; a missing upstream artifact names the command that produces it; and an entry with no prior history is served a declared fallback and flagged `LOW_INFORMATION`. *(FR-801..804, FR-212, US-4)*
 - [ ] **AC-14** The README states the v0 leakage defect and its controls, the non-commercial framing, and the full data-provenance position. *(FR-903, FR-904, FR-905, US-5)*
-- [ ] **AC-15** The target variable is implemented per FR-001 and **validated against the source's own ordering**, with disagreements reported; raw status, classification outcome, `laps_completed`, and `classified_position` are all retained, such that switching to an alternative target definition requires no recollection. A withdrawn entrant is excluded and a zero-lap retirement is kept. *(FR-001..003a)*
+- [ ] **AC-15** The target variable is implemented per FR-001 and FR-001b and **validated against the source's own ordering**, with disagreements reported; raw status, classification outcome, `laps_completed`, and `classified_position` are all retained, such that switching to an alternative target definition requires no recollection. A withdrawn entrant is excluded and a zero-lap retirement is kept. Australia 2016 — two cars retiring on the same lap — resolves to the official order. *(FR-001..003a, FR-001b)*
 - [ ] **AC-16** Weekend format is recorded for every race, sprint results are admitted as a `PRE_RACE` feature with explicit nulls on conventional weekends, and every circuit has a declared type and overtaking tier. *(FR-108, FR-109, FR-211)*
 - [ ] **AC-17** Collection is provably complete, not merely successful: every season is paged to exhaustion and asserted against the API's reported total, an unrecognised weekend-format value raises rather than defaulting, and a simulated transient timeout is retried rather than recorded as missing data. *(FR-108, FR-110, FR-111)*
 - [ ] **AC-18** All five randomness factors are modelled as distributions, and weather appears in the primary set only as a pre-race forecast or prior while observed weather appears only in the oracle set. *(FR-751, FR-751a, FR-602, FR-206)*

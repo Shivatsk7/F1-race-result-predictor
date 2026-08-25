@@ -24,6 +24,7 @@ def _row(
     outcome: ClassificationOutcome,
     status: str,
     laps: int,
+    final_lap_position: int | None = None,
 ) -> dict[str, object]:
     return {
         "season": season,
@@ -42,6 +43,7 @@ def _row(
         "status_raw": status,
         "laps_completed": laps,
         "points": 0.0,
+        "final_lap_position": final_lap_position,
     }
 
 
@@ -57,7 +59,8 @@ def australia_2014() -> pd.DataFrame:
 
     Ricciardo was disqualified having completed the full distance, which is why
     a status-based rule would place him wrongly. Massa and Kobayashi both
-    completed zero laps, so the grid tie-break decides between them.
+    completed zero laps with no final-lap position to separate them, so this is
+    the case that exercises FR-001b's grid fallback.
     """
     rows: list[dict[str, object]] = []
     add = rows.append
@@ -91,9 +94,10 @@ def australia_2014() -> pd.DataFrame:
 def australia_2016() -> pd.DataFrame:
     """22 entries including one withdrawal (Kvyat, `W`, zero laps).
 
-    Gutierrez and Alonso both retired on lap 16 after colliding. The official
-    order places Gutierrez ahead; the FR-001 grid tie-break would place Alonso
-    ahead. That divergence is real and is what FR-001a exists to surface.
+    Gutierrez and Alonso both retired on lap 16 after colliding, holding P12 and
+    P13 respectively on that lap. Laps completed cannot separate them; FR-001b's
+    final-lap position reproduces the official order, where a grid tie-break
+    would reverse it.
     """
     rows: list[dict[str, object]] = []
     add = rows.append
@@ -110,12 +114,13 @@ def australia_2016() -> pd.DataFrame:
         ("ericsson", 15, 17, "Engine", 38),
         ("raikkonen", 4, 18, "Engine", 21),
         ("haryanto", 22, 19, "Mechanical", 17),
-        ("gutierrez", 20, 20, "Collision", 16),
-        ("alonso", 11, 21, "Collision", 16),
+        ("gutierrez", 20, 20, "Collision", 16, 12),
+        ("alonso", 11, 21, "Collision", 16, 13),
     ]
-    for driver, grid, pos, status, laps in retirements:
+    for driver, grid, pos, status, laps, *detail in retirements:
         add(_row(*common, driver, grid, pos, "R",
-                 ClassificationOutcome.NOT_CLASSIFIED, status, laps))
+                 ClassificationOutcome.NOT_CLASSIFIED, status, laps,
+                 detail[0] if detail else None))
 
     # Never started: engine failure on the way to the grid.
     add(_row(*common, "kvyat", 18, 22, "W",
