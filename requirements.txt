@@ -2,7 +2,7 @@
 # v0 floated every dependency with >= and silently drifted across three major
 # versions. It happened to survive; that was luck, not a strategy.
 #
-# Verified 2026-08-16: this is the latest mutually-compatible set on
+# Verified 2026-08-25 (P1 entry, T-100): latest mutually-compatible set on
 # Python 3.13. `pip check` passes. Re-verify before each phase.
 
 # Data acquisition
@@ -22,7 +22,7 @@ pyarrow==25.0.1
 # Modelling
 xgboost==3.4.1
 scikit-learn==1.9.0
-scipy==1.18.0
+scipy==1.18.1
 joblib==1.5.3
 
 # Reporting

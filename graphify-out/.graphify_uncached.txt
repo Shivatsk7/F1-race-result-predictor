@@ -1,0 +1,7 @@
+/Users/shivatsk7/Codes/race result predictor/.specify/memory/constitution.md
+/Users/shivatsk7/Codes/race result predictor/README.md
+/Users/shivatsk7/Codes/race result predictor/requirements.txt
+/Users/shivatsk7/Codes/race result predictor/results/README.md
+/Users/shivatsk7/Codes/race result predictor/specs/001-core-predictor/plan.md
+/Users/shivatsk7/Codes/race result predictor/specs/001-core-predictor/spec.md
+/Users/shivatsk7/Codes/race result predictor/specs/001-core-predictor/tasks.md

@@ -1,0 +1,184 @@
+{
+  "nodes": [
+    {
+      "id": "pkg_f1pred",
+      "label": "f1pred",
+      "file_type": "code",
+      "type": "package",
+      "ecosystem": "python",
+      "source_file": "pyproject.toml",
+      "source_location": "L1",
+      "version": "0.1.0.dev0",
+      "_origin": "ast"
+    },
+    {
+      "id": "src_f1pred_init",
+      "label": "__init__.py",
+      "file_type": "code",
+      "source_file": "src/f1pred/__init__.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "src_f1pred_init_rationale_1",
+      "label": "F1 race result predictor — spec-driven rebuild. Governed by specs/001-core-…",
+      "file_type": "rationale",
+      "source_file": "src/f1pred/__init__.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "src_f1pred_data_init",
+      "label": "__init__.py",
+      "file_type": "code",
+      "source_file": "src/f1pred/data/__init__.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "src_f1pred_data_init_rationale_1",
+      "label": "Data acquisition and canonical schema. Implements FR-101..107.",
+      "file_type": "rationale",
+      "source_file": "src/f1pred/data/__init__.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "src_f1pred_evaluate_init",
+      "label": "__init__.py",
+      "file_type": "code",
+      "source_file": "src/f1pred/evaluate/__init__.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "src_f1pred_evaluate_init_rationale_1",
+      "label": "Evaluation harness with bootstrap uncertainty. Implements FR-501..507.",
+      "file_type": "rationale",
+      "source_file": "src/f1pred/evaluate/__init__.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "src_f1pred_features_init",
+      "label": "__init__.py",
+      "file_type": "code",
+      "source_file": "src/f1pred/features/__init__.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "src_f1pred_features_init_rationale_1",
+      "label": "Feature registry and leakage firewall. Implements FR-201..208. The registry is…",
+      "file_type": "rationale",
+      "source_file": "src/f1pred/features/__init__.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "src_f1pred_reference_init",
+      "label": "__init__.py",
+      "file_type": "code",
+      "source_file": "src/f1pred/reference/__init__.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "src_f1pred_reference_init_rationale_1",
+      "label": "Circuit metadata and priors. Supports FR-602.",
+      "file_type": "rationale",
+      "source_file": "src/f1pred/reference/__init__.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "src_f1pred_simulate_init",
+      "label": "__init__.py",
+      "file_type": "code",
+      "source_file": "src/f1pred/simulate/__init__.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "src_f1pred_simulate_init_rationale_1",
+      "label": "Monte Carlo simulation and calibration. Implements FR-601..605, FR-701..705.",
+      "file_type": "rationale",
+      "source_file": "src/f1pred/simulate/__init__.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "tests_init",
+      "label": "__init__.py",
+      "file_type": "code",
+      "source_file": "tests/__init__.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    }
+  ],
+  "edges": [
+    {
+      "source": "src_f1pred_init_rationale_1",
+      "target": "src_f1pred_init",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/f1pred/__init__.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_f1pred_data_init_rationale_1",
+      "target": "src_f1pred_data_init",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/f1pred/data/__init__.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_f1pred_evaluate_init_rationale_1",
+      "target": "src_f1pred_evaluate_init",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/f1pred/evaluate/__init__.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_f1pred_features_init_rationale_1",
+      "target": "src_f1pred_features_init",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/f1pred/features/__init__.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_f1pred_reference_init_rationale_1",
+      "target": "src_f1pred_reference_init",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/f1pred/reference/__init__.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_f1pred_simulate_init_rationale_1",
+      "target": "src_f1pred_simulate_init",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/f1pred/simulate/__init__.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0,
+  "failed_sources": []
+}
