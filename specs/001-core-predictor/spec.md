@@ -261,7 +261,7 @@ the seasons are already on disk.
 | ID | Requirement |
 |----|-------------|
 | **FR-601** | The system SHALL convert model output into a Monte Carlo simulation over race outcomes, producing a full finishing-position distribution per driver. |
-| **FR-602** | The simulation SHALL model, at minimum: pace uncertainty, stochastic retirement, **safety-car incidence**, and position-change dynamics conditioned on circuit overtaking difficulty. The four factors here SHALL match the four required by FR-751 and Constitution X.1. |
+| **FR-602** | The simulation SHALL model, at minimum: pace uncertainty, stochastic retirement, **safety-car incidence**, **weather-condition volatility**, and position-change dynamics conditioned on circuit overtaking difficulty. The five factors here SHALL match the five required by FR-751. |
 | **FR-603** | The simulation SHALL emit win, podium, and points-finish probabilities per driver. |
 | **FR-604** | Simulation SHALL be deterministic given a seed. |
 | **FR-605** | Per-driver probabilities across all finishing positions SHALL sum to 1.0 within a tolerance of 1e-6. |
@@ -281,7 +281,8 @@ the seasons are already on disk.
 
 | ID | Requirement |
 |----|-------------|
-| **FR-751** | The system SHALL model retirement, safety-car incidence, pace variability, and position-change volatility as **distributions**, with parameters estimated from prior races only (X.1, X.3). |
+| **FR-751** | The system SHALL model retirement, safety-car incidence, pace variability, position-change volatility, and **weather-condition volatility** as **distributions**, with parameters estimated from prior races only (X.1, X.3). |
+| **FR-751a** | Weather SHALL enter the system in exactly two roles, and the registry SHALL keep them distinct: as a **pre-race forecast or climatological prior** in the feature set (FR-206), and as a **distribution over race-day conditions** in the simulation (FR-751). Observed race weather is inadmissible in both, and SHALL appear only in the FR-207 oracle set. Modelling that it *might* rain is required; knowing that it *did* is prohibited (X.3). |
 | **FR-752** | No prediction SHALL be published as a bare point estimate; every predicted position SHALL carry a distribution or interval (X.2). |
 | **FR-753** | Evaluation SHALL include at least one **proper scoring rule** (Brier or log score) that rewards correctly stated uncertainty, not rank accuracy alone (X.4). |
 | **FR-754** | The system SHALL estimate and report the **irreducible noise floor**: the share of finishing-order variance no pre-race information can explain. |
@@ -368,6 +369,7 @@ This spec is satisfied when all of the following hold:
 - [ ] **AC-15** The target variable is implemented per FR-001 and **validated against the source's own ordering**, with disagreements reported; raw status, classification outcome, `laps_completed`, and `classified_position` are all retained, such that switching to an alternative target definition requires no recollection. A withdrawn entrant is excluded and a zero-lap retirement is kept. *(FR-001..003a)*
 - [ ] **AC-16** Weekend format is recorded for every race, sprint results are admitted as a `PRE_RACE` feature with explicit nulls on conventional weekends, and every circuit has a declared type and overtaking tier. *(FR-108, FR-109, FR-211)*
 - [ ] **AC-17** Collection is provably complete, not merely successful: every season is paged to exhaustion and asserted against the API's reported total, an unrecognised weekend-format value raises rather than defaulting, and a simulated transient timeout is retried rather than recorded as missing data. *(FR-108, FR-110, FR-111)*
+- [ ] **AC-18** All five randomness factors are modelled as distributions, and weather appears in the primary set only as a pre-race forecast or prior while observed weather appears only in the oracle set. *(FR-751, FR-751a, FR-602, FR-206)*
 
 ---
 

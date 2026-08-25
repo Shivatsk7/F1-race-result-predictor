@@ -138,7 +138,8 @@ whichever way it falls — as does the measured cost of a regulation reset.
 | ☐ **T-507** | Interval coverage measurement | FR-704 | Stated vs observed containment reported |
 | ☐ **T-508** | Resolve **OQ-3**, set calibration threshold | FR-705 | Threshold documented in spec |
 | ☐ **T-509** | UNCALIBRATED render-layer label | FR-705, FR-706, D-7 | Label applied in render layer; test proves no call site can omit it; no README or results-file claim rests on an unlabelled probability |
-| ☐ **T-510** | Stochastic parameters from prior races only | FR-751 | Retirement, safety car, pace variance, position volatility all distributional |
+| ☐ **T-510** | Stochastic parameters from prior races only | FR-751 | Retirement, safety car, pace variance, position volatility, **weather volatility** all distributional |
+| ☐ **T-510a** | Separate weather's two roles | FR-751a, FR-206, AC-18 | Registry test: forecast/prior admissible pre-race, weather distribution used in simulation, observed weather reachable only from the oracle set |
 | ☐ **T-511** | Proper scoring rule in main evaluation | FR-753 | Brier or log score reported alongside rank metrics |
 | ☐ **T-512** | Estimate irreducible noise floor | FR-754, OQ-4 | Floor committed to `results/`; method documented |
 | ☐ **T-513** | Report model error relative to noise floor | FR-755 | Evaluation report and README both frame error against the floor |
@@ -185,7 +186,7 @@ Every requirement maps to at least one task:
 | Regulation robustness | FR-209, FR-210, FR-406, FR-511, FR-511a, FR-512 | T-210, T-211, T-408, T-409 |
 | Simulation | FR-601..605 | T-501..504 |
 | Calibration | FR-701..706 | T-505..509 |
-| Race randomness (Art. X) | FR-751..755 | T-510..514 |
+| Race randomness (Art. X) | FR-751..755, FR-751a | T-510, T-510a, T-511..514 |
 | Interface | FR-801..804 | T-601..604 |
 | Docs | FR-901..905 | T-605..608, T-611 |
 | Non-functional | NFR-01..07 | T-004, T-100, T-207, T-609, T-610 |
@@ -218,3 +219,4 @@ the spec is amended before the code diverges.*
 | 2026-08-15 | T-001 | plan §5 | **Plan amendment A-1**: v0 sources are deleted from the tree in P0 and ported from tag `v0-vibe-coded` on demand | Plan §5 implied Port/Rewrite files remain in the tree, contradicting P0's exit gate. Porting from the tag resolves it and enforces deliberate reintroduction. |
 | 2026-08-24 | T-099 | OQ-5, OQ-6, OQ-7, FR-001a, FR-003, FR-003a, FR-108, FR-110, FR-111 | **Spike T-099 executed.** OQ-7 and OQ-5 closed; OQ-6 reframed as the corpus-start decision; six defects closed; new §7.1 records the finding. | Results data reaches back to 1996, so the 2018 floor never bound the corpus. Probing the real payload also showed FR-002 was unimplementable, FR-003's status enum was far too coarse, "not finished" is not "not classified", pagination truncates silently, and the default timeout trips intermittently. |
 | 2026-08-25 | T-106, T-108, T-409 | OQ-6, FR-508, FR-510, FR-511, FR-511a, AC-12, D-9, D-10 | **OQ-6 resolved by the owner: corpus starts 2010.** `W` default 8 → 16. FR-511 runs over the full archive rather than the rolling window, covering 2014/2017/2022. FR-511a's blanket IV.2 exemption withdrawn. Regime table gains 2010 and 2011 rows. | 2010 is the first post-refuelling season, so every grid in the corpus was set on low fuel — necessary because §1's question is whether a model beats the grid, and 2006–09 Q3 ran on race fuel. Binding FR-511 to the window would have let the 2017 observation age out silently in 2028, so the experiment reads the archive instead. |
+| 2026-08-25 | T-510, T-510a | FR-602, FR-751, FR-751a, AC-18 | **Weather added as a fifth randomness factor**; new FR-751a separates weather's feature role from its simulation role | Owner flagged that FR-751..755 never mentions weather. Article X's own rationale names "weather swings" as irreducible randomness, but X.1's enumerated minimum omits it and FR-751 and FR-602 inherited the omission. **Constitution X.1 needs the same amendment — owner action, not the agent's.** |
