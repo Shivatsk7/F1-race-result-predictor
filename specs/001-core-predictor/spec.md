@@ -28,6 +28,7 @@
 > - [x] §7 Open questions — *OQ-2, OQ-5, OQ-6, OQ-7 closed; OQ-1, OQ-3, OQ-4 resolve from data*
 > - [x] §7.1 **T-099 spike finding** — *why OQ-5 and OQ-7 are now closed*
 > - [x] §7.2 **T-107 finding** — *why OQ-2 closes without dropping weather*
+> - [x] §7.3 **T-101e finding** — *FR-001b cannot separate zero-lap retirements (OQ-8)*
 
 > This document states **what** the system must do and **why**. It contains no
 > implementation decisions — those live in `plan.md`. If you find yourself
@@ -409,6 +410,7 @@ This spec is satisfied when all of the following hold:
 | **OQ-5** | ~~Can 8 seasons actually be collected, given FastF1 coverage for 2018–19?~~ **RESOLVED 2026-08-24 by T-099.** The zero-margin problem was an artefact of a false premise. FastF1's 2018 floor binds on lap and telemetry data only; results, qualifying, standings, and schedule are served by the Ergast-compatible backend and were verified working back to 1996. The corpus is not capped at 8 seasons. What replaces this risk is a *choice*, now tracked as OQ-6. | FR-101, FR-501a | Closed. No IV.2a shortfall is expected. |
 | **OQ-6** | ~~How far back should the corpus start?~~ **RESOLVED 2026-08-25 by the owner: 2010.** The first season after the refuelling ban, so every grid in the corpus was set on low fuel and means what a modern grid means — which matters because §1's whole question is whether a model can beat the grid. A 2006 start would have bought a third transition at the cost of four seasons (2006–09) whose Q3 ran on race fuel, contaminating the baseline the project is measured against. 2010 gives a 16-season corpus, FR-511 `n=2` compliant (2017, 2022) plus 2014 as a diagnostic, and retires the FR-511a exemption. | FR-508, FR-510, FR-511a | Closed. `W` default is now 16; FR-210's regime table gains a 2010 row. |
 | **OQ-7** | ~~Does FastF1 serve race results, qualifying, and standings before 2018?~~ **RESOLVED 2026-08-24 by T-099: yes.** Verified against the live API: race results, qualifying, standings, and schedule return complete, fully-populated rows for every season probed from 1996 to 2025, including the `grid`, `laps`, `status`, and classified-position fields FR-001 and FR-003 require. `get_session(...).load(laps=False, telemetry=False)` also succeeds pre-2018 — the documented 2018 floor is a *timing-data* floor, not a results floor. Backend confirmed by reading the shipped source: fastf1 3.8.3 sets `BASE_URL = 'https://api.jolpi.ca/ergast/f1'`, so the project depends on jolpica **transitively through fastf1**, which is consistent with plan D-8's rejection of a *direct* dependency. See §7.1 for the full finding and the six defects it exposed. | FR-101, FR-511, FR-511a, OQ-5, OQ-6 | Closed. Feeds OQ-6, which is now the live question. |
+| **OQ-8** | Should FR-001b name zero-lap retirements explicitly? They are 57% of all tied rows and the rule cannot resolve them — a driver who completed no lap appears in no lap's timing data. Grid position is arguably their correct ordering rather than a weak fallback. | FR-001b | **Open, 2026-08-30.** Owner decision. Ordering is unaffected either way; only the label and the flag differ. See §7.3. |
 
 ---
 
@@ -467,6 +469,38 @@ low-fuel qualifying convention.
 settled by the owner on 2026-08-25 in favour of a **2010 start**: 16 seasons,
 FR-511 at `n=2` compliant plus one diagnostic, and FR-511a's blanket IV.2
 exemption withdrawn.
+
+### 7.3 T-101e Finding — FR-001b Cannot Separate Zero-Lap Retirements (OQ-8)
+
+*Measured 2026-08-30 against the collected corpus.*
+
+FR-001b orders retirements tied on laps completed by **track position on their
+final completed lap**. Running it over the corpus shows the rule is silent about
+the single most common tie it faces.
+
+| Tied rows | Count | Can FR-001b resolve them? |
+|-----------|-------|---------------------------|
+| Tied on a lap they completed | 83 | Yes — 81 resolved, 2 absent from the lap data |
+| Tied on **zero** completed laps | 111 | **No.** There is no lap to read |
+
+A driver who completed no lap appears in no lap's timing data, so the rule has
+nothing to query. **57% of tied rows fall here** — first-lap collisions are the
+most common way for several cars to retire on the same lap. They fall to the
+grid fallback permanently, not pending a future fetch.
+
+Grid position is arguably the *correct* ordering for them, since it is their last
+known track position rather than an unrelated signal. But FR-001b describes grid
+as a "last resort" and requires the rows be flagged as weak, which understates
+what is actually known about them.
+
+**Owner decision, recorded not taken (Constitution VII.2).** Whether to amend
+FR-001b to name zero-lap retirements explicitly and treat grid as their declared
+ordering rather than a fallback. Nothing is blocked either way: the ordering is
+identical, only its label and flag differ. Tracked as **OQ-8**.
+
+Collection cost, for the record: 40 requests, one per tied lap. The endpoint
+accepts a `lap_number`, so only the lap that can separate the tied drivers is
+fetched — not the ~11 per race the original estimate assumed.
 
 ### 7.2 T-107 Finding — Historical Weather Forecast Availability (OQ-2)
 

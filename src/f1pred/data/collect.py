@@ -45,12 +45,16 @@ from f1pred.config import (
 )
 from f1pred.data.schema import (
     RACE_ROW_SCHEMA,
+    ClassificationOutcome,
     SchemaError,
     classify,
     empty_frame,
     map_weekend_format,
     validate_frame,
 )
+
+# target.py imports only schema, so this direction carries no cycle.
+from f1pred.data.target import FINAL_LAP_POSITION_COLUMN, drop_non_starters
 
 #: The API caps `limit` at 100 regardless of what is requested.
 PAGE_SIZE: int = 100
@@ -468,6 +472,31 @@ class ErgastClient:
             pause=self.pause,
         )
 
+    def lap_positions(
+        self, season: int, round_: int, lap_number: int
+    ) -> dict[str, int]:
+        """Driver -> track position at the end of one lap (FR-001b).
+
+        One request per tied lap rather than a whole race's lap history. The
+        endpoint is asked for a single `lap_number`, which is the only lap that
+        can separate the drivers tied on it, so the corpus-wide cost is one
+        request per tie group rather than one per race.
+
+        A driver absent from the response did not complete this lap. That is
+        information, not an error: it is why zero-lap retirements have no entry
+        anywhere and cannot be separated by this rule at all.
+        """
+        self._sleep(self.pause)
+        page = with_retry(
+            lambda: self._call(
+                lambda: self._api.get_lap_times(
+                    season=season, round=round_, lap_number=lap_number, limit=PAGE_SIZE
+                )
+            ),
+            what=f"lap {lap_number} positions {season} round {round_}",
+        )
+        return positions_from_lap_page(page)
+
     def event_formats(self, season: int) -> dict[int, str]:
         """Round -> raw weekend-format string for one season (FR-108).
 
@@ -590,6 +619,137 @@ def frame_from_rows(rows: Sequence[Mapping[str, Any]]) -> pd.DataFrame:
         if col != "race_date":
             df[col] = df[col].astype(dtype)
     return validate_frame(df)
+
+
+def positions_from_lap_page(page: Any) -> dict[str, int]:
+    """Parse the lap-times payload into driver -> position for that lap.
+
+    Shape: a list of races, each carrying `Laps`, each carrying `Timings`. Only
+    one lap was requested, so anything beyond it is upstream disagreeing with
+    the query and is read rather than assumed.
+    """
+    out: dict[str, int] = {}
+    for race in page or ():
+        for lap in race.get("Laps", ()) or ():
+            for timing in lap.get("Timings", ()) or ():
+                driver = timing.get("driverId")
+                position = timing.get("position")
+                if driver is None or position is None:
+                    continue
+                out[str(driver)] = int(position)
+    return out
+
+
+#: Retirements tied on this many completed laps cannot be separated by FR-001b:
+#: a driver who completed no lap appears in no lap's timing data. See the
+#: FR-001c note in spec §3.0.
+ZERO_LAPS: int = 0
+
+
+def tie_groups_needing_lap_position(
+    df: pd.DataFrame,
+) -> list[tuple[int, int, int]]:
+    """`(season, round, lap)` for every tie FR-001b can actually resolve.
+
+    Zero-lap ties are excluded deliberately rather than attempted and failed:
+    there is no lap to ask about, so a request would be spent to learn nothing.
+    """
+    starters, _ = drop_non_starters(df)
+    retired = starters[
+        starters["classification_outcome"]
+        == ClassificationOutcome.NOT_CLASSIFIED.value
+    ]
+    if retired.empty:
+        return []
+
+    groups: list[tuple[int, int, int]] = []
+    for (season, rnd), race in retired.groupby(["season", "round"], sort=True):
+        counts = race["laps_completed"].value_counts()
+        for lap, n in counts.items():
+            if n > 1 and int(lap) > ZERO_LAPS:
+                groups.append((int(season), int(rnd), int(lap)))
+    return sorted(groups)
+
+
+@dataclass(frozen=True, slots=True)
+class TieBreakReport:
+    """What the FR-001b pass could and could not resolve."""
+
+    groups_attempted: int
+    rows_resolved: int
+    rows_unresolved_zero_lap: int
+    rows_unresolved_absent: int
+    failed_groups: tuple[tuple[int, int, int], ...] = ()
+
+    def as_dict(self) -> dict[str, object]:
+        return {
+            "groups_attempted": self.groups_attempted,
+            "rows_resolved": self.rows_resolved,
+            "rows_unresolved_zero_lap": self.rows_unresolved_zero_lap,
+            "rows_unresolved_absent": self.rows_unresolved_absent,
+            "failed_groups": [list(g) for g in self.failed_groups],
+        }
+
+
+def add_final_lap_positions(
+    df: pd.DataFrame, *, client: Any, log: Callable[[str], None] = print
+) -> tuple[pd.DataFrame, TieBreakReport]:
+    """Fill `final_lap_position` for retirements FR-001b can separate.
+
+    Only tied rows are touched. An untied retirement is already ordered by laps
+    completed, so a position for it would be data the target never reads.
+
+    A group whose fetch fails leaves its rows null rather than half-filled: the
+    grid fallback is a declared, flagged state, and a partially resolved tie
+    would be an undeclared one.
+    """
+    out = df.copy()
+    if FINAL_LAP_POSITION_COLUMN not in out.columns:
+        out[FINAL_LAP_POSITION_COLUMN] = pd.NA
+    out[FINAL_LAP_POSITION_COLUMN] = out[FINAL_LAP_POSITION_COLUMN].astype("Int64")
+
+    groups = tie_groups_needing_lap_position(out)
+    resolved = absent = 0
+    failed: list[tuple[int, int, int]] = []
+
+    for season, rnd, lap in groups:
+        try:
+            positions = client.lap_positions(season, rnd, lap)
+        except Exception as exc:  # noqa: BLE001 - a tie is not worth aborting a run
+            failed.append((season, rnd, lap))
+            log(f"  tie {season} r{rnd} lap {lap}: fetch failed ({exc}); left to grid fallback")
+            continue
+
+        mask = (
+            (out["season"] == season)
+            & (out["round"] == rnd)
+            & (out["laps_completed"] == lap)
+        )
+        for idx in out.index[mask]:
+            driver = out.at[idx, "driver_id"]
+            if driver in positions:
+                out.at[idx, FINAL_LAP_POSITION_COLUMN] = positions[driver]
+                resolved += 1
+            else:
+                absent += 1
+
+    starters, _ = drop_non_starters(out)
+    retired = starters[
+        starters["classification_outcome"]
+        == ClassificationOutcome.NOT_CLASSIFIED.value
+    ]
+    zero_lap_tied = 0
+    for _, race in retired.groupby(["season", "round"], sort=True):
+        counts = race["laps_completed"].value_counts()
+        zero_lap_tied += int(counts.get(ZERO_LAPS, 0)) if counts.get(ZERO_LAPS, 0) > 1 else 0
+
+    return out, TieBreakReport(
+        groups_attempted=len(groups),
+        rows_resolved=resolved,
+        rows_unresolved_zero_lap=zero_lap_tied,
+        rows_unresolved_absent=absent,
+        failed_groups=tuple(failed),
+    )
 
 
 # --------------------------------------------------------------------------
@@ -786,6 +946,9 @@ __all__ = [
     "RateLimited",
     "SeasonCount",
     "SeasonReport",
+    "TieBreakReport",
+    "ZERO_LAPS",
+    "add_final_lap_positions",
     "check_season_counts",
     "checkpoint_path",
     "collect_corpus",
@@ -796,10 +959,12 @@ __all__ = [
     "main",
     "merge_paged_races",
     "paginate",
+    "positions_from_lap_page",
     "read_checkpoint",
     "rows_from_race",
     "rows_in_page",
     "seasons_to_collect",
+    "tie_groups_needing_lap_position",
     "with_retry",
     "write_checkpoint",
     "write_failure_manifest",

@@ -7,7 +7,7 @@
     "FR-902"
   ],
   "generated": "2026-08-30",
-  "code_commit": "3ad894facfcf0eaef37573061a13af535515ba0e",
+  "code_commit": "15d5403837b318a8a34c8e6ce7fdc4352290439b",
   "corpus": {
     "start_season": 2010,
     "end_season": 2025,
@@ -169,11 +169,24 @@
     "sprint_sets_grid": 120
   },
   "known_gaps": {
-    "final_lap_position": "100% null by design. FR-001b's tie-break signal is fetched lazily by T-101e, which is not yet implemented. Retirement ties currently fall through to the flagged grid fallback."
+    "final_lap_position": "81 of 6,911 rows populated -- the tie-break signal is fetched only where a tie exists, so a null here is the normal case, not missing data."
   },
   "verification": {
     "schema_validate_frame": "PASS over all 16 seasons concatenated",
     "duplicate_keys_season_round_driver": 0,
     "offline_test_suite": "147 passed, 2 network-marked deselected, 1.6s (NFR-04 budget 60s)"
+  },
+  "tie_break_FR_001b": {
+    "task": "T-101e",
+    "tie_groups_fetched": 40,
+    "requests_made": 40,
+    "note": "One request per tied lap, not per race: the endpoint accepts a lap_number, so only the lap that can separate the tied drivers is fetched.",
+    "rows_resolved_by_lap_position": 81,
+    "rows_remaining_on_grid_fallback": 113,
+    "rows_before_this_pass": 194,
+    "unresolvable_zero_lap": 111,
+    "unresolved_driver_absent_from_lap_data": 2,
+    "fetch_failures": 0,
+    "limitation": "111 of the 113 remaining rows are retirements that completed ZERO laps. FR-001b orders ties by track position on the final completed lap, and a driver who completed no lap appears in no lap's timing data, so the rule has nothing to read. These fall to the grid fallback permanently, not pending a future fetch. Grid position is arguably the correct answer for them -- it is their last known track position -- but FR-001b does not say so, and they remain flagged as grid-resolved."
   }
 }
