@@ -14,21 +14,56 @@ Design notes that are not obvious from the requirements:
 * **Transient failure is not absence** (FR-111). The 5-second upstream default
   tripped three times in ninety requests during the spike, then succeeded on
   immediate retry.
+
+* **A race is reassembled before it is stored** (FR-104a). The upstream API
+  paginates by *result row*, not by race, so the last race on a page is
+  routinely truncated mid-field — a 2016 season read returns round 5 with 12 of
+  its 22 entries on page 1 and the remaining 10 on page 2. Storing a page as it
+  arrives would silently shrink a field, which is precisely the partial race
+  FR-104a forbids.
+
+This module is the only part of the project that touches the network (NFR-05).
 """
 
 from __future__ import annotations
 
+import json
 import time
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Protocol
 
 import pandas as pd
 
-from f1pred.config import MAX_FAILURE_RATE, MAX_RETRIES, ROW_COUNT_DEVIATION_TOLERANCE
+from f1pred.config import (
+    FASTF1_CACHE_DIR,
+    MAX_FAILURE_RATE,
+    MAX_RETRIES,
+    REQUEST_TIMEOUT_SECONDS,
+    ROW_COUNT_DEVIATION_TOLERANCE,
+)
+from f1pred.data.schema import (
+    RACE_ROW_SCHEMA,
+    SchemaError,
+    classify,
+    empty_frame,
+    map_weekend_format,
+    validate_frame,
+)
 
 #: The API caps `limit` at 100 regardless of what is requested.
 PAGE_SIZE: int = 100
+
+#: Politeness pause between requests. jolpica is a free community service run by
+#: volunteers; the whole corpus is only ~100 requests, so there is no reason to
+#: go faster than one per second.
+REQUEST_PAUSE_SECONDS: float = 1.0
+
+#: Extra sleep after a 429 before the FR-111 retry ladder resumes. Backing off by
+#: the ordinary 1/2/4/8 schedule would keep knocking on a door that has just
+#: asked us to stop.
+RATE_LIMIT_BACKOFF_SECONDS: float = 60.0
 
 
 class CollectionError(RuntimeError):
@@ -348,21 +383,428 @@ def iter_pending(root: Any, seasons: "Any") -> Iterator[int]:
     yield from seasons_to_collect(root, seasons)
 
 
+# --------------------------------------------------------------------------
+# The API client (FR-101, FR-108, FR-110, FR-111)
+# --------------------------------------------------------------------------
+
+
+class RateLimited(CollectionError):
+    """The API asked us to slow down. Transient, and retried under FR-111."""
+
+
+def _looks_rate_limited(exc: BaseException) -> bool:
+    text = str(exc).lower()
+    return "429" in text or "too many requests" in text
+
+
+class ErgastClient:
+    """The project's only networked object.
+
+    fastf1 3.8.3 reaches an Ergast-compatible backend at
+    ``https://api.jolpi.ca/ergast/f1``; the dependency is transitive through
+    fastf1 rather than direct, per plan D-8. Responses are requested **uncast**
+    so that every conversion into the canonical schema happens in this
+    repository, where it is tested, rather than inside a library whose casting
+    rules can change under us.
+    """
+
+    def __init__(
+        self,
+        *,
+        pause: float = REQUEST_PAUSE_SECONDS,
+        timeout: float = REQUEST_TIMEOUT_SECONDS,
+        cache_dir: Path | None = FASTF1_CACHE_DIR,
+        rate_limit_backoff: float = RATE_LIMIT_BACKOFF_SECONDS,
+        sleep: Callable[[float], None] = time.sleep,
+    ) -> None:
+        self.pause = pause
+        self.rate_limit_backoff = rate_limit_backoff
+        self._sleep = sleep
+
+        import fastf1
+        import fastf1.ergast.interface as ergast_interface
+        from fastf1.ergast import Ergast
+
+        # The upstream default is 5 seconds, which the T-099 spike measured
+        # tripping three times in ninety requests. It is a module constant read
+        # at call time, and is the only timeout knob fastf1 exposes.
+        ergast_interface.TIMEOUT = timeout
+
+        if cache_dir is not None:
+            Path(cache_dir).mkdir(parents=True, exist_ok=True)
+            fastf1.Cache.enable_cache(str(cache_dir))
+
+        self._fastf1 = fastf1
+        self._api = Ergast(result_type="raw", auto_cast=False)
+
+    # -- transport ----------------------------------------------------------
+
+    def _call(self, fn: Callable[[], Any]) -> Any:
+        """One request, with the politeness that a free service deserves."""
+        try:
+            return fn()
+        except Exception as exc:  # noqa: BLE001 - transport errors are opaque
+            if _looks_rate_limited(exc):
+                self._sleep(self.rate_limit_backoff)
+                raise RateLimited(str(exc)) from exc
+            raise
+
+    # -- endpoints ----------------------------------------------------------
+
+    def race_result_pages(self, season: int) -> list[Any]:
+        """Every page of a season's race results, asserted complete (FR-110)."""
+
+        def fetch(limit: int, offset: int) -> Any:
+            return self._call(
+                lambda: self._api.get_race_results(
+                    season=season, limit=limit, offset=offset
+                )
+            )
+
+        return paginate(
+            fetch,
+            what=f"race results {season}",
+            rows_in=rows_in_page,
+            pause=self.pause,
+        )
+
+    def event_formats(self, season: int) -> dict[int, str]:
+        """Round -> raw weekend-format string for one season (FR-108).
+
+        Read from fastf1's event schedule, which is the source that carries the
+        format vocabulary (`conventional`, `sprint`, `sprint_shootout`,
+        `sprint_qualifying`). The results endpoint does not expose it.
+        """
+        self._sleep(self.pause)
+        schedule = with_retry(
+            lambda: self._call(
+                lambda: self._fastf1.get_event_schedule(
+                    season, include_testing=False
+                )
+            ),
+            what=f"event schedule {season}",
+        )
+        return {
+            int(row.RoundNumber): str(row.EventFormat)
+            for row in schedule.itertuples()
+        }
+
+
+def rows_in_page(page: Any) -> int:
+    """Result rows on one page — the unit the API paginates by (FR-110).
+
+    Counting *races* here would be wrong: the reported total counts result rows,
+    and a race straddles the page boundary.
+    """
+    return sum(len(race.get("Results", ())) for race in page)
+
+
+# --------------------------------------------------------------------------
+# Payload -> canonical rows (FR-001..003a, FR-105, FR-108)
+# --------------------------------------------------------------------------
+
+
+def merge_paged_races(pages: Sequence[Any]) -> dict[int, dict[str, Any]]:
+    """Reassemble whole races from row-paginated pages (FR-104a).
+
+    Returns round number -> race payload whose `Results` hold the entire field.
+    A race split across two pages appears in both, each time with part of its
+    field; concatenating is the only way to get an intact race, and an intact
+    race is what FR-104a requires before anything is stored.
+    """
+    races: dict[int, dict[str, Any]] = {}
+    for page in pages:
+        for race in page:
+            rnd = int(race["round"])
+            if rnd in races:
+                races[rnd]["Results"].extend(race.get("Results", ()))
+            else:
+                merged = dict(race)
+                merged["Results"] = list(race.get("Results", ()))
+                races[rnd] = merged
+    return races
+
+
+def rows_from_race(
+    race: Mapping[str, Any], *, weekend_format_raw: str
+) -> list[dict[str, Any]]:
+    """One canonical row per entry in one race.
+
+    Nothing is inferred and nothing is defaulted: an unrecognised weekend format
+    (FR-108) or position sentinel (FR-003a) raises, and the caller records the
+    race as a failure rather than storing a guess.
+    """
+    weekend_format = map_weekend_format(weekend_format_raw)
+    season = int(race["season"])
+    rnd = int(race["round"])
+    race_date = pd.Timestamp(str(race["date"]))
+    circuit_id = str(race["Circuit"]["circuitId"])
+
+    rows: list[dict[str, Any]] = []
+    for entry in race.get("Results", ()):
+        driver = entry["Driver"]
+        code = driver.get("code")
+        position_text = str(entry["positionText"])
+        rows.append(
+            {
+                "season": season,
+                "round": rnd,
+                "race_date": race_date,
+                "circuit_id": circuit_id,
+                "weekend_format": weekend_format.value,
+                "weekend_format_raw": str(weekend_format_raw),
+                "driver_id": str(driver["driverId"]),
+                "driver_code": None if code is None else str(code),
+                "constructor_id": str(entry["Constructor"]["constructorId"]),
+                "grid_position": int(entry["grid"]),
+                "classified_position": int(entry["position"]),
+                "position_text": position_text,
+                # FR-003a: derived from the position sentinel, never the status
+                # string. Bahrain 2022 classified two cars that had stopped.
+                "classification_outcome": classify(position_text).value,
+                # FR-003: the raw status verbatim. ~30 distinct values a season,
+                # and FR-752's retirement-cause analysis needs all of them.
+                "status_raw": str(entry["status"]),
+                "laps_completed": int(entry["laps"]),
+                "points": float(entry["points"]),
+                # FR-001b's tie-break is fetched separately and only where a tie
+                # exists (T-101e); it is deliberately absent here.
+                "final_lap_position": None,
+            }
+        )
+    if not rows:
+        raise CollectionError(
+            f"{season} r{rnd}: no result rows in the payload. An empty race is "
+            f"not a small race (FR-104a)."
+        )
+    return rows
+
+
+def frame_from_rows(rows: Sequence[Mapping[str, Any]]) -> pd.DataFrame:
+    """Cast canonical rows to the schema's dtypes and validate them."""
+    if not rows:
+        return empty_frame()
+    df = pd.DataFrame(list(rows))
+    df["race_date"] = pd.to_datetime(df["race_date"])
+    for col, dtype in RACE_ROW_SCHEMA.items():
+        if col != "race_date":
+            df[col] = df[col].astype(dtype)
+    return validate_frame(df)
+
+
+# --------------------------------------------------------------------------
+# Season and corpus collection (FR-101..106)
+# --------------------------------------------------------------------------
+
+
+@dataclass(frozen=True, slots=True)
+class SeasonReport:
+    season: int
+    rows: int
+    races: int
+    #: Rounds the schedule listed. `None` for a season served from a checkpoint,
+    #: where the schedule was deliberately not refetched (FR-102).
+    scheduled_races: int | None
+    failed_rounds: tuple[int, ...]
+    from_checkpoint: bool = False
+
+    def as_dict(self) -> dict[str, object]:
+        return {
+            "season": self.season,
+            "rows": self.rows,
+            "races": self.races,
+            "scheduled_races": self.scheduled_races,
+            "failed_rounds": list(self.failed_rounds),
+            "from_checkpoint": self.from_checkpoint,
+        }
+
+
+def collect_season(
+    season: int, *, client: Any, manifest: FailureManifest
+) -> tuple[pd.DataFrame, SeasonReport]:
+    """Collect one whole season into canonical rows.
+
+    A race that cannot be built is excluded whole and recorded as a gap
+    (FR-104a, FR-104b); the threshold is checked after every race so that a run
+    which has stopped being trustworthy stops (FR-104c).
+    """
+    formats = client.event_formats(season)
+    races = merge_paged_races(client.race_result_pages(season))
+
+    frames: list[pd.DataFrame] = []
+    failed: list[int] = []
+
+    for rnd in sorted(races):
+        race = races[rnd]
+        race_date = str(race.get("date")) or None
+        raw_format = formats.get(rnd)
+        try:
+            if raw_format is None:
+                raise SchemaError(
+                    f"round {rnd} is absent from the {season} event schedule, so "
+                    f"its weekend format is unknown. FR-108 makes that an error "
+                    f"rather than a silent CONVENTIONAL."
+                )
+            frames.append(
+                frame_from_rows(rows_from_race(race, weekend_format_raw=raw_format))
+            )
+        except Exception as exc:  # noqa: BLE001 - any defect fails the race whole
+            failed.append(rnd)
+            manifest.record_failure(
+                season, rnd, f"{type(exc).__name__}: {exc}", race_date
+            )
+        else:
+            manifest.record_success()
+
+    # A scheduled round that returned no results at all is a gap too — it never
+    # reached the loop above, so nothing else would have noticed it.
+    for rnd in sorted(set(formats) - set(races)):
+        failed.append(rnd)
+        manifest.record_failure(
+            season, rnd, "scheduled round returned no race results"
+        )
+
+    # FR-104c is checked per season, not per race: after one race the rate is
+    # either 0% or 100%, so a per-race check would abort on the first failure
+    # whatever the threshold said, and the threshold would mean nothing. The
+    # manifest accumulates across seasons, so the across-the-run rate is
+    # checked here too.
+    manifest.check_threshold()
+
+    df = (
+        pd.concat(frames, ignore_index=True)
+        if frames
+        else empty_frame()
+    )
+    df = validate_frame(df)
+    return df, SeasonReport(
+        season=season,
+        rows=len(df),
+        races=int(df["round"].nunique()) if len(df) else 0,
+        scheduled_races=len(formats),
+        failed_rounds=tuple(sorted(failed)),
+    )
+
+
+def collect_corpus(
+    seasons: Sequence[int],
+    *,
+    root: Any,
+    client: Any,
+    manifest: FailureManifest | None = None,
+    log: Callable[[str], None] = print,
+) -> tuple[list[SeasonReport], FailureManifest]:
+    """Collect every season that has no checkpoint yet (FR-101..103).
+
+    Resumption is the default rather than a flag: an interrupted run is
+    restarted by running the same command again.
+    """
+    manifest = manifest if manifest is not None else FailureManifest()
+    pending = set(seasons_to_collect(root, seasons))
+    reports: list[SeasonReport] = []
+
+    for season in seasons:
+        if season not in pending:
+            existing = read_checkpoint(root, season)
+            assert existing is not None
+            reports.append(
+                SeasonReport(
+                    season=season,
+                    rows=len(existing),
+                    races=int(existing["round"].nunique()) if len(existing) else 0,
+                    scheduled_races=None,
+                    failed_rounds=(),
+                    from_checkpoint=True,
+                )
+            )
+            log(f"{season}: checkpoint present, not refetched (FR-102)")
+            continue
+
+        df, report = collect_season(season, client=client, manifest=manifest)
+        write_checkpoint(df, root, season)
+        reports.append(report)
+        log(
+            f"{season}: {report.rows} rows across {report.races} races "
+            f"(schedule says {report.scheduled_races})"
+            + (f" — failed rounds {list(report.failed_rounds)}" if report.failed_rounds else "")
+        )
+
+    return reports, manifest
+
+
+def write_failure_manifest(manifest: FailureManifest, root: Any) -> Path:
+    """FR-104b: the manifest travels with the data."""
+    root = Path(root)
+    root.mkdir(parents=True, exist_ok=True)
+    path = root / "failure_manifest.json"
+    path.write_text(json.dumps(manifest.as_dict(), indent=2) + "\n")
+    return path
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    """Run collection over the corpus window (T-106).
+
+    Deliberately minimal: the full command surface is FR-801, built in P6. This
+    exists so that the collection procedure Constitution I.3 requires to be
+    documented is a command in the repository rather than a scratch script.
+    """
+    from f1pred.config import RAW_DIR
+    from f1pred.corpus import default_window
+
+    window = default_window()
+    seasons = window.resolve()
+    print(f"corpus window: W={window.width} -> {seasons[0]}..{seasons[-1]}")
+
+    client = ErgastClient()
+    reports, manifest = collect_corpus(seasons, root=RAW_DIR, client=client)
+
+    frames = [
+        df for df in (read_checkpoint(RAW_DIR, s) for s in seasons) if df is not None
+    ]
+    corpus = pd.concat(frames, ignore_index=True) if frames else empty_frame()
+    for count in check_season_counts(corpus):
+        warning = count.warning()
+        if warning:
+            print(f"FR-106 warning: {warning}")
+
+    print(manifest.summary())
+    print(f"manifest written to {write_failure_manifest(manifest, RAW_DIR)}")
+    print(f"{len(corpus)} rows across {len(reports)} seasons")
+    return 0
+
+
 __all__ = [
     "PAGE_SIZE",
+    "RATE_LIMIT_BACKOFF_SECONDS",
+    "REQUEST_PAUSE_SECONDS",
     "CollectionError",
+    "ErgastClient",
     "FailureManifest",
     "FailureThresholdExceeded",
     "IncompletePageError",
     "RaceFailure",
+    "RateLimited",
     "SeasonCount",
+    "SeasonReport",
     "check_season_counts",
     "checkpoint_path",
+    "collect_corpus",
+    "collect_season",
     "completed_seasons",
+    "frame_from_rows",
     "iter_pending",
+    "main",
+    "merge_paged_races",
     "paginate",
     "read_checkpoint",
+    "rows_from_race",
+    "rows_in_page",
     "seasons_to_collect",
     "with_retry",
     "write_checkpoint",
+    "write_failure_manifest",
 ]
+
+
+if __name__ == "__main__":  # pragma: no cover - thin entry point
+    raise SystemExit(main())
