@@ -1,5 +1,0 @@
-Metadata-Version: 2.4
-Name: f1pred
-Version: 0.1.0.dev0
-Summary: Spec-driven F1 race result predictor with honest baseline evaluation
-Requires-Python: >=3.13
