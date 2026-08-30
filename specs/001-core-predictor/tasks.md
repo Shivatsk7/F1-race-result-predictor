@@ -40,7 +40,7 @@ models, plots, data/output, docs, .vscode, .qodo, .sixth.
 |----|------|-----------|-----------|
 | ☑ **T-099** | **Spike — pre-2018 results availability (OQ-7)** | OQ-7, FR-101 | **DONE 2026-08-24.** Answer: yes, back to 1996. Finding recorded in spec §7.1; spike deleted. Closed OQ-5, opened the OQ-6 corpus-start decision, and exposed six defects now closed as FR-001a, FR-003, FR-003a, FR-108, FR-110, FR-111. |
 | ☑ **T-101** | Define canonical row schema + validator in `data/schema.py` | FR-002, FR-003, FR-105, FR-108, FR-803 | Schema rejects missing/mistyped columns; carries `status`, `laps_completed`, `classified_position`, `weekend_format`; unit-tested — **DONE 2026-08-25.** `data/schema.py`: canonical row, dtype/null/duplicate-key validation, `ClassificationOutcome`, `WeekendFormat` mapping. 19 tests. |
-| ☑ **T-101a** | Implement the FR-001 target construction | FR-001, FR-001b, AC-15 | Finishers in official order, retirements by laps descending, DSQ last, ties broken by grid; unit-tested against a hand-built race with all four cases — **DONE 2026-08-25.** `data/target.py::compute_order` — all four cases tested on Australia 2014 and 2016. |
+| ☑ **T-101a** | Implement the FR-001 target construction | FR-001, FR-001b, AC-15 | Finishers in official order, retirements by laps descending, DSQ last; remaining ties by final-lap track position per FR-001b, grid only as a flagged fallback; unit-tested against a hand-built race with all four cases — **DONE 2026-08-25.** `data/target.py::compute_order` — all four cases tested on Australia 2014 and 2016. |
 | ☑ **T-101b** | Circuit attribute table | FR-109 | Every circuit in the corpus has type and overtaking tier; a missing entry raises — **DONE 2026-08-26.** `reference/circuits.py`: all 35 circuits raced 2010–2025, enumerated from the source; type + overtaking tier declared; `get`/`assert_all_declared` raise on any undeclared id. |
 | ☐ **T-101e** | Fetch final-lap position for tied races | FR-001b | Lap-times detail fetched **only** for races where `races_needing_final_lap_position` reports a tie; rows left to the grid fallback are flagged |
 | ☑ **T-101c** | Validate source ordering against FR-001 | FR-001a | Every race's official order is checked against the FR-001 rule; disagreements are reported, not overridden. Regression test on Australia 2014 (8 retirements incl. a DSQ) and Australia 2016 — **DONE 2026-08-25.** `validate_against_source` reports, never overrides. Australia 2014 agrees; Australia 2016 disagrees on the Gutierrez/Alonso lap-16 tie — see note below. |
@@ -181,8 +181,7 @@ Every requirement maps to at least one task:
 
 | Group | Requirements | Covered by |
 |-------|-------------|------------|
-| **Target variable** | FR-001..003 | T-101, T-101a |
-| Target variable | FR-001..003a | T-101a, T-101c, T-101d |
+| **Target variable** | FR-001..003a | T-101, T-101a, T-101c, T-101d, T-101e |
 | Data | FR-101..111 | T-099, T-101, T-101b, T-102..106, T-105a, T-105b, T-106a, T-005 |
 | Features | FR-201..218 | T-201..217, T-213a |
 | Baselines | FR-301..305 | T-301..304, T-310, T-311 |
