@@ -25,8 +25,9 @@
 > - [x] §4 Non-functional requirements
 > - [x] §5 **Out of scope** — every deletion in P0 was justified from this list
 > - [x] §6 Acceptance criteria — what "done" means
-> - [x] §7 Open questions — *OQ-5, OQ-6, OQ-7 all closed; OQ-1..4 resolve from data*
+> - [x] §7 Open questions — *OQ-2, OQ-5, OQ-6, OQ-7 closed; OQ-1, OQ-3, OQ-4 resolve from data*
 > - [x] §7.1 **T-099 spike finding** — *why OQ-5 and OQ-7 are now closed*
+> - [x] §7.2 **T-107 finding** — *why OQ-2 closes without dropping weather*
 
 > This document states **what** the system must do and **why**. It contains no
 > implementation decisions — those live in `plan.md`. If you find yourself
@@ -402,7 +403,7 @@ This spec is satisfied when all of the following hold:
 | ID | Question | Blocks | Resolution |
 |----|----------|--------|------------|
 | **OQ-1** | Which seasons form the holdout? Depends on how many collect cleanly. **Note the consequence of the obvious answer:** a 2023–25 holdout sits entirely inside the post-2022 ground-effect regime, so the headline number measures *within-regime* performance and says nothing about behaviour across a reset — despite §3.5's regulation-robustness apparatus. That limitation SHALL be stated wherever the headline result appears. | FR-501, FR-901 | Defer to after AC-1; target the three most recent complete seasons, and state the within-regime caveat explicitly rather than letting a reader infer generality. |
-| **OQ-2** | Is a pre-race weather forecast source obtainable for historical races? If not, FR-206 forces dropping weather from the primary set entirely. | FR-206 | Investigate during Phase 1; dropping weather is the acceptable fallback. |
+| **OQ-2** | ~~Is a pre-race weather forecast source obtainable for historical races?~~ **RESOLVED 2026-08-30 by T-107: partially — and the premise of the fallback was wrong.** An *archived forecast* (what was predicted before the race) is obtainable for **2017 onward only** — 9 of the corpus's 16 seasons — verified against Open-Meteo's historical-forecast API, which returns data from 2017-01-01 and nothing for 2016-12-01 or earlier. A *climatological prior* is obtainable for the **entire** corpus from ERA5 reanalysis, verified back to the 2010 season opener. FR-206 admits either, so **weather is not dropped**: the primary set takes the prior, which covers every season uniformly. The partial-coverage forecast is a separate arm on the T-214 telemetry pattern, not a primary feature. See §7.2. | FR-206 | Closed on the factual question. One owner decision remains: whether to build the 2017+ forecast arm at all (§7.2). |
 | **OQ-3** | What is the documented calibration-error threshold for FR-705? | FR-705 | Set empirically once first reliability curves exist; must be fixed before any public claim. |
 | **OQ-4** | Which estimator for the irreducible noise floor? Near-identical-race variance, DNF-bound decomposition, or both? | FR-754 | Decide in P5 with real data; both are cheap, so likely both with the wider bound reported. |
 | **OQ-5** | ~~Can 8 seasons actually be collected, given FastF1 coverage for 2018–19?~~ **RESOLVED 2026-08-24 by T-099.** The zero-margin problem was an artefact of a false premise. FastF1's 2018 floor binds on lap and telemetry data only; results, qualifying, standings, and schedule are served by the Ergast-compatible backend and were verified working back to 1996. The corpus is not capped at 8 seasons. What replaces this risk is a *choice*, now tracked as OQ-6. | FR-101, FR-501a | Closed. No IV.2a shortfall is expected. |
@@ -466,3 +467,43 @@ low-fuel qualifying convention.
 settled by the owner on 2026-08-25 in favour of a **2010 start**: 16 seasons,
 FR-511 at `n=2` compliant plus one diagnostic, and FR-511a's blanket IV.2
 exemption withdrawn.
+
+### 7.2 T-107 Finding — Historical Weather Forecast Availability (OQ-2)
+
+*Probed 2026-08-30 against the live Open-Meteo APIs. Probe code not retained
+per Constitution VII.1a.*
+
+**The headline: OQ-2 conflated two different things, and its stated fallback was
+never forced.** FR-206 admits *either* a pre-race forecast *or* a climatological
+prior. Only the first is scarce.
+
+| Source | What it is | Coverage probed | Admissible as a PRE_RACE feature? |
+|--------|-----------|-----------------|-----------------------------------|
+| Open-Meteo historical-forecast API | Archived output of past forecast runs — what was actually predicted *before* the day | **2017-01-01 onward.** 2016-12-01 and earlier return no data | Yes — it is genuinely pre-race knowledge |
+| Open-Meteo archive API (ERA5 reanalysis) | Assimilated observation of what actually happened | Verified at the 2010 season opener; full corpus | **Only as an input to a prior computed from prior seasons.** The same race's own value is observed weather — oracle set only (FR-751a, III.2) |
+
+**The boundary is sharp and was bisected, not assumed:** 2016-06-01 and
+2016-12-01 return no data; 2017-01-01 onward returns data continuously through
+2022 and beyond. The corpus starts in 2010, so an archived forecast covers
+**9 of 16 seasons (2017–2025)** and misses 2010–2016.
+
+**Consequences.**
+
+1. **Weather stays in the primary set, as a climatological prior.** The prior for
+   a race is computed from that circuit's conditions in *strictly prior* seasons.
+   Under FR-203's strict-prior discipline this carries no leakage, and it covers
+   all 16 seasons uniformly — which a 2017+ forecast does not.
+2. **ERA5 must not be read for the race's own date in the primary path.** The
+   same endpoint serves both the admissible prior and the inadmissible observation;
+   only the date range separates them. This is a leakage footgun of exactly the
+   kind FR-204/FR-205 exist to catch, and the registry test should treat a
+   same-race ERA5 read as a failure, not a judgement call.
+3. **A forecast feature would make the primary set's coverage non-uniform**,
+   which is precisely why telemetry was made a separate arm (T-214..216, AC-19)
+   rather than a primary feature. The same reasoning applies unchanged.
+
+**Owner decision outstanding.** Whether to build the 2017+ archived-forecast arm
+at all. It is not required by FR-206 — the prior satisfies it — and it would cost
+a second weather source, a second cache, and a nine-season arm whose result cannot
+be compared against the other seven. Recorded here rather than decided by the
+agent, per Constitution VII.2.
