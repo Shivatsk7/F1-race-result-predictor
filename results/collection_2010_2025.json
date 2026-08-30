@@ -1,0 +1,179 @@
+{
+  "task": "T-106 / T-106a",
+  "requirements": [
+    "FR-101",
+    "FR-509",
+    "FR-501a",
+    "FR-902"
+  ],
+  "generated": "2026-08-30",
+  "code_commit": "3ad894facfcf0eaef37573061a13af535515ba0e",
+  "corpus": {
+    "start_season": 2010,
+    "end_season": 2025,
+    "seasons_collected": 16,
+    "season_list": [
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "excluded": {
+      "2026": "season in progress; FR-509 bars it"
+    }
+  },
+  "totals": {
+    "rows": 6911,
+    "races": 329,
+    "drivers": 83,
+    "circuits": 35
+  },
+  "per_season": [
+    {
+      "season": 2010,
+      "rows": 456,
+      "races": 19,
+      "entries_per_race": 24.0
+    },
+    {
+      "season": 2011,
+      "rows": 454,
+      "races": 19,
+      "entries_per_race": 23.89
+    },
+    {
+      "season": 2012,
+      "rows": 478,
+      "races": 20,
+      "entries_per_race": 23.9
+    },
+    {
+      "season": 2013,
+      "rows": 418,
+      "races": 19,
+      "entries_per_race": 22.0
+    },
+    {
+      "season": 2014,
+      "rows": 407,
+      "races": 19,
+      "entries_per_race": 21.42
+    },
+    {
+      "season": 2015,
+      "rows": 378,
+      "races": 19,
+      "entries_per_race": 19.89
+    },
+    {
+      "season": 2016,
+      "rows": 462,
+      "races": 21,
+      "entries_per_race": 22.0
+    },
+    {
+      "season": 2017,
+      "rows": 400,
+      "races": 20,
+      "entries_per_race": 20.0
+    },
+    {
+      "season": 2018,
+      "rows": 420,
+      "races": 21,
+      "entries_per_race": 20.0
+    },
+    {
+      "season": 2019,
+      "rows": 420,
+      "races": 21,
+      "entries_per_race": 20.0
+    },
+    {
+      "season": 2020,
+      "rows": 340,
+      "races": 17,
+      "entries_per_race": 20.0
+    },
+    {
+      "season": 2021,
+      "rows": 440,
+      "races": 22,
+      "entries_per_race": 20.0
+    },
+    {
+      "season": 2022,
+      "rows": 440,
+      "races": 22,
+      "entries_per_race": 20.0
+    },
+    {
+      "season": 2023,
+      "rows": 440,
+      "races": 22,
+      "entries_per_race": 20.0
+    },
+    {
+      "season": 2024,
+      "rows": 479,
+      "races": 24,
+      "entries_per_race": 19.96
+    },
+    {
+      "season": 2025,
+      "rows": 479,
+      "races": 24,
+      "entries_per_race": 19.96
+    }
+  ],
+  "constitution_IV_2": {
+    "floor_total_seasons": 8,
+    "actual_total_seasons": 16,
+    "margin_seasons": 8,
+    "floor_training_seasons": 5,
+    "floor_holdout_seasons": 3,
+    "floor_min_rows": 200,
+    "actual_rows": 6911,
+    "met": true,
+    "shortfall": null,
+    "note": "IV.2a not engaged: no shortfall to declare."
+  },
+  "collection_health": {
+    "races_attempted": 329,
+    "failures": 0,
+    "failure_rate": 0.0,
+    "max_failure_rate": 0.1,
+    "manifest": "data/raw/failure_manifest.json (gitignored per FR-107)"
+  },
+  "classification_outcomes": {
+    "classified": 5826,
+    "not_classified": 1025,
+    "withdrawn": 43,
+    "disqualified": 17
+  },
+  "weekend_formats": {
+    "conventional": 6431,
+    "sprint_standalone": 360,
+    "sprint_sets_grid": 120
+  },
+  "known_gaps": {
+    "final_lap_position": "100% null by design. FR-001b's tie-break signal is fetched lazily by T-101e, which is not yet implemented. Retirement ties currently fall through to the flagged grid fallback."
+  },
+  "verification": {
+    "schema_validate_frame": "PASS over all 16 seasons concatenated",
+    "duplicate_keys_season_round_driver": 0,
+    "offline_test_suite": "147 passed, 2 network-marked deselected, 1.6s (NFR-04 budget 60s)"
+  }
+}
