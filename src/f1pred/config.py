@@ -116,3 +116,30 @@ def regime_for_season(season: int) -> Regime:
 def seasons_since_regime_start(season: int) -> int:
     """Seasons elapsed since the current regime began. Zero in a reset year."""
     return season - regime_for_season(season).start_season
+
+
+# --------------------------------------------------------------------------
+# Cold-start fallbacks (FR-212)
+# --------------------------------------------------------------------------
+#
+# FR-212 forbids the field mean, and rightly: filling a rookie's form features
+# with 0.5 asserts average competitiveness on no evidence at all. These values
+# are instead *measured* — the mean within-race finishing percentile actually
+# achieved by drivers and constructors on their corpus debut.
+#
+# Measured over 2011-2014 only, deliberately. Those seasons sit inside any
+# chronological training split (FR-501), so the constant cannot carry holdout
+# information back into a training feature. 2010 is excluded because every
+# entrant is a debutant at the corpus start, which would measure the corpus
+# boundary rather than debut performance.
+#
+# The samples are small — 20 driver debuts and 6 constructor debuts — so these
+# are weak estimates, and that is exactly why every row they touch is flagged
+# LOW_INFORMATION (FR-212) rather than being presented as an ordinary
+# prediction. For reference the contemporaneous field mean is 0.52.
+
+#: Mean finishing percentile of a driver's corpus debut, 2011-2014 (n=20).
+COLD_START_DRIVER_PERCENTILE: Final[float] = 0.35
+
+#: Mean finishing percentile of a constructor's corpus debut, 2011-2014 (n=6).
+COLD_START_CONSTRUCTOR_PERCENTILE: Final[float] = 0.33

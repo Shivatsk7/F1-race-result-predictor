@@ -1,0 +1,543 @@
+"""The registered features (FR-202, FR-203, FR-209, FR-210, FR-211).
+
+Every feature the project computes is declared here. Importing this module is
+what populates `registry.REGISTRY`; `build` and `checks` read the result. There
+is no list of feature names anywhere else in the codebase, which is the point
+of FR-202 — v0's hand-maintained list is what let a post-race weather flag sit
+in the model for four months.
+
+**Shape of this module.** Historical performance is computed twice: once as an
+absolute quantity in the INTERMEDIATE group, and once as that quantity's rank
+against the cars that actually turned up. Only the second reaches a model,
+because FR-209 says a pace number that means one thing in 2013 and another in
+2023 is not a feature, it is a date in disguise.
+
+The disposition of every v0 feature — ported here, or dropped and why — is
+recorded in `disposition.py` and tested, so "we ported the features" is a
+checkable claim rather than a memory.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Callable
+
+import numpy as np
+import pandas as pd
+
+from f1pred.config import RegimeSeverity, regime_for_season, seasons_since_regime_start
+from f1pred.data.schema import ClassificationOutcome, WeekendFormat
+from f1pred.features.priors import (
+    RACE_KEYS,
+    prior_race_count,
+    prior_rate,
+    prior_stat,
+    within_race_percentile,
+)
+from f1pred.features.ratings import sequential_elo
+from f1pred.features.registry import Availability, FeatureGroup, feature
+from f1pred.reference import circuits
+
+PRE = Availability.PRE_RACE
+POST = Availability.POST_RACE
+INTERMEDIATE = FeatureGroup.INTERMEDIATE
+
+#: The FR-001 total order, added by `data.target.build_target` before any
+#: feature runs. Named once so no feature spells it as a literal.
+FINISH = "target_position"
+
+
+def _relative(
+    base: str,
+    *,
+    higher_is_better: bool,
+    description: str,
+    name: str | None = None,
+) -> None:
+    """Register `base`'s field-relative form as a primary feature (FR-209).
+
+    Generated rather than hand-written because these nineteen declarations are
+    identical but for two words, and nineteen copies of the same function is
+    nineteen chances to rank one of them the wrong way round.
+    """
+
+    def compute(df: pd.DataFrame, _base: str = base, _hib: bool = higher_is_better):
+        return within_race_percentile(df, df[_base], higher_is_better=_hib)
+
+    compute.__name__ = name or f"{base}_pct"
+    compute.__doc__ = description
+    feature(
+        PRE,
+        depends_on=[base],
+        summarises_history=True,
+        relative=True,
+        name=name or f"{base}_pct",
+    )(compute)
+
+
+# --------------------------------------------------------------------------
+# Starting position and race context — knowable at lights out by definition
+# --------------------------------------------------------------------------
+
+
+@feature(PRE, depends_on=["grid_position"])
+def grid_slot(df: pd.DataFrame) -> pd.Series:
+    """Where the car starts. The single strongest signal in the sport.
+
+    Named `grid_slot` rather than `grid_position` because a feature may not
+    share a name with the raw column it reads: `depends_on` resolves against
+    both, and a shadowed name is an unresolvable dependency.
+    """
+    return df["grid_position"].astype("float64")
+
+
+@feature(PRE, depends_on=["grid_position"])
+def grid_position_sq(df: pd.DataFrame) -> pd.Series:
+    """Grid position squared: the cost of a place lost grows down the order."""
+    return df["grid_position"].astype("float64") ** 2
+
+
+@feature(PRE, depends_on=["grid_position", "constructor_id", *RACE_KEYS])
+def grid_rank_vs_teammate(df: pd.DataFrame) -> pd.Series:
+    """Rank within the constructor's own cars on this grid — 1 is ahead.
+
+    v0 called this `quali_vs_teammate`. It is the cleanest available read on a
+    driver's pace with the car held constant, which is why it survives even
+    though the qualifying times it would ideally use are not in the corpus.
+    """
+    return (
+        df.groupby([*RACE_KEYS, "constructor_id"], dropna=False, sort=False)[
+            "grid_position"
+        ]
+        .rank(method="dense")
+        .astype("float64")
+    )
+
+
+@feature(PRE, depends_on=[*RACE_KEYS])
+def field_size(df: pd.DataFrame) -> pd.Series:
+    """How many cars started. Ranges from 20 to 26 across the corpus."""
+    return (
+        df.groupby(list(RACE_KEYS), dropna=False, sort=False)["driver_id"]
+        .transform("size")
+        .astype("float64")
+    )
+
+
+@feature(PRE, depends_on=["weekend_format"])
+def is_sprint_weekend(df: pd.DataFrame) -> pd.Series:
+    """Whether a sprint race preceded the Grand Prix (FR-108, FR-211).
+
+    Knowable months in advance — the calendar declares it. The sprint's
+    *result* is a further pre-race signal that FR-211 admits; it is not yet
+    collected, so this flag carries only the weekend's structure.
+    """
+    return (df["weekend_format"] != WeekendFormat.CONVENTIONAL.value).astype("float64")
+
+
+# --------------------------------------------------------------------------
+# Circuit attributes — declared data (FR-109, T-101b)
+# --------------------------------------------------------------------------
+
+
+def _circuit_attr(df: pd.DataFrame, fn: Callable[[circuits.Circuit], float]) -> pd.Series:
+    """Map each row's circuit to a declared attribute. Unknown ids raise."""
+    unique = {cid: fn(circuits.get(cid)) for cid in df["circuit_id"].unique()}
+    return df["circuit_id"].map(unique).astype("float64")
+
+
+@feature(PRE, depends_on=["circuit_id"])
+def is_street_circuit(df: pd.DataFrame) -> pd.Series:
+    """Street venue: overtaking is scarce and the grid holds."""
+    return _circuit_attr(df, lambda c: float(c.circuit_type is circuits.CircuitType.STREET))
+
+
+@feature(PRE, depends_on=["circuit_id"])
+def is_permanent_circuit(df: pd.DataFrame) -> pd.Series:
+    """Purpose-built permanent facility."""
+    return _circuit_attr(
+        df, lambda c: float(c.circuit_type is circuits.CircuitType.PERMANENT)
+    )
+
+
+@feature(PRE, depends_on=["circuit_id"])
+def is_hybrid_circuit(df: pd.DataFrame) -> pd.Series:
+    """Public roads forming a semi-permanent facility."""
+    return _circuit_attr(
+        df, lambda c: float(c.circuit_type is circuits.CircuitType.HYBRID)
+    )
+
+
+@feature(PRE, depends_on=["circuit_id"])
+def overtaking_difficulty(df: pd.DataFrame) -> pd.Series:
+    """Declared overtaking tier, 0 (easy) to 3 (very hard)."""
+    return _circuit_attr(df, lambda c: float(c.overtaking_tier.rank))
+
+
+@feature(PRE, depends_on=["grid_position", "overtaking_difficulty"])
+def grid_x_overtaking(df: pd.DataFrame) -> pd.Series:
+    """Grid position weighted by how hard the circuit is to pass at.
+
+    Replaces v0's `weighted_grid_position`, which multiplied grid position by a
+    logistic of five undeclared track indices. This uses the one circuit
+    attribute the project actually declares (FR-109) and leaves the shape of
+    the interaction to the model.
+    """
+    return df["grid_position"].astype("float64") * (1.0 + df["overtaking_difficulty"])
+
+
+@feature(PRE, depends_on=["grid_position", "is_street_circuit"])
+def grid_x_street(df: pd.DataFrame) -> pd.Series:
+    """Grid position on a street circuit, zero elsewhere (v0's street pressure)."""
+    return df["grid_position"].astype("float64") * df["is_street_circuit"]
+
+
+# --------------------------------------------------------------------------
+# Regulation regime — declared data (FR-210, plan D-10)
+# --------------------------------------------------------------------------
+
+
+@feature(PRE, depends_on=["season"])
+def regime_id(df: pd.DataFrame) -> pd.Series:
+    """Start season of the regulation regime in force (FR-210).
+
+    Knowable before a season begins, so Constitution III.1 is satisfied
+    trivially. Carried as the start season rather than an index, so the value
+    stays meaningful when a regime is inserted into the declared table.
+    """
+    unique = {s: float(regime_for_season(int(s)).start_season) for s in df["season"].unique()}
+    return df["season"].map(unique).astype("float64")
+
+
+@feature(PRE, depends_on=["season"])
+def seasons_since_regime(df: pd.DataFrame) -> pd.Series:
+    """Seasons elapsed since the current regime began; zero in a reset year."""
+    unique = {s: float(seasons_since_regime_start(int(s))) for s in df["season"].unique()}
+    return df["season"].map(unique).astype("float64")
+
+
+@feature(PRE, depends_on=["season"])
+def regime_is_major(df: pd.DataFrame) -> pd.Series:
+    """Whether the regime in force began with a major regulation reset."""
+    unique = {
+        s: float(regime_for_season(int(s)).severity is RegimeSeverity.MAJOR)
+        for s in df["season"].unique()
+    }
+    return df["season"].map(unique).astype("float64")
+
+
+# --------------------------------------------------------------------------
+# Experience — participation counts, not performance (so FR-209 does not bind)
+# --------------------------------------------------------------------------
+
+
+@feature(PRE, depends_on=["driver_id"])
+def driver_prior_races(df: pd.DataFrame) -> pd.Series:
+    """Races this driver has already contested in the corpus. Zero = rookie."""
+    return prior_race_count(df, entity="driver_id")
+
+
+@feature(PRE, depends_on=["constructor_id"])
+def constructor_prior_races(df: pd.DataFrame) -> pd.Series:
+    """Races this constructor has already contested. Zero = new team."""
+    return prior_race_count(df, entity="constructor_id")
+
+
+# --------------------------------------------------------------------------
+# Driver form — absolute intermediates (FR-203)
+# --------------------------------------------------------------------------
+
+
+@feature(PRE, group=INTERMEDIATE, depends_on=["driver_id", FINISH], summarises_history=True)
+def driver_finish_last3(df: pd.DataFrame) -> pd.Series:
+    """Mean finishing position over the driver's three previous races."""
+    return prior_stat(df, entity="driver_id", value=FINISH, window=3)
+
+
+@feature(PRE, group=INTERMEDIATE, depends_on=["driver_id", FINISH], summarises_history=True)
+def driver_finish_last5(df: pd.DataFrame) -> pd.Series:
+    """Mean finishing position over the driver's five previous races."""
+    return prior_stat(df, entity="driver_id", value=FINISH, window=5)
+
+
+@feature(
+    PRE, group=INTERMEDIATE, depends_on=["driver_id", "grid_position"], summarises_history=True
+)
+def driver_grid_last3(df: pd.DataFrame) -> pd.Series:
+    """Mean grid position over the driver's three previous races."""
+    return prior_stat(df, entity="driver_id", value="grid_position", window=3)
+
+
+@feature(PRE, group=INTERMEDIATE, depends_on=["driver_id", "points"], summarises_history=True)
+def driver_points_last3(df: pd.DataFrame) -> pd.Series:
+    """Mean points scored over the driver's three previous races."""
+    return prior_stat(df, entity="driver_id", value="points", window=3)
+
+
+@feature(
+    PRE,
+    group=INTERMEDIATE,
+    depends_on=["driver_id", "grid_position", FINISH],
+    summarises_history=True,
+)
+def driver_gain_last5(df: pd.DataFrame) -> pd.Series:
+    """Mean places gained from the grid over the driver's five previous races."""
+    work = df.copy()
+    work["_gain"] = df["grid_position"].astype("float64") - pd.to_numeric(
+        df[FINISH], errors="coerce"
+    )
+    return prior_stat(work, entity="driver_id", value="_gain", window=5)
+
+
+@feature(
+    PRE, group=INTERMEDIATE, depends_on=["driver_id", "season", FINISH], summarises_history=True
+)
+def driver_win_rate_season(df: pd.DataFrame) -> pd.Series:
+    """Share of this season's earlier races the driver won.
+
+    Scoped to the season, so the rate speaks about the current car rather than
+    about a career. Resets at each season boundary, which is correct: a driver
+    who won six races in a title-winning car is not thereby a favourite in a
+    midfield one.
+    """
+    return prior_rate(
+        df, entity=["season", "driver_id"], mask=pd.to_numeric(df[FINISH]) == 1
+    )
+
+
+@feature(
+    PRE, group=INTERMEDIATE, depends_on=["driver_id", "season", FINISH], summarises_history=True
+)
+def driver_podium_rate_season(df: pd.DataFrame) -> pd.Series:
+    """Share of this season's earlier races the driver finished in the top three."""
+    return prior_rate(
+        df, entity=["season", "driver_id"], mask=pd.to_numeric(df[FINISH]) <= 3
+    )
+
+
+@feature(
+    PRE, group=INTERMEDIATE, depends_on=["driver_id", "season", "points"], summarises_history=True
+)
+def driver_points_per_race_season(df: pd.DataFrame) -> pd.Series:
+    """Mean points per race so far this season, excluding this race."""
+    return prior_stat(df, entity=["season", "driver_id"], value="points")
+
+
+@feature(PRE, group=INTERMEDIATE, depends_on=["driver_id", FINISH], summarises_history=True)
+def driver_elo_race(df: pd.DataFrame) -> pd.Series:
+    """Pairwise race-execution rating as it stood before this race."""
+    return sequential_elo(df, entity="driver_id", outcome=FINISH, k_factor=24.0)
+
+
+@feature(
+    PRE, group=INTERMEDIATE, depends_on=["driver_id", "grid_position"], summarises_history=True
+)
+def driver_elo_quali(df: pd.DataFrame) -> pd.Series:
+    """Pairwise qualifying-pace rating as it stood before this race."""
+    return sequential_elo(df, entity="driver_id", outcome="grid_position", k_factor=20.0)
+
+
+# --------------------------------------------------------------------------
+# Constructor form — aggregated to the team-race grain before any shift
+# --------------------------------------------------------------------------
+
+
+@feature(
+    PRE,
+    group=INTERMEDIATE,
+    depends_on=["constructor_id", "season", "points"],
+    summarises_history=True,
+)
+def constructor_points_per_race_season(df: pd.DataFrame) -> pd.Series:
+    """Mean points the team scored per earlier race this season, both cars."""
+    return prior_stat(
+        df, entity=["season", "constructor_id"], value="points", within_race="sum"
+    )
+
+
+@feature(
+    PRE,
+    group=INTERMEDIATE,
+    depends_on=["constructor_id", "season", "classification_outcome"],
+    summarises_history=True,
+)
+def constructor_reliability_season(df: pd.DataFrame) -> pd.Series:
+    """Share of the team's earlier car-starts this season that were classified.
+
+    Read from the classification outcome, not from a regex over the status
+    string. v0 matched `Finished|Lap`, which counted "+1 Lap" as a finish and
+    "Lapped" as one too, but silently scored a classified retirement — Bahrain
+    2022, both Red Bulls — as a failure.
+    """
+    classified = (
+        df["classification_outcome"] == ClassificationOutcome.CLASSIFIED.value
+    )
+    return prior_rate(df, entity=["season", "constructor_id"], mask=classified)
+
+
+@feature(
+    PRE, group=INTERMEDIATE, depends_on=["constructor_id", FINISH], summarises_history=True
+)
+def constructor_finish_last3(df: pd.DataFrame) -> pd.Series:
+    """Mean finishing position of the team's cars over its three previous races."""
+    return prior_stat(df, entity="constructor_id", value=FINISH, window=3)
+
+
+# --------------------------------------------------------------------------
+# Circuit history — a driver's record at this venue, before today
+# --------------------------------------------------------------------------
+
+
+@feature(
+    PRE,
+    group=INTERMEDIATE,
+    depends_on=["driver_id", "circuit_id", FINISH],
+    summarises_history=True,
+)
+def driver_circuit_finish_mean(df: pd.DataFrame) -> pd.Series:
+    """Mean finish at this circuit in the driver's earlier visits."""
+    return prior_stat(df, entity=["driver_id", "circuit_id"], value=FINISH)
+
+
+@feature(
+    PRE,
+    group=INTERMEDIATE,
+    depends_on=["driver_id", "circuit_id", "grid_position"],
+    summarises_history=True,
+)
+def driver_circuit_grid_mean(df: pd.DataFrame) -> pd.Series:
+    """Mean grid slot at this circuit in the driver's earlier visits."""
+    return prior_stat(df, entity=["driver_id", "circuit_id"], value="grid_position")
+
+
+@feature(
+    PRE,
+    group=INTERMEDIATE,
+    depends_on=["driver_id", "circuit_id", FINISH],
+    summarises_history=True,
+)
+def driver_circuit_best_finish(df: pd.DataFrame) -> pd.Series:
+    """Best finish at this circuit in the driver's earlier visits."""
+    return prior_stat(df, entity=["driver_id", "circuit_id"], value=FINISH, how="min")
+
+
+@feature(
+    PRE,
+    group=INTERMEDIATE,
+    depends_on=["constructor_id", "circuit_id", FINISH],
+    summarises_history=True,
+)
+def constructor_circuit_finish_mean(df: pd.DataFrame) -> pd.Series:
+    """Mean finish of the team's cars at this circuit in earlier visits."""
+    return prior_stat(df, entity=["constructor_id", "circuit_id"], value=FINISH)
+
+
+# --------------------------------------------------------------------------
+# Field-relative forms — the primary set (FR-209)
+# --------------------------------------------------------------------------
+
+_RELATIVE: tuple[tuple[str, bool, str], ...] = (
+    ("driver_finish_last3", False, "Recent finishing form, ranked against today's field."),
+    ("driver_finish_last5", False, "Five-race finishing form, ranked against today's field."),
+    ("driver_grid_last3", False, "Recent qualifying form, ranked against today's field."),
+    ("driver_points_last3", True, "Recent points scoring, ranked against today's field."),
+    ("driver_gain_last5", True, "Recent race-day places gained, ranked against today's field."),
+    ("driver_win_rate_season", True, "Season win rate, ranked against today's field."),
+    ("driver_podium_rate_season", True, "Season podium rate, ranked against today's field."),
+    ("driver_points_per_race_season", True, "Season points rate, ranked against today's field."),
+    ("driver_elo_race", True, "Race-execution rating, ranked against today's field."),
+    ("driver_elo_quali", True, "Qualifying-pace rating, ranked against today's field."),
+    ("constructor_points_per_race_season", True, "Team season points rate, ranked against today's field."),
+    ("constructor_reliability_season", True, "Team season reliability, ranked against today's field."),
+    ("constructor_finish_last3", False, "Team recent finishing form, ranked against today's field."),
+    ("driver_circuit_finish_mean", False, "Record at this circuit, ranked against today's field."),
+    ("driver_circuit_grid_mean", False, "Qualifying record at this circuit, ranked against today's field."),
+    ("driver_circuit_best_finish", False, "Best result at this circuit, ranked against today's field."),
+    ("constructor_circuit_finish_mean", False, "Team record at this circuit, ranked against today's field."),
+)
+
+for _base, _hib, _doc in _RELATIVE:
+    _relative(_base, higher_is_better=_hib, description=_doc)
+
+
+# --------------------------------------------------------------------------
+# Composite prior strength — v0's `_add_strength_context`, made relative
+# --------------------------------------------------------------------------
+
+#: v0 blended these four with weights 0.35/0.20/0.20/0.25 chosen by nobody in
+#: particular. The weights are kept because they are at least declared and the
+#: blend's only job is to produce a ranking, but the components are registered
+#: separately so the model can disagree with them.
+_STRENGTH_WEIGHTS: tuple[tuple[str, float], ...] = (
+    ("driver_elo_race_pct", 0.35),
+    ("driver_elo_quali_pct", 0.20),
+    ("driver_points_last3_pct", 0.20),
+    ("constructor_points_per_race_season_pct", 0.25),
+)
+
+
+@feature(
+    PRE,
+    group=INTERMEDIATE,
+    depends_on=[name for name, _ in _STRENGTH_WEIGHTS],
+    summarises_history=True,
+)
+def prior_strength_score(df: pd.DataFrame) -> pd.Series:
+    """Weighted blend of driver rating, qualifying rating, form, and team pace."""
+    total = pd.Series(0.0, index=df.index, dtype="float64")
+    for name, weight in _STRENGTH_WEIGHTS:
+        total = total + weight * df[name].fillna(0.5)
+    return total
+
+
+@feature(PRE, depends_on=["prior_strength_score"], summarises_history=True, relative=True)
+def strength_rank_prior(df: pd.DataFrame) -> pd.Series:
+    """Where the field's prior strength ranks this car, 1 = strongest."""
+    return (
+        df.groupby(list(RACE_KEYS), dropna=False, sort=False)["prior_strength_score"]
+        .rank(method="dense", ascending=False)
+        .astype("float64")
+    )
+
+
+@feature(
+    PRE,
+    depends_on=["strength_rank_prior", "grid_position"],
+    summarises_history=True,
+    relative=True,
+)
+def overqualified_by_grid(df: pd.DataFrame) -> pd.Series:
+    """Prior strength rank minus grid slot: positive means it out-qualified form.
+
+    v0 registered this *and* its exact negation, `underqualified_by_grid`. One
+    of the two was pure noise in every importance ranking it appeared in.
+    """
+    return df["strength_rank_prior"] - df["grid_position"].astype("float64")
+
+
+# --------------------------------------------------------------------------
+# Post-race features — oracle set only (FR-207, Constitution III.2)
+# --------------------------------------------------------------------------
+#
+# These exist so FR-207's upper bound can be measured and so the leakage checks
+# of FR-204 and FR-205 have something real to catch. Nothing here may reach the
+# primary matrix, and the static check fails the build if it does.
+
+
+@feature(POST, depends_on=["classification_outcome"])
+def finished_race(df: pd.DataFrame) -> pd.Series:
+    """Whether the car was classified. Known only once the race has run."""
+    return (
+        df["classification_outcome"] == ClassificationOutcome.CLASSIFIED.value
+    ).astype("float64")
+
+
+@feature(POST, depends_on=["laps_completed", *RACE_KEYS])
+def race_distance_share(df: pd.DataFrame) -> pd.Series:
+    """Laps completed as a share of the winner's. Post-race by construction."""
+    leader = df.groupby(list(RACE_KEYS), dropna=False, sort=False)[
+        "laps_completed"
+    ].transform("max")
+    return (df["laps_completed"] / leader.replace(0, np.nan)).astype("float64")
+
+
+__all__ = ["FINISH"]

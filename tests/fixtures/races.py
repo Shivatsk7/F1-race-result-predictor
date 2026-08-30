@@ -147,3 +147,74 @@ def bahrain_2022_tail() -> pd.DataFrame:
              "Power Unit", 44),
     ]
     return _frame(rows)
+
+
+def synthetic_corpus(
+    *,
+    seasons: tuple[int, ...] = (2013, 2014, 2015),
+    rounds: int = 6,
+    teams: int = 5,
+    circuits: tuple[str, ...] = ("albert_park", "monaco", "monza", "spa"),
+    transfer: tuple[int, int] | None = (2014, 4),
+    seed: int = 20260830,
+) -> pd.DataFrame:
+    """A small multi-season corpus for feature and leakage tests.
+
+    Real races are the wrong tool here. The leakage checks need many races over
+    several seasons with a stable roster, a mid-corpus driver transfer, and at
+    least one retirement per race; a hand-built pair of real Grands Prix gives
+    two races and no history. The values are meaningless — what matters is that
+    the *structure* is faithful: two cars per team, drivers persisting across
+    seasons, and one driver changing team mid-corpus so FR-216 has something to
+    detect.
+
+    Deterministic under `seed`, so a failing leakage test reproduces exactly.
+    """
+    import numpy as np
+
+    rng = np.random.default_rng(seed)
+    drivers = [f"driver_{i:02d}" for i in range(teams * 2)]
+    team_of = {d: f"team_{i // 2:02d}" for i, d in enumerate(drivers)}
+    # One mid-corpus move, so `detect_transfers` and POST_TRANSFER are exercised.
+    mover, new_team = drivers[0], f"team_{teams - 1:02d}"
+
+    rows: list[dict[str, object]] = []
+    for season in seasons:
+        for rnd in range(1, rounds + 1):
+            circuit = circuits[(rnd - 1) % len(circuits)]
+            date = f"{season}-{(rnd % 12) + 1:02d}-07"
+            order = list(rng.permutation(drivers))
+            # The last two cars retire, so retirement handling and the
+            # reliability feature see real variation.
+            retired = set(order[-2:])
+            for slot, driver in enumerate(order, start=1):
+                team = team_of[driver]
+                if (
+                    driver == mover
+                    and transfer is not None
+                    and (season, rnd) >= transfer
+                ):
+                    team = new_team
+                is_retired = driver in retired
+                add_points = max(0.0, 26.0 - 2.0 * slot) if not is_retired else 0.0
+                rows.append(
+                    _row(
+                        season,
+                        rnd,
+                        date,
+                        circuit,
+                        driver,
+                        grid=int(rng.integers(1, len(drivers) + 1)),
+                        position=slot,
+                        position_text="R" if is_retired else str(slot),
+                        outcome=(
+                            ClassificationOutcome.NOT_CLASSIFIED
+                            if is_retired
+                            else ClassificationOutcome.CLASSIFIED
+                        ),
+                        status="Engine" if is_retired else "Finished",
+                        laps=int(rng.integers(5, 40)) if is_retired else 50,
+                    )
+                    | {"constructor_id": team, "points": add_points}
+                )
+    return _frame(rows)
