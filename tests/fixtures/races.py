@@ -226,6 +226,10 @@ def synthetic_corpus(
                         laps=int(rng.integers(5, 40)) if is_retired else 50,
                     )
                     | {
+                        # `_row` derives a code from the name, which would make
+                        # every synthetic driver "DRI". The code is a join key
+                        # for practice data, so it has to be unique.
+                        "driver_code": "D" + driver.rsplit("_", 1)[1],
                         "constructor_id": team,
                         "points": add_points,
                         "weekend_format": (

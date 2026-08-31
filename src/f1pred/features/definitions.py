@@ -580,6 +580,104 @@ def overqualified_by_grid(df: pd.DataFrame) -> pd.Series:
 
 
 # --------------------------------------------------------------------------
+# Telemetry group — a separate arm, never the primary set (FR-213..215)
+# --------------------------------------------------------------------------
+#
+# Friday practice is the only place in a weekend where long-run pace is visible
+# before the race, so these are admissible pre-race under Constitution III.1.
+# They are still kept out of the primary matrix, because the source begins in
+# 2018 and the corpus begins in 2010: 3,453 of 6,911 rows have no practice data
+# at all. FR-214 forbids imputing that away and FR-215 makes the group a
+# separate arm measured on covered seasons only.
+#
+# Every one of these reads a column that `data.telemetry.attach` puts on the
+# frame. Build the group with `build_group(attach(corpus, practice),
+# FeatureGroup.TELEMETRY)`; without the attach, dependency resolution fails
+# loudly rather than quietly producing a matrix of nulls.
+
+TELEMETRY = FeatureGroup.TELEMETRY
+
+
+@feature(
+    PRE,
+    group=TELEMETRY,
+    depends_on=["long_run_pace_s", *RACE_KEYS],
+    summarises_history=True,
+    relative=True,
+    never_impute=True,
+)
+def practice_long_run_pace_pct(df: pd.DataFrame) -> pd.Series:
+    """Long-run practice pace ranked against the same weekend's field.
+
+    Relative for a reason beyond FR-209 here: a lap time in seconds is a fact
+    about the circuit, not the car, so the absolute value carries no signal at
+    all across weekends. The ranking within one Friday is the whole content.
+    """
+    return within_race_percentile(
+        df, pd.to_numeric(df["long_run_pace_s"], errors="coerce"), higher_is_better=False
+    )
+
+
+@feature(
+    PRE,
+    group=TELEMETRY,
+    depends_on=["stint_pace_trend_s_per_lap", *RACE_KEYS],
+    summarises_history=True,
+    relative=True,
+    never_impute=True,
+)
+def practice_stint_trend_pct(df: pd.DataFrame) -> pd.Series:
+    """How well pace held up over a stint, ranked against the weekend's field.
+
+    The underlying slope confounds tyre wear with fuel burn and track
+    evolution, so its level means little — see the note on the collected
+    column. Ranking it within a weekend cancels most of that: every car on
+    Friday burns fuel on the same rubbering-in track.
+    """
+    return within_race_percentile(
+        df,
+        pd.to_numeric(df["stint_pace_trend_s_per_lap"], errors="coerce"),
+        higher_is_better=False,
+    )
+
+
+@feature(
+    PRE,
+    group=TELEMETRY,
+    depends_on=["best_lap_s", *RACE_KEYS],
+    summarises_history=True,
+    relative=True,
+    never_impute=True,
+)
+def practice_best_lap_pct(df: pd.DataFrame) -> pd.Series:
+    """Best practice lap ranked against the weekend's field.
+
+    Overlaps with qualifying and is expected to add little once the grid is
+    known. It is registered anyway so the separate-arm comparison of FR-215 is
+    measuring the whole telemetry group rather than a hand-picked part of it.
+    """
+    return within_race_percentile(
+        df, pd.to_numeric(df["best_lap_s"], errors="coerce"), higher_is_better=False
+    )
+
+
+@feature(
+    PRE,
+    group=TELEMETRY,
+    depends_on=["long_run_laps"],
+    never_impute=True,
+)
+def practice_long_run_laps(df: pd.DataFrame) -> pd.Series:
+    """How many long-run laps the pace figure rests on.
+
+    Not a performance measure — it is the sample size behind the three above,
+    and a model is entitled to trust a pace built on twenty laps more than one
+    built on five.
+    """
+    return pd.to_numeric(df["long_run_laps"], errors="coerce").astype("float64")
+
+
+# --------------------------------------------------------------------------
 # Post-race features — oracle set only (FR-207, Constitution III.2)
 # --------------------------------------------------------------------------
 #

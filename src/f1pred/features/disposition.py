@@ -233,6 +233,10 @@ NEW_FEATURES: Final[dict[str, str]] = {
     "constructor_prior_races": "FR-212: zero identifies a new team exactly.",
     "sprint_finish_pct": "FR-211: the sprint result, null where no sprint ran.",
     "sprint_places_gained_pct": "FR-211: sprint race-day progress, null likewise.",
+    "practice_long_run_pace_pct": "FR-213: telemetry group, separate arm.",
+    "practice_stint_trend_pct": "FR-213: telemetry group, separate arm.",
+    "practice_best_lap_pct": "FR-213: telemetry group, separate arm.",
+    "practice_long_run_laps": "FR-213: sample size behind the practice pace.",
     "finished_race": "FR-207: post-race, oracle set only.",
     "race_distance_share": "FR-207: post-race, oracle set only.",
 }
