@@ -81,25 +81,32 @@ is known.
 | ☑ **T-210** | Regime table + `regime_id` / `seasons_since_regime_start` features | FR-210, D-10 | Five-row declared table; both features registered `PRE_RACE`; 2026 row present so the table needs no edit when it completes — **DONE 2026-08-30.** `regime_id`, `seasons_since_regime`, and `regime_is_major` registered PRE_RACE, reading `config.REGIMES`. The 2026 row is present and tested for, so the table needs no edit when that season completes. |
 | ☑ **T-211** | Relative-feature constraint in the registry | FR-209, D-10 | Every historical-performance feature declares `relative=True` or carries a written justification; static check scans the field in the same pass as the leakage check — **DONE 2026-08-30.** `summarises_history` / `relative` / `relative_justification` on every declaration; the registry refuses an absolute historical feature at registration, and the static check rescans the field in the same pass as the leakage fields. Satisfied in practice by computing each historical quantity twice — absolute in a new INTERMEDIATE group that reaches no model, and as a within-race percentile that does. |
 | ☑ **T-212** | Sprint result as `PRE_RACE` feature | FR-211, FR-108 | Registered pre-race; explicit null on conventional weekends, never imputed; leakage checks pass — **DONE 2026-08-30.** Two new sparse schema columns (`sprint_position`, `sprint_grid_position`) and a `sprint_result_pages` endpoint on the client, paged and asserted against the reported total per FR-110 — 2023 returns 2 of its 6 sprints unpaginated. 24 sprint weekends collected, 480 rows filled, and the results endpoint agreed with FR-108's declared weekend format in both directions: no declared sprint without results, no results for an undeclared round. Features `sprint_finish_pct` and `sprint_places_gained_pct` registered PRE_RACE. The null is enforced, not merely intended: a new `never_impute` declaration makes FR-212's cold-start fallbacks skip these features, so a rookie on a conventional weekend gets fallbacks for their form and nothing at all for a sprint that did not happen. Counts in `results/sprint_collection_2021_2025.json`. |
-| ◐ **T-213a** | Junior-formula supplement with hard date filter | FR-217, FR-218, AC-22 | Date-filtered admission; undated records discarded; source/licence/retrieval date in README; cached and version-pinned so features are byte-reproducible; leakage test fails on a record dated on or after the race — **BLOCKED 2026-08-30** — needs the external junior-formula source chosen and cached. No work started. |
+| ⊘ **T-213a** | Junior-formula supplement with hard date filter | FR-217, FR-218, AC-22 | Date-filtered admission; undated records discarded; source/licence/retrieval date in README; cached and version-pinned so features are byte-reproducible; leakage test fails on a record dated on or after the race — **DROPPED 2026-08-31, owner decision.** FR-217 says the system *may* supplement, so declining is compliant rather than a shortfall. Measured before deciding: the supplement could touch 100 of 6,868 rows (1.46%), and 27 of those are the 2010 opener where every entrant is a debutant because the corpus starts there, not because anyone was a rookie — so the real population is ~56 rows, under 1%. Wikidata's query service returns empty results for even trivial queries; Wikipedia is licensed and reachable but means scraping ~45 season pages of inconsistent tables. Against that, this is the one task in the phase with real leakage exposure, since junior records are written and revised after the fact and FR-218 would require proving every admitted record predates the race. Cost and risk both high, population under 1%. **Consequence: FR-217, FR-218 and AC-22 are deliberately unexercised — see the note under the P2 exit gate.** |
 | ☑ **T-213** | Cold-start fallbacks + `LOW_INFORMATION` flag | FR-212 | Declared fallbacks documented and not field-mean; rookie/new-team row produces a flagged prediction rather than a null or a crash — **DONE 2026-08-30.** Fallbacks are *measured*, not invented: the mean finishing percentile actually achieved on debut, 0.35 for drivers and 0.33 for constructors, taken from 2011-2014 only so the constant cannot carry holdout information into a training feature. Field mean is 0.52 and is explicitly not used. Every affected row carries `low_information`; 100 rows in the corpus. |
 | ◐ **T-214** | Telemetry collection for covered seasons | FR-213, FR-214 | Practice long-run pace and tyre-stint data collected for 2018+; per-season coverage reported; pre-2018 rows explicitly null, never imputed — **BLOCKED 2026-08-30** — needs a FastF1 practice-session collection pass over 2018+. No work started. |
 | ◐ **T-215** | Telemetry feature group, excluded from primary set | FR-213, FR-215, AC-19 | Named group in the registry; leakage/registry test fails if any telemetry feature reaches the primary set — **BLOCKED 2026-08-30** — the `TELEMETRY` group exists in the registry and `build_group` assembles the separate arm; the features themselves wait on T-214. |
-| ◐ **T-216** | Telemetry benefit as a separate arm | FR-215, AC-19 | Primary vs primary+telemetry on telemetry-covered seasons only; delta with CI; reduced season count stated in the results file — **BLOCKED 2026-08-30** — waits on T-214. |
 | ☑ **T-217** | Driver-transfer robustness | FR-216, AC-20 | Constructor rolling features reset on a move, driver features carry across, transfer recorded, next race flagged `POST_TRANSFER`; regression test on a known mid-corpus transfer — **DONE 2026-08-30.** Structural rather than patched: constructor priors group by `constructor_id`, so a move recomputes against the new team by construction, while driver priors group by `driver_id` and carry across. `detect_transfers` records all 90 mid-corpus moves; the first race after one is flagged `post_transfer`. Regression test asserts a mover and their new teammate see identical constructor history on the day of the move. |
+| ☐ **T-218** | **Collect the climatological weather prior and register the pre-race weather features** | FR-206, FR-751a, AC-18 | ERA5 climatological priors collected for every race in the corpus; registered `PRE_RACE`; observed race weather registered `POST_RACE` and reachable only from the oracle set; the leakage check fails if a same-race observation reaches the primary matrix. — **NEW 2026-08-31, IDENTIFIED BY AUDIT, NEEDS OWNER SIGN-OFF.** Nothing on the board collected weather. T-107 answered whether a source *exists* (it does — ERA5 covers the whole corpus) and closed OQ-2, but no task turned that answer into data. Without this task FR-206 has no implementation, and T-510a and AC-18 — which test that weather's two roles stay separate — have nothing to test. The same endpoint serves the admissible prior and the inadmissible observation, separated only by date range, which is exactly why T-107 asked that a same-race read be a hard failure. |
 **Exit gate:** AC-2. T-207 is the gate's gate — an untested test is not a control.
 
-**P2 PARTIAL** (2026-08-30). The firewall, the feature port, and the sprint
-result are complete, and all three checks pass on the real 2010-2025 corpus:
-37 primary features over 6,868 rows, static and behavioural leakage clean over
-12 perturbed races, two builds byte-identical. 268 tests pass.
+**P2 PARTIAL** (2026-08-31). The firewall, the feature port, the sprint result
+and the practice-telemetry group are complete. On the real 2010-2025 corpus: 37
+primary features over 6,868 rows, static and behavioural leakage clean over 12
+perturbed races, two builds byte-identical. 296 tests pass.
 
-Four tasks remain, every one of them blocked on data that has not been
-collected rather than on design: telemetry (T-214..216) needs practice sessions
-for 2018+, and the junior-formula supplement (T-213a) needs its external source
-chosen. The registry already carries the `TELEMETRY` and `JUNIOR_FORMULA`
-groups and `build_group` assembles the separate arm, so each is a collection
-job followed by feature declarations, not a redesign.
+**What remains, and why:**
+
+* **T-218 (weather)** — a gap this board did not previously record. Newly added
+  by the 2026-08-31 audit and awaiting owner sign-off before implementation.
+* **T-214** — collection is running; the feature code and its tests are done.
+* **T-213a (junior formula)** — ⊘ dropped by owner decision. FR-217 says *may*,
+  so this is a declined option, not a shortfall. **FR-217, FR-218 and AC-22 are
+  therefore deliberately unexercised.** They are recorded here rather than
+  quietly dropped, because a requirement with no task and no explanation is
+  indistinguishable from one nobody noticed. If rookie predictions turn out to
+  be visibly poor once the model exists, this is the first thing to revisit.
+* **T-216** — moved to P4. It was never completable here: measuring the
+  telemetry arm's benefit needs a model and bootstrap CIs.
 
 **AC-2 is therefore not yet claimed.** What is proven is that the firewall
 works, including that it fails when it should.
@@ -139,6 +146,7 @@ so the bar is set before there is any temptation to move it.
 | ☐ **T-405** | Reproducibility test | FR-405 | Same seed + data ⇒ identical predictions |
 | ☐ **T-406** | **Run the headline evaluation** | AC-4 | Model vs grid baseline with delta CI, committed to `results/` |
 | ☐ **T-407** | Oracle-variant comparison | FR-207 | Quantifies how much v0's leak inflated its numbers |
+| ☐ **T-216** | Telemetry benefit as a separate arm | FR-215, AC-19 | Primary vs primary+telemetry on telemetry-covered seasons only; delta with CI; reduced season count stated in the results file — **MOVED FROM P2 on 2026-08-31.** It cannot be done in P2: its own "done when" needs a trained model (T-401), paired bootstrap delta CIs (T-308) and the results emitter (T-310), none of which exist until P3/P4. Left in P2 it made that phase's exit gate unreachable by construction. The data and the feature group are ready; only the measurement waits. |
 | ☐ **T-408** | Recency weighting with configurable decay | FR-406, D-10 | `sample_weight` applied; decay persisted as a hyperparameter; zero decay reproduces uniform weighting bit-for-bit |
 | ☐ **T-409** | **Regulation-transfer experiment** | FR-511, FR-511a, FR-512, AC-12 | Run over the **full archive, not the FR-508 window**, for all three resets (2014, 2017, 2022) against their preceding-season comparators; penalty at two decay settings; each result carries its actual training-season count; 2014 labelled `DIAGNOSTIC`, headline stated as `n=2`. |
 
@@ -155,7 +163,7 @@ whichever way it falls — as does the measured cost of a regulation reset.
 | ☐ **T-502** | Seed determinism | FR-604 | Same seed ⇒ identical simulation |
 | ☐ **T-503** | Probability-sum assertion | FR-605 | Sums to 1.0 ± 1e-6; test enforces |
 | ☐ **T-504** | Emit win/podium/points probabilities | FR-603 | All three per driver |
-| ☐ **T-505** | Reliability curves | FR-702 | Binned predicted vs observed, three event types |
+| ☐ **T-505** | Reliability curves | FR-701, FR-702 | Binned predicted vs observed, three event types |
 | ☐ **T-506** | Brier scores vs two baselines | FR-703 | Against base rate and grid baseline |
 | ☐ **T-507** | Interval coverage measurement | FR-704 | Stated vs observed containment reported |
 | ☐ **T-508** | Resolve **OQ-3**, set calibration threshold | FR-705 | Threshold documented in spec |
@@ -163,9 +171,9 @@ whichever way it falls — as does the measured cost of a regulation reset.
 | ☐ **T-510** | Stochastic parameters from prior races only | FR-751 | Retirement, safety car, pace variance, position volatility, **weather volatility** all distributional |
 | ☐ **T-510a** | Separate weather's two roles | FR-751a, FR-206, AC-18 | Registry test: forecast/prior admissible pre-race, weather distribution used in simulation, observed weather reachable only from the oracle set |
 | ☐ **T-511** | Proper scoring rule in main evaluation | FR-753 | Brier or log score reported alongside rank metrics |
-| ☐ **T-512** | Estimate irreducible noise floor | FR-754, OQ-4 | Floor committed to `results/`; method documented |
-| ☐ **T-513** | Report model error relative to noise floor | FR-755 | Evaluation report and README both frame error against the floor |
-| ☐ **T-514** | Assert no bare point estimates | FR-752 | Test fails if any output path emits a position without an interval |
+| ☐ **T-512** | Estimate irreducible noise floor | FR-754, OQ-4, AC-9 | Floor committed to `results/`; method documented |
+| ☐ **T-513** | Report model error relative to noise floor | FR-755, AC-9 | Evaluation report and README both frame error against the floor |
+| ☐ **T-514** | Assert no bare point estimates | FR-752, AC-10 | Test fails if any output path emits a position without an interval |
 
 **Exit gate:** AC-5, AC-6.
 
@@ -181,8 +189,8 @@ whichever way it falls — as does the measured cost of a regulation reset.
 | ☐ **T-604** | Precision rules on numeric output | FR-804 | Probabilities ≤2 dp; no metric rendered to more dp than its CI half-width supports; both rules unit-tested |
 | ☐ **T-605** | README headline result first | FR-901 | Result above feature list |
 | ☐ **T-606** | Every number traceable to `results/` | FR-902 | Each figure cites its file |
-| ☐ **T-607** | Document the v0 leakage defect and its controls | FR-903 | Section exists; references T-205..207 |
-| ☐ **T-608** | Non-commercial framing + data provenance | FR-904, FR-905 | Both stated in README; all four provenance points of FR-905 present |
+| ☐ **T-607** | Document the v0 leakage defect and its controls | FR-903, AC-14 | Section exists; references T-205..207 |
+| ☐ **T-608** | Non-commercial framing + data provenance | FR-904, FR-905, AC-14 | Both stated in README; all four provenance points of FR-905 present |
 | ☐ **T-609** | Offline test-suite timing check | NFR-04, NFR-05 | Full suite <60s, no network |
 | ☐ **T-610** | Record wall-clock timings against the reference machine | NFR-01 | Evaluation runtime measured and written into the results file; reference machine named in plan §4 |
 | ☐ **T-611** | Within-regime caveat on the headline result | OQ-1, FR-901 | README states the holdout sits inside one regulation regime wherever the headline number appears |
@@ -199,13 +207,16 @@ Every requirement maps to at least one task:
 |-------|-------------|------------|
 | **Target variable** | FR-001..003a | T-101, T-101a, T-101c, T-101d, T-101e |
 | Data | FR-101..111 | T-099, T-101, T-101b, T-102..106, T-105a, T-105b, T-106a, T-005 |
-| Features | FR-201..218 | T-201..217, T-213a |
+| Features | FR-201..216 | T-201..215, T-217 |
+| Features (optional, declined) | FR-217, FR-218 | ⊘ T-213a — deliberately unexercised, see P2 note |
+| Telemetry benefit | FR-215 | T-216 (P4) |
 | Baselines | FR-301..305 | T-301..304, T-310, T-311 |
 | Model | FR-401..406 | T-401..405, T-408 |
 | Evaluation | FR-500..507 | T-304a, T-305..311, T-406 |
 | Corpus window | FR-508..510 | T-108, T-305, T-310 |
 | Regulation robustness | FR-209, FR-210, FR-406, FR-511, FR-511a, FR-512 | T-210, T-211, T-408, T-409 |
 | Simulation | FR-601..605 | T-501..504 |
+| Calibration | FR-701..706 | T-505..509 |
 | Calibration | FR-701..706 | T-505..509 |
 | Race randomness (Art. X) | FR-751..755, FR-751a | T-510, T-510a, T-511..514 |
 | Interface | FR-801..804 | T-601..604 |
@@ -248,3 +259,4 @@ the spec is amended before the code diverges.*
 | 2026-08-30 | T-107 | OQ-2, FR-206, FR-204, FR-205 | **OQ-2 closed, and its stated fallback withdrawn.** The question assumed that no historical forecast forces dropping weather from the primary set. FR-206 admits *either* a forecast *or* a climatological prior, and only the forecast is scarce. Primary set takes the prior. New spec §7.2. | Probing the live APIs showed archived forecasts begin 2017-01-01 — 9 of 16 seasons — while ERA5 priors cover the whole corpus. A 2017+ forecast would make primary-set coverage non-uniform, the same defect that made telemetry a separate arm under T-214..216. Two items recorded for the owner rather than decided: whether to build the forecast arm at all, and that the same ERA5 endpoint serves both the admissible prior and inadmissible observed weather separated only by date range — FR-204/FR-205 should treat a same-race read as a hard failure. |
 | 2026-08-25 | T-101a, T-101e | FR-001, **FR-001b**, AC-15 | **FR-001's tie-break replaced.** Retirements tied on laps completed are now ordered by track position on their final completed lap; grid position is a flagged last resort. | T-101c's validator disagreed with the official order on Australia 2016, where Gutiérrez and Alonso collided and retired on the same lap — laps completed cannot separate them and grid position reverses the official result. A probe confirmed the lap-times endpoint carries per-lap position back to at least 2005 and gives P12/P13, reproducing the official order exactly. Owner chose the finer signal. Fetched lazily (~11 requests/race) only where a tie exists. |
 | 2026-08-30 | T-212 | FR-211, FR-108, T-101 schema | **Canonical row schema extended by two sparse columns** for the sprint result. No requirement changed — FR-211 already required the sprint result as a feature; T-101's schema simply did not carry it. | The sprint is a separate endpoint with its own payload key, so the columns could not be filled by the race pass. They are nullable and null on 305 of 329 weekends, which is why they are exempt from the non-null rule. All 16 season checkpoints were rewritten in place rather than recollected, following the T-101e precedent. One genuine gap the extension exposed: a null in these columns means "no sprint ran" only *after* the sprint pass has run — before it, the same null means "not fetched yet". The two are indistinguishable in the data, so the distinction lives in the collection order and in `SprintReport`, not in the frame. |
+| 2026-08-31 | T-213a, T-216, T-218, T-505, T-210 | FR-206, FR-217, FR-218, FR-701, FR-751a, AC-16, AC-17, AC-18, AC-22 | **Board audit.** Five defects found by checking the spec against the board mechanically rather than by eye, and fixed: (1) **T-213a dropped** by owner decision, with FR-217/FR-218/AC-22 recorded as deliberately unexercised rather than left orphaned; (2) **T-216 moved to P4** — its "done when" needs a model and bootstrap CIs, so sitting in P2 it made that phase's exit gate unreachable; (3) **new T-218** — no task collected weather at all, leaving FR-206 unimplemented and T-510a/AC-18 with nothing to test; (4) **FR-701 had no task** — added to T-505, which is what actually assesses calibration against held-out outcomes; (5) **AC-16 and AC-17 were already satisfied but unticked**, and five acceptance criteria were cited nowhere on the board. | The traceability section claimed every requirement maps to a task, and it had drifted: 97 requirements, 89 tasks, and no mechanical check that the two agreed. Reading a 250-line board by eye does not catch an orphaned requirement — a script comparing the spec's defined IDs against the board's Satisfies column catches all of them in one pass. Also renamed the `seasons_since_regime` feature to `seasons_since_regime_start` to match FR-210 and the config helper; the board and the code had drifted apart, which is precisely the kind of gap that makes a "done when" unverifiable. |

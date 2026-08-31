@@ -227,7 +227,7 @@ NEW_FEATURES: Final[dict[str, str]] = {
     "field_size": "How many cars started; the corpus ranges from 20 to 26.",
     "is_sprint_weekend": "FR-211: the weekend's format is declared in advance.",
     "regime_id": "FR-210: the regulation regime in force, from the declared table.",
-    "seasons_since_regime": "FR-210: seasons elapsed since the regime began.",
+    "seasons_since_regime_start": "FR-210: seasons elapsed since the regime began.",
     "regime_is_major": "FR-210: whether that regime began with a major reset.",
     "driver_prior_races": "FR-212: zero identifies a cold start exactly.",
     "constructor_prior_races": "FR-212: zero identifies a new team exactly.",

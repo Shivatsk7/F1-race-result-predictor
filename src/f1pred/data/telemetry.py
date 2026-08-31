@@ -448,6 +448,7 @@ def collect_practice_season(
     season: int,
     *,
     client: Any,
+    all_sessions: bool = False,
     log: Callable[[str], None] = logger.info,
 ) -> tuple[pd.DataFrame, PracticeSeasonReport]:
     """Every practice session of one season, tolerant of individual failures.
@@ -457,8 +458,14 @@ def collect_practice_season(
     FR-104a's all-or-nothing rule for race results, and it is safe here for a
     reason: these features never enter the primary set, so a thinner weekend
     degrades a side experiment rather than corrupting the headline answer.
+
+    `all_sessions` reads every practice session the weekend held rather than
+    the single preferred one. Three times the requests against a hard hourly
+    cap, and worth it for coverage: a driver who ran only short stints in FP2
+    may well have a long run in FP1 or FP3, and pooling the weekend turns a
+    null into a measurement.
     """
-    names_by_round = client.practice_names(season)
+    names_by_round = client.practice_names(season, all_sessions=all_sessions)
     rows: list[dict[str, Any]] = []
     read = 0
     failed: list[tuple[int, str]] = []
@@ -492,6 +499,7 @@ def collect_practice_corpus(
     *,
     client: Any,
     root: Path = RAW_DIR,
+    all_sessions: bool = False,
     log: Callable[[str], None] = logger.info,
 ) -> tuple[pd.DataFrame, list[PracticeSeasonReport]]:
     """Collect the covered seasons, checkpointing each, resuming from disk."""
@@ -516,7 +524,9 @@ def collect_practice_corpus(
             )
             log(f"practice {season}: served from checkpoint")
             continue
-        frame, report = collect_practice_season(season, client=client, log=log)
+        frame, report = collect_practice_season(
+            season, client=client, all_sessions=all_sessions, log=log
+        )
         write_practice_checkpoint(frame, root, season)
         frames.append(frame)
         reports.append(report)

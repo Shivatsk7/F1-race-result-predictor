@@ -116,7 +116,7 @@ class TestRegimeFeatures:
     """T-210, FR-210: regime identity is declared data, not inferred."""
 
     def test_both_regime_features_are_pre_race(self):
-        for name in ("regime_id", "seasons_since_regime"):
+        for name in ("regime_id", "seasons_since_regime_start"):
             assert REGISTRY.get(name).availability is Availability.PRE_RACE
 
     def test_regime_id_is_the_declared_start_season(self, corpus, built):
@@ -126,9 +126,9 @@ class TestRegimeFeatures:
         assert got.loc[2014].tolist() == [2014.0]
         assert got.loc[2015].tolist() == [2014.0]
 
-    def test_seasons_since_regime_is_zero_in_a_reset_year(self, built):
+    def test_seasons_since_regime_start_is_zero_in_a_reset_year(self, built):
         reset = built.X["regime_id"] == built.keys["season"].astype(float)
-        assert (built.X.loc[reset, "seasons_since_regime"] == 0).all()
+        assert (built.X.loc[reset, "seasons_since_regime_start"] == 0).all()
 
     def test_the_table_extends_past_the_corpus(self):
         # Plan D-10: 2026 is present so the FR-511 experiment gains an

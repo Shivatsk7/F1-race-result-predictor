@@ -24,7 +24,8 @@ from collections.abc import Callable
 import numpy as np
 import pandas as pd
 
-from f1pred.config import RegimeSeverity, regime_for_season, seasons_since_regime_start
+from f1pred.config import RegimeSeverity, regime_for_season
+from f1pred.config import seasons_since_regime_start as _regime_age
 from f1pred.data.schema import ClassificationOutcome, WeekendFormat
 from f1pred.features.priors import (
     RACE_KEYS,
@@ -274,9 +275,9 @@ def regime_id(df: pd.DataFrame) -> pd.Series:
 
 
 @feature(PRE, depends_on=["season"])
-def seasons_since_regime(df: pd.DataFrame) -> pd.Series:
+def seasons_since_regime_start(df: pd.DataFrame) -> pd.Series:
     """Seasons elapsed since the current regime began; zero in a reset year."""
-    unique = {s: float(seasons_since_regime_start(int(s))) for s in df["season"].unique()}
+    unique = {s: float(_regime_age(int(s))) for s in df["season"].unique()}
     return df["season"].map(unique).astype("float64")
 
 
