@@ -1,0 +1,51 @@
+{
+  "task": "T-218",
+  "requirements": [
+    "FR-206",
+    "FR-751a",
+    "FR-902",
+    "FR-905",
+    "AC-18"
+  ],
+  "generated": "2026-08-31",
+  "code_commit": "f63543081bc7d7009283573882f48840c1ff495e",
+  "archive": {
+    "source_rows": 396305,
+    "circuits": 35,
+    "first_day": "1995-01-01",
+    "last_day": "2025-12-31",
+    "circuits_failed": 0
+  },
+  "coverage": {
+    "races": 329,
+    "races_with_a_prior": 329,
+    "races_with_an_observation": 329,
+    "note": "A prior needs 5 prior years within +/-15 days of the race date. Every race in the corpus clears that because the archive starts in 1995."
+  },
+  "separation": {
+    "note": "FR-206's two roles come from one endpoint separated only by date range. The prior reads years strictly before the race's own; the cut-off is derived from the race date, so no caller can widen it.",
+    "verified_prior_ignores_race_day": true,
+    "verified_prior_responds_to_earlier_years": true,
+    "observed_weather_availability": "oracle feature set only"
+  },
+  "sanity": {
+    "wettest_circuits_by_prior": {
+      "sepang": 0.854,
+      "marina_bay": 0.814,
+      "interlagos": 0.656,
+      "red_bull_ring": 0.621,
+      "spa": 0.456
+    },
+    "observed_wet_race_share": 0.356,
+    "prior_vs_observed_correlation": 0.394,
+    "note": "A climatological prior should correlate positively but weakly with what actually happened. A strong correlation would mean it was reading the race."
+  },
+  "provenance": {
+    "source": "Open-Meteo ERA5 archive",
+    "url": "https://archive-api.open-meteo.com/v1/archive",
+    "dataset": "ERA5 reanalysis",
+    "retrieved": "2026-08-31",
+    "licence": "Open-Meteo: free for non-commercial use; ERA5 via Copernicus (CC-BY-4.0)",
+    "role_split": "Days before the race year form the FR-206 climatological prior (PRE_RACE). The race day itself is POST_RACE and reachable only from the oracle set."
+  }
+}
