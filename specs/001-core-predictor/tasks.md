@@ -84,7 +84,7 @@ is known.
 | ⊘ **T-213a** | Junior-formula supplement with hard date filter | FR-217, FR-218, AC-22 | Date-filtered admission; undated records discarded; source/licence/retrieval date in README; cached and version-pinned so features are byte-reproducible; leakage test fails on a record dated on or after the race — **DROPPED 2026-08-31, owner decision.** FR-217 says the system *may* supplement, so declining is compliant rather than a shortfall. Measured before deciding: the supplement could touch 100 of 6,868 rows (1.46%), and 27 of those are the 2010 opener where every entrant is a debutant because the corpus starts there, not because anyone was a rookie — so the real population is ~56 rows, under 1%. Wikidata's query service returns empty results for even trivial queries; Wikipedia is licensed and reachable but means scraping ~45 season pages of inconsistent tables. Against that, this is the one task in the phase with real leakage exposure, since junior records are written and revised after the fact and FR-218 would require proving every admitted record predates the race. Cost and risk both high, population under 1%. **Consequence: FR-217, FR-218 and AC-22 are deliberately unexercised — see the note under the P2 exit gate.** |
 | ☑ **T-213** | Cold-start fallbacks + `LOW_INFORMATION` flag | FR-212 | Declared fallbacks documented and not field-mean; rookie/new-team row produces a flagged prediction rather than a null or a crash — **DONE 2026-08-30.** Fallbacks are *measured*, not invented: the mean finishing percentile actually achieved on debut, 0.35 for drivers and 0.33 for constructors, taken from 2011-2014 only so the constant cannot carry holdout information into a training feature. Field mean is 0.52 and is explicitly not used. Every affected row carries `low_information`; 100 rows in the corpus. |
 | ◐ **T-214** | Telemetry collection for covered seasons | FR-213, FR-214 | Practice long-run pace and tyre-stint data collected for 2018+; per-season coverage reported; pre-2018 rows explicitly null, never imputed — **BLOCKED 2026-08-30** — needs a FastF1 practice-session collection pass over 2018+. No work started. |
-| ◐ **T-215** | Telemetry feature group, excluded from primary set | FR-213, FR-215, AC-19 | Named group in the registry; leakage/registry test fails if any telemetry feature reaches the primary set — **BLOCKED 2026-08-30** — the `TELEMETRY` group exists in the registry and `build_group` assembles the separate arm; the features themselves wait on T-214. |
+| ☑ **T-215** | Telemetry feature group, excluded from primary set | FR-213, FR-215, AC-19 | Named group in the registry; leakage/registry test fails if any telemetry feature reaches the primary set — **DONE 2026-08-31** — validated, having been left at ◐ by mistake. This task is the registry group and its guard, none of which depends on the collection in T-214. Verified mechanically: the `TELEMETRY` group holds four registered features, none appears in the primary set, `static_leakage_check` **fails** when one is placed there, and `build_group` returns the `primary+telemetry` arm. The features are written and tested; only the data behind them is still arriving, and that is T-214. |
 | ☑ **T-217** | Driver-transfer robustness | FR-216, AC-20 | Constructor rolling features reset on a move, driver features carry across, transfer recorded, next race flagged `POST_TRANSFER`; regression test on a known mid-corpus transfer — **DONE 2026-08-30.** Structural rather than patched: constructor priors group by `constructor_id`, so a move recomputes against the new team by construction, while driver priors group by `driver_id` and carry across. `detect_transfers` records all 90 mid-corpus moves; the first race after one is flagged `post_transfer`. Regression test asserts a mover and their new teammate see identical constructor history on the day of the move. |
 | ☑ **T-221** | **Behavioural check must perturb race-level values, not only driver-level** | FR-205, NFR-03 | Perturbation moves race-level post-race quantities; a feature reading race-day weather while declaring itself pre-race fails the check. — **DONE 2026-08-31.** Found by T-218's negative control passing when it should have failed. The check perturbed a race by permuting outcomes *among its drivers*, which is correct for finishing positions but a no-op for anything the whole race shares: weather has one value per race, so shuffling it changed nothing and a race-level leak was invisible. Race-level columns are now *substituted* with a value from a different race, detected automatically rather than listed so a post-race column added later cannot miss out. Columns that decide whether a row exists (`classification_outcome`, `position_text`) are exempt: substituting "withdrawn" into a race deletes its whole field under FR-002. |
 | ☑ **T-219** | **Shrinkage for thin estimates** | FR-212a, FR-203 | A feature's value is blended toward its declared prior in proportion to the evidence behind it; the counter is declared per feature; no-history rows return the prior exactly. — **DONE 2026-08-31, owner-approved.** `priors.shrink_towards`, a per-feature `evidence` declaration in the registry, and four new counters (season-scoped and circuit-scoped as well as career). Strength k=5, derived not tuned: a driver's finishing percentile after one race correlates 0.41 with where they settle over ten or more, so the observation earns weight r²≈0.17, giving 1/(1+k)=0.17. Replaces a cliff with a slope — the old code took a single race at full confidence. Reaches the 26% of rows whose season features rest on four races or fewer, against the 1.2% a cold-start fallback alone touches. Rank-scaled features are exempt and tested for. |
@@ -92,27 +92,43 @@ is known.
 | ☑ **T-218** | **Collect the climatological weather prior and register the pre-race weather features** | FR-206, FR-751a, AC-18 | ERA5 climatological priors collected for every race in the corpus; registered `PRE_RACE`; observed race weather registered `POST_RACE` and reachable only from the oracle set; the leakage check fails if a same-race observation reaches the primary matrix. — **DONE 2026-08-31.** ERA5 archive collected for all 35 circuits — 396,305 daily records, zero failures, ~47 min under a per-minute rate limit the client now waits out. Circuit coordinates added to the declared table, fetched from the same upstream source as the race results rather than typed by hand. The prior reads only years strictly before the race's own, a cut-off derived from the race date that no caller can widen; verified by rewriting a race day's rainfall to 999 mm and confirming its prior does not move, and by the mirror test that an *earlier* year does move it. Sepang tops the wet-probability prior at 0.87, which is the right answer. Three prior features registered PRE_RACE, two observed features POST_RACE. **The negative control found a hole in the firewall — see T-221.** |
 **Exit gate:** AC-2. T-207 is the gate's gate — an untested test is not a control.
 
-**P2 PARTIAL** (2026-08-31). The firewall, the feature port, the sprint result
-and the practice-telemetry group are complete. On the real 2010-2025 corpus: 37
-primary features over 6,868 rows, static and behavioural leakage clean over 12
-perturbed races, two builds byte-identical. 296 tests pass.
+**P2 PARTIAL** (2026-08-31, re-validated after the weather and shrinkage work).
+Verified mechanically against the real 2010-2025 corpus rather than by reading:
+every P2 "done when" clause was re-checked in one pass, and the numbers below
+come from that run, not from an earlier one.
 
-**What remains, and why:**
+* **40 primary features** over 6,868 rows.
+* Static and behavioural leakage checks and the determinism check all pass on
+  the enriched corpus, over 12 perturbed races.
+* **331 tests pass.**
 
-* **T-218 (weather)** — a gap this board did not previously record. Newly added
-  by the 2026-08-31 audit and awaiting owner sign-off before implementation.
-* **T-214** — collection is running; the feature code and its tests are done.
+**What remains:**
+
+* **T-214** — the only outstanding task. Practice collection is running:
+  2018-2021 checkpointed, 2022-2025 still to fetch, paced under a hard limit of
+  about 83 sessions an hour. Everything that consumes the data is already
+  written and tested.
 * **T-213a (junior formula)** — ⊘ dropped by owner decision. FR-217 says *may*,
   so this is a declined option, not a shortfall. **FR-217, FR-218 and AC-22 are
   therefore deliberately unexercised.** They are recorded here rather than
   quietly dropped, because a requirement with no task and no explanation is
   indistinguishable from one nobody noticed. If rookie predictions turn out to
   be visibly poor once the model exists, this is the first thing to revisit.
+* **T-220 (teammate anchoring)** — ⊘ dropped because it failed its own
+  measurement; see the row for what the first, leaky measurement claimed.
 * **T-216** — moved to P4. It was never completable here: measuring the
   telemetry arm's benefit needs a model and bootstrap CIs.
 
-**AC-2 is therefore not yet claimed.** What is proven is that the firewall
-works, including that it fails when it should.
+**AC-2 is met and now ticked in the spec**: the automated leakage checks pass
+on the real corpus, and three deliberately leaky features — one declared, one
+hidden, one race-level — each make them fail. The firewall is proven to work
+*and* to be capable of failing, which is the whole of AC-2.
+
+**AC-19 is not met**, and it is not AC-2: telemetry coverage cannot be reported
+until T-214 finishes, and the benefit arm is T-216 in P4. The phase gate cites
+AC-2 alone, so the gate is satisfied while T-214 remains open — recorded
+explicitly, because a gate met with a task outstanding is exactly the kind of
+thing that gets misread later as the phase being finished.
 
 ---
 
@@ -210,7 +226,7 @@ Every requirement maps to at least one task:
 |-------|-------------|------------|
 | **Target variable** | FR-001..003a | T-101, T-101a, T-101c, T-101d, T-101e |
 | Data | FR-101..111 | T-099, T-101, T-101b, T-102..106, T-105a, T-105b, T-106a, T-005 |
-| Features | FR-201..216 | T-201..215, T-217 |
+| Features | FR-201..216, FR-212a | T-201..215, T-217, T-219, T-221 |
 | Features (optional, declined) | FR-217, FR-218 | ⊘ T-213a — deliberately unexercised, see P2 note |
 | Telemetry benefit | FR-215 | T-216 (P4) |
 | Baselines | FR-301..305 | T-301..304, T-310, T-311 |

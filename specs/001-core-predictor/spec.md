@@ -378,7 +378,7 @@ Explicitly excluded. Each entry is a deliberate decision, not an oversight.
 This spec is satisfied when all of the following hold:
 
 - [ ] **AC-1** A clean checkout can rebuild the dataset for **≥8 seasons** via documented commands, and an interrupted run resumes without refetching. Any shortfall is recorded, not accommodated. *(FR-101..107, FR-501a)*
-- [ ] **AC-2** The automated leakage check passes, and a deliberately introduced post-race feature causes it to fail. *(FR-204, FR-205, NFR-03)*
+- [x] **AC-2** The automated leakage check passes, and a deliberately introduced post-race feature causes it to fail. *(FR-204, FR-205, NFR-03)*
 - [ ] **AC-3** `evaluate` reports model and all three baselines on a **≥3-season holdout drawn from a ≥8-season corpus** with bootstrap CIs on every metric and on every delta. *(FR-501..506)*
 - [ ] **AC-4** The headline model-versus-grid comparison is stated in the README with its confidence interval, in whichever direction it falls. *(FR-507, FR-901)*
 - [ ] **AC-5** Reliability curves and Brier scores exist for win, podium, and points events, each against two baselines, and a proper scoring rule appears in the main evaluation. *(FR-701..703, FR-753)*
