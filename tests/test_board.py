@@ -83,32 +83,55 @@ class TestTraceability:
 
 class TestBoardMatchesCode:
     """A "done when" clause that names something the code does not have is not
-    checkable, which Constitution VII.4 forbids."""
+    checkable, which Constitution VII.4 forbids.
 
-    #: Names that look like features in prose but are not registry entries:
-    #: enums, flags, columns, and modules the board legitimately refers to.
-    NOT_FEATURES = {
-        "regime_id_and_seasons_since_regime_start",
-    }
+    The rule is deliberately blunt: a backticked snake_case identifier in a
+    completed row must appear **as a whole word** somewhere in the package
+    source. That admits everything the board legitimately mentions — schema
+    columns, method names, dataclass fields, flag literals, keyword arguments —
+    while still catching a name the code has since renamed.
 
-    def test_backticked_feature_names_in_done_tasks_exist(self):
-        # Only names that look like our feature convention are checked, so the
-        # board stays free to mention columns, classes, and files.
-        suffixes = ("_pct", "_last3", "_last5", "_season")
+    Whole-word matching is what makes it work. `seasons_since_regime` is a
+    substring of `seasons_since_regime_start`, so a naive containment test
+    would call the stale name present; a `\\b` boundary does not, because the
+    trailing underscore is a word character. That exact rename is what this
+    class was written for, and the first version of it — which filtered
+    candidates by a handful of name suffixes — did not catch it.
+    """
+
+    #: Concatenated package source, searched once.
+    SOURCE = "\n".join(
+        p.read_text() for p in (Path(__file__).resolve().parents[1] / "src").rglob("*.py")
+    )
+
+    #: Identifiers the board may name that deliberately do not exist in the
+    #: code. Each needs a reason; an entry without one is a bug being hidden.
+    ALLOWED_ABSENT: dict[str, str] = {}
+
+    def test_identifiers_named_by_completed_tasks_exist_in_the_code(self):
         missing: dict[str, str] = {}
-        for status, tid, _name, _sat in task_rows():
-            if status != "☑":
-                continue
-            row = TASKS[TASKS.index(f"**{tid}**") :].split("\n", 1)[0]
-            for token in re.findall(r"`([a-z][a-z0-9_]+)`", row):
-                if token in self.NOT_FEATURES or token in REGISTRY:
+        for m in re.finditer(r"^\|\s*(☑)\s*\*\*(T-[0-9a-z]+)\*\*.*$", TASKS, re.M):
+            tid = m.group(2)
+            for token in re.findall(r"`([a-z][a-z0-9_]*_[a-z0-9_]+)`", m.group(0)):
+                if token in self.ALLOWED_ABSENT:
                     continue
-                if token.endswith(suffixes):
-                    missing[token] = tid
+                if re.search(rf"\b{re.escape(token)}\b", self.SOURCE):
+                    continue
+                missing.setdefault(token, tid)
         assert not missing, (
-            f"completed tasks name features that are not registered: {missing}. "
-            f"The board and the code have drifted apart."
+            f"completed tasks name identifiers the code does not have: {missing}. "
+            f"The board and the code have drifted apart, which makes those "
+            f"'done when' clauses unverifiable (Constitution VII.4)."
         )
+
+    def test_the_check_would_catch_a_rename(self):
+        """Guards the guard: prove whole-word matching rejects a stale prefix.
+
+        Without this, someone 'simplifying' the regex to a containment test
+        would silently disable the class and every test here would still pass.
+        """
+        assert re.search(r"\bseasons_since_regime_start\b", self.SOURCE)
+        assert not re.search(r"\bseasons_since_regime\b", self.SOURCE)
 
 
 class TestStatusDiscipline:
