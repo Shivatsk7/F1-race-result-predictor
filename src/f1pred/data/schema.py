@@ -151,13 +151,27 @@ RACE_ROW_SCHEMA: Final[dict[str, str]] = {
     # laps completed left retirements tied, because collecting it costs roughly
     # eleven extra requests per race.
     "final_lap_position": "Int64",
+    # FR-211: the sprint race, where one happened. Null on a conventional
+    # weekend, and the null is load-bearing — a neutral value here would assert
+    # a sprint result for a weekend that had no sprint. Nullable Int64 rather
+    # than float so a position stays a position.
+    "sprint_position": "Int64",
+    "sprint_grid_position": "Int64",
 }
 
 #: Columns that may never be null. `driver_code` is exempt because some
 #: historical entries genuinely have no three-letter code; `final_lap_position`
-#: because it is fetched only where a tie needs breaking.
+#: because it is fetched only where a tie needs breaking; the sprint columns
+#: because most weekends have no sprint at all (FR-211).
 NON_NULL_COLUMNS: Final[frozenset[str]] = frozenset(
-    set(RACE_ROW_SCHEMA) - {"driver_code", "points", "final_lap_position"}
+    set(RACE_ROW_SCHEMA)
+    - {
+        "driver_code",
+        "points",
+        "final_lap_position",
+        "sprint_position",
+        "sprint_grid_position",
+    }
 )
 
 #: FR-105: these together identify a row uniquely.

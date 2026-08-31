@@ -25,6 +25,8 @@ def _row(
     status: str,
     laps: int,
     final_lap_position: int | None = None,
+    sprint_position: int | None = None,
+    sprint_grid_position: int | None = None,
 ) -> dict[str, object]:
     return {
         "season": season,
@@ -44,6 +46,8 @@ def _row(
         "laps_completed": laps,
         "points": 0.0,
         "final_lap_position": final_lap_position,
+        "sprint_position": sprint_position,
+        "sprint_grid_position": sprint_grid_position,
     }
 
 
@@ -156,6 +160,7 @@ def synthetic_corpus(
     teams: int = 5,
     circuits: tuple[str, ...] = ("albert_park", "monaco", "monza", "spa"),
     transfer: tuple[int, int] | None = (2014, 4),
+    sprint_rounds: tuple[tuple[int, int], ...] = (),
     seed: int = 20260830,
 ) -> pd.DataFrame:
     """A small multi-season corpus for feature and leakage tests.
@@ -167,6 +172,10 @@ def synthetic_corpus(
     the *structure* is faithful: two cars per team, drivers persisting across
     seasons, and one driver changing team mid-corpus so FR-216 has something to
     detect.
+
+    `sprint_rounds` marks (season, round) pairs as sprint weekends by their
+    declared format, leaving the sprint result itself null — which is the state
+    the corpus is in before the FR-211 collection pass runs.
 
     Deterministic under `seed`, so a failing leakage test reproduces exactly.
     """
@@ -182,6 +191,7 @@ def synthetic_corpus(
     for season in seasons:
         for rnd in range(1, rounds + 1):
             circuit = circuits[(rnd - 1) % len(circuits)]
+            sprint = (season, rnd) in sprint_rounds
             date = f"{season}-{(rnd % 12) + 1:02d}-07"
             order = list(rng.permutation(drivers))
             # The last two cars retire, so retirement handling and the
@@ -215,6 +225,17 @@ def synthetic_corpus(
                         status="Engine" if is_retired else "Finished",
                         laps=int(rng.integers(5, 40)) if is_retired else 50,
                     )
-                    | {"constructor_id": team, "points": add_points}
+                    | {
+                        "constructor_id": team,
+                        "points": add_points,
+                        "weekend_format": (
+                            WeekendFormat.SPRINT_STANDALONE.value
+                            if sprint
+                            else WeekendFormat.CONVENTIONAL.value
+                        ),
+                        "weekend_format_raw": (
+                            "sprint_qualifying" if sprint else "conventional"
+                        ),
+                    }
                 )
     return _frame(rows)

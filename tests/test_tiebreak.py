@@ -45,6 +45,8 @@ def _row(driver, laps, grid, *, outcome, position, rnd=1, season=2010):
         "laps_completed": laps,
         "points": 0.0,
         "final_lap_position": None,
+        "sprint_position": None,
+        "sprint_grid_position": None,
     }
 
 

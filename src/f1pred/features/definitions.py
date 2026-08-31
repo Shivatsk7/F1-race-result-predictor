@@ -135,6 +135,71 @@ def is_sprint_weekend(df: pd.DataFrame) -> pd.Series:
 
 
 # --------------------------------------------------------------------------
+# The sprint race (FR-211, T-212)
+# --------------------------------------------------------------------------
+#
+# A sprint runs on Saturday and the Grand Prix on Sunday, so its result is
+# knowable before lights out and is admissible pre-race under Constitution
+# III.1. Twenty-four weekends in the corpus have one; the other 305 do not, and
+# for those the value is null and stays null. FR-211 is explicit that a neutral
+# fill here would be a claim about a race that never happened, so every feature
+# in this section is declared `never_impute` and the FR-212 cold-start
+# fallbacks skip it.
+
+
+@feature(
+    PRE,
+    depends_on=["sprint_position", *RACE_KEYS],
+    summarises_history=True,
+    relative=True,
+    never_impute=True,
+)
+def sprint_finish_pct(df: pd.DataFrame) -> pd.Series:
+    """Sprint finishing position ranked against the same weekend's field.
+
+    Relative for the same reason every other form feature is (FR-209), and
+    conveniently so: a sprint field is exactly the field that lines up for the
+    Grand Prix the next day, which makes the comparison unusually clean.
+    """
+    return within_race_percentile(
+        df, pd.to_numeric(df["sprint_position"], errors="coerce"), higher_is_better=False
+    )
+
+
+@feature(
+    PRE,
+    group=INTERMEDIATE,
+    depends_on=["sprint_position", "sprint_grid_position"],
+    summarises_history=True,
+    never_impute=True,
+)
+def sprint_places_gained(df: pd.DataFrame) -> pd.Series:
+    """Places gained in the sprint, from its own grid. Positive is forward."""
+    return pd.to_numeric(df["sprint_grid_position"], errors="coerce") - pd.to_numeric(
+        df["sprint_position"], errors="coerce"
+    )
+
+
+@feature(
+    PRE,
+    depends_on=["sprint_places_gained", *RACE_KEYS],
+    summarises_history=True,
+    relative=True,
+    never_impute=True,
+)
+def sprint_places_gained_pct(df: pd.DataFrame) -> pd.Series:
+    """Sprint race-day progress ranked against the same weekend's field.
+
+    Carries something the finishing position alone does not: a car that started
+    the sprint last and finished tenth is a different proposition on Sunday
+    from one that qualified tenth and stayed there.
+    """
+    return within_race_percentile(
+        df, df["sprint_places_gained"], higher_is_better=True
+    )
+
+
+# --------------------------------------------------------------------------
 # Circuit attributes — declared data (FR-109, T-101b)
 # --------------------------------------------------------------------------
 

@@ -160,6 +160,9 @@ def _apply_cold_start(
         for f in features:
             if not f.summarises_history or f.name not in filled.columns:
                 continue
+            if f.never_impute:
+                # FR-211: the null is the answer. See `Feature.never_impute`.
+                continue
             fallback = (
                 COLD_START_CONSTRUCTOR_PERCENTILE
                 if f.name.startswith("constructor_")

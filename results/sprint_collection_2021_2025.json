@@ -1,0 +1,88 @@
+{
+  "task": "T-212",
+  "requirements": [
+    "FR-211",
+    "FR-108",
+    "FR-110",
+    "FR-902"
+  ],
+  "generated": "2026-08-30",
+  "code_commit": "d8aa0483e9afc0f0450d99fd1fcf729ddddcef20",
+  "what_was_collected": {
+    "sprint_weekends": 24,
+    "rows_filled": 480,
+    "seasons": {
+      "2021": {
+        "sprints": 3,
+        "rounds": [
+          10,
+          14,
+          19
+        ]
+      },
+      "2022": {
+        "sprints": 3,
+        "rounds": [
+          4,
+          11,
+          21
+        ]
+      },
+      "2023": {
+        "sprints": 6,
+        "rounds": [
+          4,
+          9,
+          12,
+          17,
+          18,
+          20
+        ]
+      },
+      "2024": {
+        "sprints": 6,
+        "rounds": [
+          5,
+          6,
+          11,
+          19,
+          21,
+          23
+        ]
+      },
+      "2025": {
+        "sprints": 6,
+        "rounds": [
+          2,
+          6,
+          13,
+          19,
+          21,
+          23
+        ]
+      }
+    }
+  },
+  "agreement_check": {
+    "note": "Sprint weekends are declared by FR-108's weekend format, read from the event schedule. The results endpoint is a second, independent source. Both were compared rather than one being trusted.",
+    "rounds_declared_as_sprint_with_no_results": [],
+    "rounds_with_results_not_declared_as_sprint": [],
+    "rows_on_a_sprint_weekend_with_no_sprint_classification": 0
+  },
+  "pagination": {
+    "note": "FR-110. 2023 is the case that matters: an unpaginated request returns 2 of its 6 sprints and reports no error.",
+    "sprints_2023": 6
+  },
+  "features": {
+    "note": "FR-211 requires an explicit null on conventional weekends. These counts are the nulls, stated rather than assumed.",
+    "rows_in_matrix": 6868,
+    "rows_with_a_sprint_value": {
+      "sprint_finish_pct": 475,
+      "sprint_places_gained_pct": 475
+    },
+    "rows_null_because_no_sprint_ran": {
+      "sprint_finish_pct": 6393,
+      "sprint_places_gained_pct": 6393
+    }
+  }
+}

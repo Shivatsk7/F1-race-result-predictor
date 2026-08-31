@@ -231,6 +231,8 @@ NEW_FEATURES: Final[dict[str, str]] = {
     "regime_is_major": "FR-210: whether that regime began with a major reset.",
     "driver_prior_races": "FR-212: zero identifies a cold start exactly.",
     "constructor_prior_races": "FR-212: zero identifies a new team exactly.",
+    "sprint_finish_pct": "FR-211: the sprint result, null where no sprint ran.",
+    "sprint_places_gained_pct": "FR-211: sprint race-day progress, null likewise.",
     "finished_race": "FR-207: post-race, oracle set only.",
     "race_distance_share": "FR-207: post-race, oracle set only.",
 }

@@ -91,6 +91,11 @@ class Feature:
     relative: bool = False
     #: Required when `summarises_history` and not `relative`.
     relative_justification: str | None = None
+    #: FR-211: a null here is a fact, not a gap. The cold-start fallbacks of
+    #: FR-212 skip such a feature — filling a sprint result on a weekend that
+    #: had no sprint would assert an event that did not happen, which is the
+    #: specific thing FR-211 forbids.
+    never_impute: bool = False
 
     @property
     def is_primary(self) -> bool:
@@ -248,6 +253,7 @@ def feature(
     summarises_history: bool = False,
     relative: bool = False,
     relative_justification: str | None = None,
+    never_impute: bool = False,
     name: str | None = None,
     registry: Registry | None = None,
 ) -> Callable[[FeatureFn], FeatureFn]:
@@ -272,6 +278,7 @@ def feature(
                 summarises_history=summarises_history,
                 relative=relative,
                 relative_justification=relative_justification,
+                never_impute=never_impute,
             )
         )
         return fn

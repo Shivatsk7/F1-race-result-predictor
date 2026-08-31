@@ -32,7 +32,7 @@ import time
 from collections.abc import Callable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any, Final, Protocol
 
 import pandas as pd
 
@@ -49,6 +49,7 @@ from f1pred.data.schema import (
     SchemaError,
     classify,
     empty_frame,
+    WeekendFormat,
     map_weekend_format,
     validate_frame,
 )
@@ -518,6 +519,32 @@ class ErgastClient:
             for row in schedule.itertuples()
         }
 
+    def sprint_result_pages(self, season: int) -> list[Any]:
+        """Every page of a season's sprint results, asserted complete (FR-110).
+
+        Paged for the same reason race results are. 2023 is the case that
+        proves it matters: a single unpaginated request returns two of its six
+        sprints and reports no error at all, which is the exact shape of the
+        defect FR-110 exists to catch.
+
+        A season with no sprints returns no pages. That is the answer for every
+        season before 2021 and is not a failure.
+        """
+
+        def fetch(limit: int, offset: int) -> Any:
+            return self._call(
+                lambda: self._api.get_sprint_results(
+                    season=season, limit=limit, offset=offset
+                )
+            )
+
+        return paginate(
+            fetch,
+            what=f"sprint results {season}",
+            rows_in=sprint_rows_in_page,
+            pause=self.pause,
+        )
+
 
 def rows_in_page(page: Any) -> int:
     """Result rows on one page — the unit the API paginates by (FR-110).
@@ -526,6 +553,11 @@ def rows_in_page(page: Any) -> int:
     and a race straddles the page boundary.
     """
     return sum(len(race.get("Results", ())) for race in page)
+
+
+def sprint_rows_in_page(page: Any) -> int:
+    """Sprint result rows on one page. The payload key differs from the race one."""
+    return sum(len(race.get("SprintResults", ())) for race in page)
 
 
 # --------------------------------------------------------------------------
@@ -599,6 +631,12 @@ def rows_from_race(
                 # FR-001b's tie-break is fetched separately and only where a tie
                 # exists (T-101e); it is deliberately absent here.
                 "final_lap_position": None,
+                # FR-211's sprint result likewise: a separate endpoint, fetched
+                # only for the seasons that have sprints (T-212). Null here
+                # means "not yet fetched"; null after that pass means "no
+                # sprint happened", and only the second is a fact.
+                "sprint_position": None,
+                "sprint_grid_position": None,
             }
         )
     if not rows:
@@ -749,6 +787,165 @@ def add_final_lap_positions(
         rows_unresolved_zero_lap=zero_lap_tied,
         rows_unresolved_absent=absent,
         failed_groups=tuple(failed),
+    )
+
+
+# --------------------------------------------------------------------------
+# Sprint results (FR-211, T-212)
+# --------------------------------------------------------------------------
+
+SPRINT_POSITION_COLUMN: Final[str] = "sprint_position"
+SPRINT_GRID_COLUMN: Final[str] = "sprint_grid_position"
+
+
+@dataclass(frozen=True, slots=True)
+class SprintReport:
+    """What the sprint pass found. FR-211's nulls are counted, not assumed."""
+
+    seasons_attempted: tuple[int, ...] = ()
+    sprints_fetched: int = 0
+    rows_filled: int = 0
+    #: Rows on a sprint weekend that the sprint classification does not cover —
+    #: a car that started the Grand Prix but not the sprint, or the reverse.
+    rows_absent_from_sprint: int = 0
+    #: Rounds the corpus marks as sprint weekends but the API has no sprint for,
+    #: and the reverse. Either direction is a disagreement between FR-108's
+    #: format mapping and the results endpoint, and is reported rather than
+    #: reconciled.
+    rounds_missing_results: tuple[tuple[int, int], ...] = ()
+    rounds_unexpected: tuple[tuple[int, int], ...] = ()
+    failed_seasons: tuple[int, ...] = ()
+
+    def as_dict(self) -> dict[str, object]:
+        return {
+            "seasons_attempted": list(self.seasons_attempted),
+            "sprints_fetched": self.sprints_fetched,
+            "rows_filled": self.rows_filled,
+            "rows_absent_from_sprint": self.rows_absent_from_sprint,
+            "rounds_missing_results": [list(r) for r in self.rounds_missing_results],
+            "rounds_unexpected": [list(r) for r in self.rounds_unexpected],
+            "failed_seasons": list(self.failed_seasons),
+        }
+
+    def summary(self) -> str:
+        return (
+            f"sprint results: {self.sprints_fetched} sprints, "
+            f"{self.rows_filled} rows filled, "
+            f"{self.rows_absent_from_sprint} rows on a sprint weekend with no "
+            f"sprint classification"
+        )
+
+
+def sprint_rounds_expected(df: pd.DataFrame) -> set[tuple[int, int]]:
+    """(season, round) the corpus marks as a sprint weekend, from FR-108's format.
+
+    Read from the declared format rather than from the results endpoint, so the
+    two can be compared. Agreement is worth knowing; disagreement is worth
+    knowing more.
+    """
+    sprint_formats = {
+        WeekendFormat.SPRINT_SETS_GRID.value,
+        WeekendFormat.SPRINT_STANDALONE.value,
+    }
+    rows = df[df["weekend_format"].isin(sprint_formats)]
+    return {(int(s), int(r)) for s, r in zip(rows["season"], rows["round"])}
+
+
+def merge_paged_sprints(pages: Sequence[Any]) -> dict[int, list[Mapping[str, Any]]]:
+    """Reassemble whole sprints from row-paginated pages (FR-104a, FR-110).
+
+    Same hazard as the race endpoint: the API paginates by result row, so a
+    sprint whose field straddles a page boundary arrives in two halves.
+    """
+    sprints: dict[int, list[Mapping[str, Any]]] = {}
+    for page in pages:
+        for race in page:
+            sprints.setdefault(int(race["round"]), []).extend(
+                race.get("SprintResults", ())
+            )
+    return sprints
+
+
+def add_sprint_results(
+    df: pd.DataFrame, *, client: Any, log: Callable[[str], None] = print
+) -> tuple[pd.DataFrame, SprintReport]:
+    """Fill the sprint columns for weekends that had a sprint (FR-211).
+
+    Only seasons the corpus already marks as containing a sprint are fetched,
+    so the pass costs a handful of requests rather than one per season. Every
+    other row keeps its null, and the null is the point: FR-211 forbids
+    imputing a neutral value for a sprint that never happened, because a
+    neutral value is a claim and an absent sprint is not.
+
+    A season whose fetch fails leaves its rows null and is recorded. Half a
+    season of sprint results is worse than none, since nothing downstream could
+    tell the two apart.
+    """
+    out = df.copy()
+    for column in (SPRINT_POSITION_COLUMN, SPRINT_GRID_COLUMN):
+        if column not in out.columns:
+            out[column] = pd.NA
+        out[column] = out[column].astype("Int64")
+
+    expected = sprint_rounds_expected(out)
+    seasons = sorted({season for season, _ in expected})
+    if not seasons:
+        return out, SprintReport()
+
+    index = {
+        (int(s), int(r), str(d)): idx
+        for idx, (s, r, d) in enumerate(
+            zip(out["season"], out["round"], out["driver_id"])
+        )
+    }
+
+    fetched = filled = 0
+    seen: set[tuple[int, int]] = set()
+    failed: list[int] = []
+
+    for season in seasons:
+        try:
+            pages = client.sprint_result_pages(season)
+        except Exception as exc:  # noqa: BLE001 - one season is not the corpus
+            failed.append(season)
+            log(f"  sprint results {season}: fetch failed ({exc}); rows left null")
+            continue
+
+        sprints = merge_paged_sprints(pages)
+        fetched += len(sprints)
+        for rnd, results in sprints.items():
+            seen.add((season, rnd))
+            for entry in results:
+                driver = str(entry["Driver"]["driverId"])
+                idx = index.get((season, rnd, driver))
+                if idx is None:
+                    # Contested the sprint but not the Grand Prix. Nothing in
+                    # the corpus to attach it to.
+                    continue
+                out.iat[idx, out.columns.get_loc(SPRINT_POSITION_COLUMN)] = int(
+                    entry["position"]
+                )
+                out.iat[idx, out.columns.get_loc(SPRINT_GRID_COLUMN)] = int(
+                    entry["grid"]
+                )
+                filled += 1
+        log(f"  sprint results {season}: {len(sprints)} sprint(s)")
+
+    on_sprint_weekend = out.apply(
+        lambda row: (int(row["season"]), int(row["round"])) in expected, axis=1
+    )
+    absent = int(
+        (on_sprint_weekend & out[SPRINT_POSITION_COLUMN].isna()).sum()
+    )
+
+    return out, SprintReport(
+        seasons_attempted=tuple(seasons),
+        sprints_fetched=fetched,
+        rows_filled=filled,
+        rows_absent_from_sprint=absent,
+        rounds_missing_results=tuple(sorted(expected - seen)),
+        rounds_unexpected=tuple(sorted(seen - expected)),
+        failed_seasons=tuple(failed),
     )
 
 
