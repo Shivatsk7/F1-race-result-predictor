@@ -15,8 +15,9 @@
 > - [x] §2 User stories and their traceability map
 > - [ ] §3.0 **Target variable** (FR-001..003a) *(amended 2026-08-25: FR-001b)* — *what a DNF scores; read this first*
 > - [x] §3.1 Data acquisition (FR-101..111, FR-104a..c) — *sprint formats; pagination and retry*
-> - [ ] §3.2 Feature engineering (FR-201..218, **FR-212a**) — **RETURNED TO DRAFT 2026-08-31 per Constitution IX.5**: FR-212a is new and needs the owner's read before this section counts as ratified again. The work is implemented and the owner approved the change in conversation, but IX.2 is explicit that approving a summary is not ratification of the text.
-> - [x] §3.2 as ratified 2026-08-25 (FR-201..218) — *leakage rules; regime-relative features; cold start; **telemetry group and transfer robustness***
+> - [x] §3.2 Feature engineering (FR-201..218, **FR-212a**) — *leakage rules; regime-relative features; cold start; telemetry group and transfer robustness; **shrinkage for thin estimates***
+>   - Ratified 2026-08-25 by Shiva Kaushik (FR-201..218).
+>   - **FR-212a ratified 2026-08-31 by Shiva Kaushik**, read in full per IX.2 after the section returned to Draft under IX.5.
 > - [x] §3.3 Baselines (FR-301..305)
 > - [x] §3.4 Model (FR-401..406)
 > - [x] §3.5 Evaluation (FR-500..512) — *primary metric; **16-season window from 2010**; regulation-transfer experiment, `n=2`*
