@@ -96,6 +96,13 @@ class Feature:
     #: had no sprint would assert an event that did not happen, which is the
     #: specific thing FR-211 forbids.
     never_impute: bool = False
+    #: Name of the column carrying how many prior observations this feature
+    #: rests on. Declared rather than inferred because the right counter
+    #: differs per feature: a career rolling mean is backed by races the driver
+    #: has run, a season rate by races run *this season*, and a circuit record
+    #: by previous visits to that circuit. Using one counter for all three
+    #: would over-trust the season features every January.
+    evidence: str | None = None
 
     @property
     def is_primary(self) -> bool:
@@ -254,6 +261,7 @@ def feature(
     relative: bool = False,
     relative_justification: str | None = None,
     never_impute: bool = False,
+    evidence: str | None = None,
     name: str | None = None,
     registry: Registry | None = None,
 ) -> Callable[[FeatureFn], FeatureFn]:
@@ -279,6 +287,7 @@ def feature(
                 relative=relative,
                 relative_justification=relative_justification,
                 never_impute=never_impute,
+                evidence=evidence,
             )
         )
         return fn

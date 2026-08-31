@@ -271,3 +271,103 @@ class TestNoHandWrittenFeatureList:
         assert "extra_signal" in build(
             corpus, features=fork.primary(), set_name="primary", registry=fork
         ).X.columns
+
+
+class TestShrinkage:
+    """T-219, FR-212a: a thin estimate is blended toward its declared prior."""
+
+    def test_no_history_returns_the_prior_exactly(self, built):
+        # FR-212's cold-start fallback is not replaced by shrinkage, it is
+        # subsumed: the fallback is what the formula returns at n=0.
+        cold = built.flags["low_information"].to_numpy()
+        values = built.X.loc[cold, "driver_finish_last3_pct"].unique()
+        assert list(values) == [COLD_START_DRIVER_PERCENTILE]
+
+    def test_a_thin_estimate_is_pulled_toward_the_prior(self, corpus, built):
+        from f1pred.features.priors import prior_race_count, sort_canonically
+
+        work = sort_canonically(corpus)
+        n = prior_race_count(work, entity="driver_id").to_numpy()
+        thin = (n > 0) & (n <= 2)
+        settled = n >= 20
+        if thin.sum() and settled.sum():
+            spread_thin = built.X.loc[thin, "driver_finish_last3_pct"].std()
+            spread_settled = built.X.loc[settled, "driver_finish_last3_pct"].std()
+            assert spread_thin < spread_settled, (
+                "thin estimates should be compressed toward the prior, so their "
+                "spread must be narrower than that of well-evidenced rows"
+            )
+
+    #: Historical features that are deliberately NOT shrunk. Both are measured
+    #: on the 1..N rank scale rather than the 0..1 percentile scale, so the
+    #: declared percentile prior has no meaning for them — blending a grid-slot
+    #: difference toward 0.35 would be an arithmetic error, not a weak prior.
+    RANK_SCALED = {"strength_rank_prior", "overqualified_by_grid"}
+
+    def test_every_percentile_feature_declares_what_backs_it(self):
+        for f in REGISTRY.primary():
+            if not f.summarises_history or f.never_impute:
+                continue
+            if f.name in self.RANK_SCALED:
+                assert not f.evidence, (
+                    f"{f.name} is rank-scaled and must not be shrunk toward a "
+                    f"percentile prior"
+                )
+                continue
+            assert f.evidence, f"{f.name} is shrunk but declares no evidence counter"
+
+    def test_the_rank_scaled_exemptions_really_are_rank_scaled(self, built):
+        # Guards the exemption list above: if one of these ever becomes a
+        # percentile, it should start being shrunk and this test should fail.
+        for name in self.RANK_SCALED:
+            assert built.X[name].abs().max() > 1.0, (
+                f"{name} looks like a percentile now; it should declare "
+                f"evidence and be shrunk"
+            )
+
+    def test_season_features_use_the_season_counter(self):
+        # The whole reason evidence is declared per feature: a season rate
+        # resets in January and must not borrow the career count's confidence.
+        for name in (
+            "driver_win_rate_season_pct",
+            "driver_points_per_race_season_pct",
+        ):
+            assert REGISTRY.get(name).evidence == "driver_prior_races_season"
+
+    def test_circuit_features_use_the_visit_counter(self):
+        assert REGISTRY.get("driver_circuit_finish_mean_pct").evidence == (
+            "driver_prior_visits"
+        )
+
+    def test_never_impute_features_are_left_alone(self, built):
+        # FR-211/FR-214: an absent sprint or an absent practice session is a
+        # fact. Blending a fact toward a prior would erase it.
+        for f in REGISTRY.primary():
+            if f.never_impute and f.name in built.X:
+                assert built.X[f.name].isna().any(), (
+                    f"{f.name} declares never_impute but has no nulls left"
+                )
+
+    def test_the_strength_is_declared_not_tuned(self):
+        from f1pred.config import SHRINKAGE_STRENGTH
+
+        assert SHRINKAGE_STRENGTH > 0
+
+    def test_a_missing_evidence_column_is_an_error_not_a_silent_skip(self, corpus):
+        from f1pred.features.registry import Feature
+
+        reg = Registry("no-evidence")
+        reg.register(
+            Feature(
+                "thin",
+                lambda df: pd.Series(0.9, index=df.index),
+                Availability.PRE_RACE,
+                FeatureGroup.PRIMARY,
+                "A feature whose counter was never computed.",
+                summarises_history=True,
+                relative=True,
+                evidence="a_counter_nobody_built",
+            )
+        )
+        with pytest.raises(BuildError, match="declares evidence"):
+            build(corpus, features=reg.primary(), set_name="x", registry=reg)

@@ -143,3 +143,21 @@ COLD_START_DRIVER_PERCENTILE: Final[float] = 0.35
 
 #: Mean finishing percentile of a constructor's corpus debut, 2011-2014 (n=6).
 COLD_START_CONSTRUCTOR_PERCENTILE: Final[float] = 0.33
+
+
+# --------------------------------------------------------------------------
+# Shrinkage (FR-212a)
+# --------------------------------------------------------------------------
+#
+# The number of prior races at which an observation and the declared prior
+# carry equal weight in `priors.shrink_towards`.
+#
+# Derived, not tuned. A driver's within-race finishing percentile after one
+# race correlates 0.41 with where they settle over ten or more (measured
+# 2026-08-31 across 76 drivers). Treating that correlation as the reliability
+# of a one-race sample gives a weight of r^2 = 0.17 on the observation, so
+# 1 / (1 + k) = 0.17 and k is very close to five.
+#
+# Tuning this against holdout results would be fitting a feature to the
+# outcome, so it stays where the measurement put it.
+SHRINKAGE_STRENGTH: Final[float] = 5.0

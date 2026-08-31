@@ -61,6 +61,13 @@ class Circuit:
     country: str
     circuit_type: CircuitType
     overtaking_tier: OvertakingTier
+    #: Decimal degrees, from the same upstream source as the race results
+    #: (retrieved 2026-08-31). Typed out by hand they would be a source of
+    #: silent error; fetched from the source the corpus already trusts, they
+    #: are the same provenance as everything else. Used to place a race in the
+    #: ERA5 grid for FR-206's climatological prior.
+    latitude: float = 0.0
+    longitude: float = 0.0
 
 
 _P = CircuitType.PERMANENT
@@ -76,41 +83,41 @@ _VHARD = OvertakingTier.VERY_HARD
 CIRCUITS: Final[dict[str, Circuit]] = {
     c.circuit_id: c
     for c in (
-        Circuit("albert_park", "Albert Park Grand Prix Circuit", "Australia", _H, _MOD),
-        Circuit("americas", "Circuit of the Americas", "USA", _P, _MOD),
-        Circuit("bahrain", "Bahrain International Circuit", "Bahrain", _P, _EASY),
-        Circuit("baku", "Baku City Circuit", "Azerbaijan", _S, _EASY),
-        Circuit("buddh", "Buddh International Circuit", "India", _P, _MOD),
-        Circuit("catalunya", "Circuit de Barcelona-Catalunya", "Spain", _P, _HARD),
-        Circuit("hockenheimring", "Hockenheimring", "Germany", _P, _MOD),
-        Circuit("hungaroring", "Hungaroring", "Hungary", _P, _HARD),
-        Circuit("imola", "Autodromo Enzo e Dino Ferrari", "Italy", _P, _HARD),
-        Circuit("interlagos", "Autodromo Jose Carlos Pace", "Brazil", _P, _EASY),
-        Circuit("istanbul", "Istanbul Park", "Turkey", _P, _MOD),
-        Circuit("jeddah", "Jeddah Corniche Circuit", "Saudi Arabia", _S, _MOD),
-        Circuit("losail", "Losail International Circuit", "Qatar", _P, _HARD),
-        Circuit("marina_bay", "Marina Bay Street Circuit", "Singapore", _S, _HARD),
-        Circuit("miami", "Miami International Autodrome", "USA", _S, _MOD),
-        Circuit("monaco", "Circuit de Monaco", "Monaco", _S, _VHARD),
-        Circuit("monza", "Autodromo Nazionale di Monza", "Italy", _P, _EASY),
-        Circuit("mugello", "Autodromo Internazionale del Mugello", "Italy", _P, _HARD),
-        Circuit("nurburgring", "Nurburgring", "Germany", _P, _MOD),
-        Circuit("portimao", "Autodromo Internacional do Algarve", "Portugal", _P, _MOD),
-        Circuit("red_bull_ring", "Red Bull Ring", "Austria", _P, _EASY),
-        Circuit("ricard", "Circuit Paul Ricard", "France", _P, _MOD),
-        Circuit("rodriguez", "Autodromo Hermanos Rodriguez", "Mexico", _P, _MOD),
-        Circuit("sepang", "Sepang International Circuit", "Malaysia", _P, _EASY),
-        Circuit("shanghai", "Shanghai International Circuit", "China", _P, _EASY),
-        Circuit("silverstone", "Silverstone Circuit", "UK", _P, _MOD),
-        Circuit("sochi", "Sochi Autodrom", "Russia", _H, _HARD),
-        Circuit("spa", "Circuit de Spa-Francorchamps", "Belgium", _P, _EASY),
-        Circuit("suzuka", "Suzuka Circuit", "Japan", _P, _HARD),
-        Circuit("valencia", "Valencia Street Circuit", "Spain", _S, _HARD),
-        Circuit("vegas", "Las Vegas Strip Street Circuit", "USA", _S, _EASY),
-        Circuit("villeneuve", "Circuit Gilles Villeneuve", "Canada", _H, _MOD),
-        Circuit("yas_marina", "Yas Marina Circuit", "UAE", _P, _MOD),
-        Circuit("yeongam", "Korean International Circuit", "Korea", _P, _MOD),
-        Circuit("zandvoort", "Circuit Park Zandvoort", "Netherlands", _P, _HARD),
+        Circuit("albert_park", "Albert Park Grand Prix Circuit", "Australia", _H, _MOD, -37.8497, 144.968),
+        Circuit("americas", "Circuit of the Americas", "USA", _P, _MOD, 30.1328, -97.6411),
+        Circuit("bahrain", "Bahrain International Circuit", "Bahrain", _P, _EASY, 26.0325, 50.5106),
+        Circuit("baku", "Baku City Circuit", "Azerbaijan", _S, _EASY, 40.3725, 49.8533),
+        Circuit("buddh", "Buddh International Circuit", "India", _P, _MOD, 28.3487, 77.5331),
+        Circuit("catalunya", "Circuit de Barcelona-Catalunya", "Spain", _P, _HARD, 41.57, 2.26111),
+        Circuit("hockenheimring", "Hockenheimring", "Germany", _P, _MOD, 49.3278, 8.56583),
+        Circuit("hungaroring", "Hungaroring", "Hungary", _P, _HARD, 47.5789, 19.2486),
+        Circuit("imola", "Autodromo Enzo e Dino Ferrari", "Italy", _P, _HARD, 44.3439, 11.7167),
+        Circuit("interlagos", "Autodromo Jose Carlos Pace", "Brazil", _P, _EASY, -23.7036, -46.6997),
+        Circuit("istanbul", "Istanbul Park", "Turkey", _P, _MOD, 40.9517, 29.405),
+        Circuit("jeddah", "Jeddah Corniche Circuit", "Saudi Arabia", _S, _MOD, 21.6319, 39.1044),
+        Circuit("losail", "Losail International Circuit", "Qatar", _P, _HARD, 25.49, 51.4542),
+        Circuit("marina_bay", "Marina Bay Street Circuit", "Singapore", _S, _HARD, 1.2914, 103.864),
+        Circuit("miami", "Miami International Autodrome", "USA", _S, _MOD, 25.9581, -80.2389),
+        Circuit("monaco", "Circuit de Monaco", "Monaco", _S, _VHARD, 43.7347, 7.42056),
+        Circuit("monza", "Autodromo Nazionale di Monza", "Italy", _P, _EASY, 45.6156, 9.28111),
+        Circuit("mugello", "Autodromo Internazionale del Mugello", "Italy", _P, _HARD, 43.9975, 11.3719),
+        Circuit("nurburgring", "Nurburgring", "Germany", _P, _MOD, 50.3356, 6.9475),
+        Circuit("portimao", "Autodromo Internacional do Algarve", "Portugal", _P, _MOD, 37.227, -8.6267),
+        Circuit("red_bull_ring", "Red Bull Ring", "Austria", _P, _EASY, 47.2197, 14.7647),
+        Circuit("ricard", "Circuit Paul Ricard", "France", _P, _MOD, 43.2506, 5.79167),
+        Circuit("rodriguez", "Autodromo Hermanos Rodriguez", "Mexico", _P, _MOD, 19.4042, -99.0907),
+        Circuit("sepang", "Sepang International Circuit", "Malaysia", _P, _EASY, 2.76083, 101.738),
+        Circuit("shanghai", "Shanghai International Circuit", "China", _P, _EASY, 31.3389, 121.22),
+        Circuit("silverstone", "Silverstone Circuit", "UK", _P, _MOD, 52.0786, -1.01694),
+        Circuit("sochi", "Sochi Autodrom", "Russia", _H, _HARD, 43.4057, 39.9578),
+        Circuit("spa", "Circuit de Spa-Francorchamps", "Belgium", _P, _EASY, 50.4372, 5.97139),
+        Circuit("suzuka", "Suzuka Circuit", "Japan", _P, _HARD, 34.8431, 136.541),
+        Circuit("valencia", "Valencia Street Circuit", "Spain", _S, _HARD, 39.4589, -0.331667),
+        Circuit("vegas", "Las Vegas Strip Street Circuit", "USA", _S, _EASY, 36.1147, -115.173),
+        Circuit("villeneuve", "Circuit Gilles Villeneuve", "Canada", _H, _MOD, 45.5, -73.5228),
+        Circuit("yas_marina", "Yas Marina Circuit", "UAE", _P, _MOD, 24.4672, 54.6031),
+        Circuit("yeongam", "Korean International Circuit", "Korea", _P, _MOD, 34.7333, 126.417),
+        Circuit("zandvoort", "Circuit Park Zandvoort", "Netherlands", _P, _HARD, 52.3888, 4.54092),
     )
 }
 

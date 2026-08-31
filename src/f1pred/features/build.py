@@ -16,10 +16,16 @@ import pandas as pd
 from f1pred.config import (
     COLD_START_CONSTRUCTOR_PERCENTILE,
     COLD_START_DRIVER_PERCENTILE,
+    SHRINKAGE_STRENGTH,
 )
 from f1pred.data.target import build_target
 from f1pred.features import definitions as _definitions  # noqa: F401  (populates REGISTRY)
-from f1pred.features.priors import RACE_KEYS, prior_race_count, sort_canonically
+from f1pred.features.priors import (
+    RACE_KEYS,
+    prior_race_count,
+    shrink_towards,
+    sort_canonically,
+)
 from f1pred.features.registry import (
     REGISTRY,
     Availability,
@@ -136,43 +142,58 @@ def _post_transfer_flag(df: pd.DataFrame) -> pd.Series:
     return (previous.notna() & (df["constructor_id"] != previous)).astype(bool)
 
 
-def _apply_cold_start(
+def _shrink_low_evidence(
     matrix: pd.DataFrame,
     df: pd.DataFrame,
     features: tuple[Feature, ...],
 ) -> tuple[pd.DataFrame, pd.Series]:
-    """FR-212: declared fallbacks for entrants with no history, and the flag.
+    """FR-212/FR-212a: blend thin estimates toward their declared prior.
 
-    Only a genuine cold start is filled — zero prior races for the driver or
-    the constructor. A veteran's first visit to a new circuit leaves its
-    circuit-history features null on purpose: the gradient-boosted ranker
-    learns a branch for missing values, which is a real answer, whereas a
-    constant here would be an invented one.
+    Replaces a cliff with a slope. The old behaviour handed a debut row a
+    declared fallback and then, from the driver's second race, took that single
+    race at full confidence — even though a one-race sample correlates only
+    0.41 with where a driver settles. Now the weight on the observation rises
+    with the evidence behind it, and the fallback is simply what the formula
+    returns when there is none.
+
+    A feature is shrunk only if it declares an `evidence` counter, so the rule
+    is applied where a declaration says it belongs rather than by guessing from
+    a name. Two consequences worth stating rather than discovering:
+
+    * Rank-scaled features (`strength_rank_prior`, `overqualified_by_grid`)
+      declare no counter and are left alone. They live on the 1..N scale, and
+      the declared prior is a percentile; blending the two would be an
+      arithmetic error dressed as a weak prior.
+    * Shrinkage runs on the finished matrix, so an INTERMEDIATE composite such
+      as `prior_strength_score` is built from *unshrunk* percentiles. That is a
+      real limitation. Shrinking mid-build instead would mean shrinking a
+      feature before knowing whether anything downstream wanted it raw. `never_impute` features are skipped entirely: FR-211's absent
+    sprint and FR-214's absent telemetry are facts, and blending a fact toward
+    a prior would erase it.
     """
-    # Computed here rather than read from the matrix: the flag must hold for
-    # any feature set, including one that did not ask for the count features.
     driver_cold = prior_race_count(df, entity="driver_id") == 0
     constructor_cold = prior_race_count(df, entity="constructor_id") == 0
     cold = driver_cold | constructor_cold
 
-    filled = matrix.copy()
-    if cold.any():
-        for f in features:
-            if not f.summarises_history or f.name not in filled.columns:
-                continue
-            if f.never_impute:
-                # FR-211: the null is the answer. See `Feature.never_impute`.
-                continue
-            fallback = (
-                COLD_START_CONSTRUCTOR_PERCENTILE
-                if f.name.startswith("constructor_")
-                else COLD_START_DRIVER_PERCENTILE
+    out = matrix.copy()
+    for f in features:
+        if f.never_impute or not f.evidence or f.name not in out.columns:
+            continue
+        if f.evidence not in df.columns:
+            raise BuildError(
+                f"feature {f.name!r} declares evidence {f.evidence!r}, which "
+                f"was not computed. Add it to `depends_on` so the build "
+                f"resolves it before this feature."
             )
-            rows = constructor_cold if f.name.startswith("constructor_") else driver_cold
-            target_rows = rows & filled[f.name].isna()
-            filled.loc[target_rows, f.name] = fallback
-
-    return filled, cold
+        prior = (
+            COLD_START_CONSTRUCTOR_PERCENTILE
+            if f.name.startswith("constructor_")
+            else COLD_START_DRIVER_PERCENTILE
+        )
+        out[f.name] = shrink_towards(
+            out[f.name], df[f.evidence], prior, strength=SHRINKAGE_STRENGTH
+        )
+    return out, cold
 
 
 # --------------------------------------------------------------------------
@@ -213,7 +234,7 @@ def build(
 
     names = tuple(f.name for f in features)
     matrix = work[list(names)].copy()
-    matrix, cold = _apply_cold_start(matrix, work, features)
+    matrix, cold = _shrink_low_evidence(matrix, work, features)
 
     flags = pd.DataFrame(
         {

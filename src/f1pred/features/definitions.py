@@ -52,6 +52,7 @@ def _relative(
     *,
     higher_is_better: bool,
     description: str,
+    evidence: str,
     name: str | None = None,
 ) -> None:
     """Register `base`'s field-relative form as a primary feature (FR-209).
@@ -68,9 +69,10 @@ def _relative(
     compute.__doc__ = description
     feature(
         PRE,
-        depends_on=[base],
+        depends_on=[base, evidence],
         summarises_history=True,
         relative=True,
+        evidence=evidence,
         name=name or f"{base}_pct",
     )(compute)
 
@@ -308,6 +310,41 @@ def constructor_prior_races(df: pd.DataFrame) -> pd.Series:
     return prior_race_count(df, entity="constructor_id")
 
 
+@feature(PRE, group=INTERMEDIATE, depends_on=["driver_id", "season"])
+def driver_prior_races_season(df: pd.DataFrame) -> pd.Series:
+    """Races this driver has run *this season*. Zero every January.
+
+    A separate counter from the career one because the season-scoped features
+    reset annually, and 26% of corpus rows carry a season rate built on four
+    races or fewer. Trusting those as if they were career-length samples is
+    the specific error shrinkage exists to correct.
+    """
+    return prior_race_count(df, entity=["season", "driver_id"])
+
+
+@feature(PRE, group=INTERMEDIATE, depends_on=["constructor_id", "season"])
+def constructor_prior_races_season(df: pd.DataFrame) -> pd.Series:
+    """Races this constructor has run this season."""
+    return prior_race_count(df, entity=["season", "constructor_id"])
+
+
+@feature(PRE, group=INTERMEDIATE, depends_on=["driver_id", "circuit_id"])
+def driver_prior_visits(df: pd.DataFrame) -> pd.Series:
+    """Previous visits this driver has made to this circuit.
+
+    Usually a very small number — a driver sees a circuit once a year — which
+    is why the circuit-history features are the thinnest in the set and the
+    ones shrinkage moves most.
+    """
+    return prior_race_count(df, entity=["driver_id", "circuit_id"])
+
+
+@feature(PRE, group=INTERMEDIATE, depends_on=["constructor_id", "circuit_id"])
+def constructor_prior_visits(df: pd.DataFrame) -> pd.Series:
+    """Previous visits this constructor has made to this circuit."""
+    return prior_race_count(df, entity=["constructor_id", "circuit_id"])
+
+
 # --------------------------------------------------------------------------
 # Driver form — absolute intermediates (FR-203)
 # --------------------------------------------------------------------------
@@ -501,28 +538,32 @@ def constructor_circuit_finish_mean(df: pd.DataFrame) -> pd.Series:
 # Field-relative forms — the primary set (FR-209)
 # --------------------------------------------------------------------------
 
-_RELATIVE: tuple[tuple[str, bool, str], ...] = (
-    ("driver_finish_last3", False, "Recent finishing form, ranked against today's field."),
-    ("driver_finish_last5", False, "Five-race finishing form, ranked against today's field."),
-    ("driver_grid_last3", False, "Recent qualifying form, ranked against today's field."),
-    ("driver_points_last3", True, "Recent points scoring, ranked against today's field."),
-    ("driver_gain_last5", True, "Recent race-day places gained, ranked against today's field."),
-    ("driver_win_rate_season", True, "Season win rate, ranked against today's field."),
-    ("driver_podium_rate_season", True, "Season podium rate, ranked against today's field."),
-    ("driver_points_per_race_season", True, "Season points rate, ranked against today's field."),
-    ("driver_elo_race", True, "Race-execution rating, ranked against today's field."),
-    ("driver_elo_quali", True, "Qualifying-pace rating, ranked against today's field."),
-    ("constructor_points_per_race_season", True, "Team season points rate, ranked against today's field."),
-    ("constructor_reliability_season", True, "Team season reliability, ranked against today's field."),
-    ("constructor_finish_last3", False, "Team recent finishing form, ranked against today's field."),
-    ("driver_circuit_finish_mean", False, "Record at this circuit, ranked against today's field."),
-    ("driver_circuit_grid_mean", False, "Qualifying record at this circuit, ranked against today's field."),
-    ("driver_circuit_best_finish", False, "Best result at this circuit, ranked against today's field."),
-    ("constructor_circuit_finish_mean", False, "Team record at this circuit, ranked against today's field."),
+#: base feature, higher-is-better, description, evidence counter.
+#: The fourth column is what makes shrinkage correct rather than approximate:
+#: a season rate backed by two races and a career rating backed by two hundred
+#: must not be trusted equally, and only a per-feature declaration can say so.
+_RELATIVE: tuple[tuple[str, bool, str, str], ...] = (
+    ("driver_finish_last3", False, "Recent finishing form, ranked against today's field.", "driver_prior_races"),
+    ("driver_finish_last5", False, "Five-race finishing form, ranked against today's field.", "driver_prior_races"),
+    ("driver_grid_last3", False, "Recent qualifying form, ranked against today's field.", "driver_prior_races"),
+    ("driver_points_last3", True, "Recent points scoring, ranked against today's field.", "driver_prior_races"),
+    ("driver_gain_last5", True, "Recent race-day places gained, ranked against today's field.", "driver_prior_races"),
+    ("driver_win_rate_season", True, "Season win rate, ranked against today's field.", "driver_prior_races_season"),
+    ("driver_podium_rate_season", True, "Season podium rate, ranked against today's field.", "driver_prior_races_season"),
+    ("driver_points_per_race_season", True, "Season points rate, ranked against today's field.", "driver_prior_races_season"),
+    ("driver_elo_race", True, "Race-execution rating, ranked against today's field.", "driver_prior_races"),
+    ("driver_elo_quali", True, "Qualifying-pace rating, ranked against today's field.", "driver_prior_races"),
+    ("constructor_points_per_race_season", True, "Team season points rate, ranked against today's field.", "constructor_prior_races_season"),
+    ("constructor_reliability_season", True, "Team season reliability, ranked against today's field.", "constructor_prior_races_season"),
+    ("constructor_finish_last3", False, "Team recent finishing form, ranked against today's field.", "constructor_prior_races"),
+    ("driver_circuit_finish_mean", False, "Record at this circuit, ranked against today's field.", "driver_prior_visits"),
+    ("driver_circuit_grid_mean", False, "Qualifying record at this circuit, ranked against today's field.", "driver_prior_visits"),
+    ("driver_circuit_best_finish", False, "Best result at this circuit, ranked against today's field.", "driver_prior_visits"),
+    ("constructor_circuit_finish_mean", False, "Team record at this circuit, ranked against today's field.", "constructor_prior_visits"),
 )
 
-for _base, _hib, _doc in _RELATIVE:
-    _relative(_base, higher_is_better=_hib, description=_doc)
+for _base, _hib, _doc, _evidence in _RELATIVE:
+    _relative(_base, higher_is_better=_hib, description=_doc, evidence=_evidence)
 
 
 # --------------------------------------------------------------------------

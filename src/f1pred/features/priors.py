@@ -250,6 +250,49 @@ def within_season_zscore(
     return ((values - mean) / std.replace(0.0, np.nan)).fillna(0.0).astype("float64")
 
 
+def shrink_towards(
+    observed: pd.Series,
+    evidence: pd.Series,
+    prior: float | pd.Series,
+    *,
+    strength: float,
+) -> pd.Series:
+    """Blend an estimate toward a prior in proportion to how little backs it.
+
+    `(n * observed + k * prior) / (n + k)`, the standard shrunk mean, where `n`
+    is how many prior races the estimate rests on and `k` is the declared
+    strength — the number of races at which the observation and the prior carry
+    equal weight.
+
+    This exists because the project measured what a thin estimate is worth. A
+    driver's form after one race correlates 0.41 with where they eventually
+    settle, and 26% of corpus rows carry season-scoped features built on four
+    races or fewer, because those features reset every January. Before
+    shrinkage the pipeline had a cliff: no history at all took a declared
+    fallback, and a single race took that race at full confidence. One race is
+    not full confidence.
+
+    At `n = 0` this returns the prior exactly, so FR-212's cold-start fallback
+    is not replaced but subsumed — it is this function's endpoint.
+    """
+    if not observed.index.equals(evidence.index):
+        raise PriorError("observed and evidence must share an index")
+    if strength <= 0:
+        raise PriorError(
+            f"shrinkage strength must be positive, got {strength}. Zero would "
+            f"divide by zero at n=0, which is the case this exists to handle."
+        )
+    n = pd.to_numeric(evidence, errors="coerce").fillna(0.0).clip(lower=0.0)
+    prior_series = (
+        prior if isinstance(prior, pd.Series) else pd.Series(prior, index=observed.index)
+    )
+    # A missing observation contributes nothing; the prior carries the row.
+    obs = observed.copy()
+    n = n.where(obs.notna(), 0.0)
+    obs = obs.fillna(0.0)
+    return ((n * obs + strength * prior_series) / (n + strength)).astype("float64")
+
+
 __all__ = [
     "Aggregation",
     "PriorError",
@@ -260,6 +303,7 @@ __all__ = [
     "prior_rate",
     "prior_stat",
     "race_ordinal",
+    "shrink_towards",
     "sort_canonically",
     "within_race_percentile",
     "within_season_zscore",
