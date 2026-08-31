@@ -1,0 +1,146 @@
+{
+  "task": "T-214",
+  "requirements": [
+    "FR-213",
+    "FR-214",
+    "FR-902",
+    "AC-19"
+  ],
+  "generated": "2026-09-01",
+  "code_commit": "6d98f6f7b7fcf254cb1bd7669ba44301272c832e",
+  "collected": {
+    "seasons": [
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "practice_rows": 3598,
+    "races": 173,
+    "rows_with_long_run_pace": 3259,
+    "long_run_pace_rate": 0.906
+  },
+  "coverage_per_season": {
+    "2010": {
+      "corpus_rows": 456,
+      "covered": 0,
+      "coverage": 0.0,
+      "source_covers_season": false
+    },
+    "2011": {
+      "corpus_rows": 454,
+      "covered": 0,
+      "coverage": 0.0,
+      "source_covers_season": false
+    },
+    "2012": {
+      "corpus_rows": 478,
+      "covered": 0,
+      "coverage": 0.0,
+      "source_covers_season": false
+    },
+    "2013": {
+      "corpus_rows": 418,
+      "covered": 0,
+      "coverage": 0.0,
+      "source_covers_season": false
+    },
+    "2014": {
+      "corpus_rows": 407,
+      "covered": 0,
+      "coverage": 0.0,
+      "source_covers_season": false
+    },
+    "2015": {
+      "corpus_rows": 378,
+      "covered": 0,
+      "coverage": 0.0,
+      "source_covers_season": false
+    },
+    "2016": {
+      "corpus_rows": 462,
+      "covered": 0,
+      "coverage": 0.0,
+      "source_covers_season": false
+    },
+    "2017": {
+      "corpus_rows": 400,
+      "covered": 0,
+      "coverage": 0.0,
+      "source_covers_season": false
+    },
+    "2018": {
+      "corpus_rows": 420,
+      "covered": 420,
+      "coverage": 1.0,
+      "source_covers_season": true
+    },
+    "2019": {
+      "corpus_rows": 420,
+      "covered": 420,
+      "coverage": 1.0,
+      "source_covers_season": true
+    },
+    "2020": {
+      "corpus_rows": 340,
+      "covered": 339,
+      "coverage": 0.9971,
+      "source_covers_season": true
+    },
+    "2021": {
+      "corpus_rows": 440,
+      "covered": 440,
+      "coverage": 1.0,
+      "source_covers_season": true
+    },
+    "2022": {
+      "corpus_rows": 440,
+      "covered": 440,
+      "coverage": 1.0,
+      "source_covers_season": true
+    },
+    "2023": {
+      "corpus_rows": 440,
+      "covered": 435,
+      "coverage": 0.9886,
+      "source_covers_season": true
+    },
+    "2024": {
+      "corpus_rows": 479,
+      "covered": 479,
+      "coverage": 1.0,
+      "source_covers_season": true
+    },
+    "2025": {
+      "corpus_rows": 479,
+      "covered": 479,
+      "coverage": 1.0,
+      "source_covers_season": true
+    }
+  },
+  "corpus_split": {
+    "note": "FR-215's reason for a separate arm, as a number: the telemetry source starts in 2018 and the corpus starts in 2010.",
+    "rows_the_source_can_speak_about": 3458,
+    "rows_it_cannot": 3453,
+    "share_covered": 0.5
+  },
+  "method": {
+    "sessions_read": "one per weekend, preferring Practice 2 then Practice 1 then Practice 3",
+    "long_run_min_laps": 5,
+    "max_lap_ratio_to_personal_best": 1.1,
+    "excluded_track_status": "safety car, red flag, virtual safety car (yellow retained)",
+    "note": "Metric is named stint_pace_trend, not degradation: within a stint the tyre wearing out competes with fuel burn and track evolution, so its level is confounded and its within-weekend ranking is what carries signal."
+  },
+  "verification": {
+    "pre_2018_rows_with_a_practice_value": 0,
+    "leakage_static": "pass",
+    "leakage_behavioural": "pass",
+    "determinism": "pass",
+    "note": "FR-214: pre-2018 nulls are never imputed; the features declare never_impute."
+  },
+  "ac_19_status": "NOT met. Coverage is reported and the group is excluded from the primary set, but AC-19 also requires the benefit measured as a separate arm with its reduced season count stated \u2014 that is T-216, which needs a model and bootstrap CIs (P4)."
+}
