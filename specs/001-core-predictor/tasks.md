@@ -136,21 +136,41 @@ thing that gets misread later as the phase being finished.
 
 | ID | Task | Satisfies | Done when |
 |----|------|-----------|-----------|
-| ☐ **T-301** | Define `Predictor` protocol | D-3, FR-304 | Baselines and model are interchangeable in evaluation |
-| ☐ **T-302** | Grid-order baseline | FR-301 | Implemented, unit-tested |
-| ☐ **T-303** | Standings-order baseline | FR-302 | Implemented, unit-tested |
-| ☐ **T-304** | Random-order control | FR-303 | Seeded, reproducible; mean over ≥1000 orderings with its own CI, never a single draw |
-| ☐ **T-304a** | Pin the primary metric in code | FR-500 | One definition, imported everywhere; no call site re-specifies which metric gates a claim |
-| ☐ **T-305** | `ChronologicalSplit` object, fed by `CorpusWindow` | FR-403, FR-501, D-4, D-9 | No API anywhere accepts a random split; split consumes a resolved window, never a literal season list |
-| ☐ **T-306** | Metric battery | FR-502 | All **nine** metrics enumerated in FR-502 implemented and tested |
-| ☐ **T-307** | Race-level bootstrap CIs | FR-503, D-5 | CIs on every metric; resamples races not rows |
-| ☐ **T-308** | Paired delta CIs vs grid baseline | FR-504 | Delta CI computed within replicates |
-| ☐ **T-309** | Segmentation by season, circuit type, overtaking tier | FR-505, FR-109 | Report breaks out all three |
-| ☐ **T-310** | JSON results emission | FR-506, FR-510 | Machine-readable file written to `results/`, recording `W` and the resolved season list |
-| ☐ **T-311** | Explicit "does not beat baseline" verdict | FR-507, FR-305 | Verdict line rendered prominently, both directions; baselines appear in the main report body alongside the model, never in a footnote or appendix |
-
+| ☑ **T-301** | Define `Predictor` protocol | D-3, FR-304 | Baselines and model are interchangeable in evaluation — **DONE 2026-08-31.** `models/base.py`: a runtime-checkable `Predictor` protocol plus `rank_to_positions`, which ranks with `method="first"` so a predicted order is always a permutation — a tie would put two cars in P3 and none in P4, and every metric would then score against a position that does not exist. |
+| ☑ **T-302** | Grid-order baseline | FR-301 | Implemented, unit-tested — **DONE 2026-08-31.** `GridOrderBaseline`. Scores **0.6555** Spearman on the 2023-2025 holdout: the bar the model must clear. |
+| ☑ **T-303** | Standings-order baseline | FR-302 | Implemented, unit-tested — **DONE 2026-08-31.** `StandingsOrderBaseline`, ordering by championship points held *before* the race, grid as tie-break so the score cannot depend on row order. Scores 0.6128 — **worse than the grid by -0.0427, CI excluding zero.** Championship position is a weaker guide to Sunday than the starting grid. |
+| ☑ **T-304** | Random-order control | FR-303 | Seeded, reproducible; mean over ≥1000 orderings with its own CI, never a single draw — **DONE 2026-08-31.** `RandomOrderControl` refuses fewer than 1000 draws. Mean over 1000 seeded orderings: **+0.0012, CI -0.0494 to +0.0516** — a floor of zero with an interval straddling it, which is the result that validates the whole harness. |
+| ☑ **T-304a** | Pin the primary metric in code | FR-500 | One definition, imported everywhere; no call site re-specifies which metric gates a claim — **DONE 2026-08-31.** `PRIMARY_METRIC` in `metrics.py`, imported everywhere. No call site re-specifies which metric gates a claim, so none can gate on one that happens to look better. |
+| ☑ **T-305** | `ChronologicalSplit` object, fed by `CorpusWindow` | FR-403, FR-501, D-4, D-9 | No API anywhere accepts a random split; split consumes a resolved window, never a literal season list — **DONE 2026-08-31.** `ChronologicalSplit` takes a `CorpusWindow`, never a season list, and has no `test_size`, `shuffle`, `random_state` or `stratify` parameter — asserted by signature inspection, so random splitting is unexpressible rather than discouraged. `assert_no_leakage` refuses any training row at or after the boundary. |
+| ☑ **T-306** | Metric battery | FR-502 | All **nine** metrics enumerated in FR-502 implemented and tested — **DONE 2026-08-31.** All nine implemented and tested. FR-502 lists `top_3_set_accuracy` and `podium_set_accuracy` without defining either; declared here as partial credit versus exact set match, since getting two of three right is materially different from getting all three and one number hides which happened. |
+| ☑ **T-307** | Race-level bootstrap CIs | FR-503, D-5 | CIs on every metric; resamples races not rows — **DONE 2026-08-31.** `bootstrap_metrics` resamples **races, not driver-rows** — twenty cars compete for twenty positions, so rows are not independent and resampling them would give dishonestly narrow intervals. A test asserts the draw count equals the race count. |
+| ☑ **T-308** | Paired delta CIs vs grid baseline | FR-504 | Delta CI computed within replicates — **DONE 2026-08-31.** `bootstrap_delta` pairs within each replicate; scoring two predictors separately and subtracting their intervals discards the pairing and overstates the uncertainty. A delta over mismatched race sets raises rather than dropping rows. |
+| ☑ **T-309** | Segmentation by season, circuit type, overtaking tier | FR-505, FR-109 | Report breaks out all three — **DONE 2026-08-31.** By season, circuit type and overtaking tier. The tier breakdown is a strong independent check: grid order predicts best where overtaking is **very hard** (0.851) and worst where it is moderate (0.616), which is the real physical relationship falling out of separately-declared circuit attributes. |
+| ☑ **T-310** | JSON results emission | FR-506, FR-510 | Machine-readable file written to `results/`, recording `W` and the resolved season list — **DONE 2026-08-31.** `write_results` emits the record with the resolved season list and the FR-501a shortfall field. `results/baselines_2023_2025.json`. |
+| ☑ **T-311** | Explicit "does not beat baseline" verdict | FR-507, FR-305 | Verdict line rendered prominently, both directions; baselines appear in the main report body alongside the model, never in a footnote or appendix — **DONE 2026-08-31.** `verdict` is computed from the delta intervals, never written by hand, and states both directions. On the current run it reads DOES NOT BEAT THE GRID BASELINE — correctly, since no model exists yet and the only comparator is the standings baseline, which loses. |
 **Exit gate:** AC-3. **Baselines are evaluated here, before the model exists** —
 so the bar is set before there is any temptation to move it.
+
+**P3 COMPLETE** (2026-08-31). All twelve tasks done and validated against the
+real corpus, not fixtures. The harness scores every predictor through one
+function, so the model cannot later be evaluated on terms the baselines did not
+face.
+
+Headline, on the 2023-2025 holdout (70 races, 13 training seasons):
+
+| predictor | primary metric | 95% CI |
+|---|---|---|
+| grid_order | **0.6555** | 0.6050 to 0.7047 |
+| standings_order | 0.6128 | 0.5683 to 0.6576 |
+| random_order (1000 draws) | 0.0012 | -0.0494 to 0.0516 |
+
+**AC-3 is NOT ticked, and the gate as written cannot be met here.** It requires
+"model and all three baselines"; the model is T-401 in P4. Everything AC-3 asks
+for *other than the model* is in place and exercised. This is the same defect
+class as T-216 sitting in P2 — a gate naming an artefact a later phase
+produces — and it is recorded rather than quietly ticked or quietly ignored.
+**Owner decision needed:** either AC-3 moves to P4's gate, or it is split so
+P3 owns the baseline half.
 
 ---
 
@@ -282,3 +302,4 @@ the spec is amended before the code diverges.*
 | 2026-08-31 | T-219, T-220, T-218 | **FR-212a (new)**, FR-206, FR-212, Constitution IX.5 | **Shrinkage added as FR-212a; teammate anchoring proposed, measured, and rejected; the weather task approved.** Spec §3.2 is returned to Draft for the owner's read of FR-212a's text — the owner approved the change in conversation, but IX.2 says approving a summary is not ratification. | The cold-start fallback only ever addressed rows with *no* history — 1.2% of the corpus. Measurement showed the real problem is one step along: a driver's form after a single race correlates just 0.41 with where they settle, and 26% of rows carry season-scoped features built on four races or fewer, because those reset every January. The pipeline had a cliff there and now has a slope. **T-220 is the more useful entry.** Anchoring rookies to their car looked excellent — correlation 0.83 — until the number was checked, at which point it turned out to be measuring the teammate's finish *in the race being predicted*. This is the project's own stated failure mode reappearing in the analysis used to justify a feature rather than in the feature itself, and the leakage firewall would not have caught it, because no feature was built. Recorded because the next person to have this idea should find the measurement, not repeat it. |
 | 2026-08-31 | T-218, T-221 | FR-205, FR-206, NFR-03 | **A hole in the behavioural leakage check, found by the control that was supposed to be routine.** The check permuted post-race values among a race's drivers. That is right for anything that varies per car and useless for anything the race shares — so observed weather, which has one value per race, could be read by a feature declaring itself pre-race and neither layer would object. | The static layer cannot see it (the feature declares only a raw column) and the behavioural layer's perturbation was a no-op on it. Every race-level post-race quantity had the same exposure, not just weather. Worth recording because the control was written expecting a green tick: the check had been passing for eleven days against a class of leak it could not detect. Also added `absent_sources` to the built matrix — a frame built without weather or telemetry now says so, since a matrix whose weather features are entirely null is a different experiment from one where they are present. |
 | 2026-08-31 | T-219 | FR-212a, Constitution IX.2, IX.4, IX.5 | **FR-212a ratified by the owner**, read in full. Spec §3.2 leaves Draft and is ratified again; the ratifying party and date are recorded in the spec header. | The section was returned to Draft when FR-212a was added, because IX.3 forbids the drafting agent from ratifying its own text and IX.2 is explicit that approving a summary is not ratification. The owner had approved the *change* in conversation on the same day; this closes the gap between that and approving the wording, which is the distinction Article IX exists to enforce. |
+| 2026-08-31 | T-301..T-311 | AC-3, FR-301..305, FR-500..507 | **P3 complete. AC-3 left unticked because it cannot be met in P3.** The criterion requires "model and all three baselines"; the model is T-401 in P4. Everything else AC-3 names is in place and exercised. Owner decision needed: move AC-3 to P4's gate, or split it so P3 owns the baseline half. | This is the second instance of the same defect class the 2026-08-31 audit found with T-216 — a phase gate naming an artefact a later phase produces, which makes the gate unreachable from inside its own phase. Recorded rather than ticked, because ticking it would assert the model had been evaluated when no model exists, and ignoring it would leave the phase looking incomplete for the wrong reason. The substantive result is that the **grid baseline scores 0.6555** on the 2023-2025 holdout and the standings baseline is measurably *worse* at 0.6128 (delta -0.0427, CI excluding zero) — so the bar is the grid, and it is a high one. The random control's +0.0012 with an interval straddling zero is the check that the harness itself is sound. |
