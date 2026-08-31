@@ -237,6 +237,11 @@ NEW_FEATURES: Final[dict[str, str]] = {
     "practice_stint_trend_pct": "FR-213: telemetry group, separate arm.",
     "practice_best_lap_pct": "FR-213: telemetry group, separate arm.",
     "practice_long_run_laps": "FR-213: sample size behind the practice pace.",
+    "weather_prior_wet": "FR-206: climatological prior, admissible pre-race.",
+    "weather_prior_temp": "FR-206: climatological prior, admissible pre-race.",
+    "weather_prior_wind": "FR-206: climatological prior, admissible pre-race.",
+    "weather_actual_precip": "FR-206/FR-207: observed, oracle set only.",
+    "weather_actual_temp": "FR-206/FR-207: observed, oracle set only.",
     "finished_race": "FR-207: post-race, oracle set only.",
     "race_distance_share": "FR-207: post-race, oracle set only.",
 }

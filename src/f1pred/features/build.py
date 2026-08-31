@@ -8,9 +8,11 @@ whole of FR-202, and it is why `build_primary()` takes no feature list.
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from typing import Final
 
+import numpy as np
 import pandas as pd
 
 from f1pred.config import (
@@ -34,6 +36,8 @@ from f1pred.features.registry import (
     Registry,
 )
 
+logger = logging.getLogger(__name__)
+
 #: Carried alongside the matrix so a prediction can be traced to a row.
 KEY_COLUMNS: Final[tuple[str, ...]] = (
     "season",
@@ -45,6 +49,35 @@ KEY_COLUMNS: Final[tuple[str, ...]] = (
 )
 
 TARGET_COLUMN: Final[str] = "target_position"
+
+#: Columns that arrive from an optional enrichment pass rather than from race
+#: collection: the weather archive (FR-206) and the practice sessions
+#: (FR-213). A frame that never had them enriched genuinely has no value for
+#: them, so the build adds them as nulls rather than failing — but it says so,
+#: and the features that read them all declare `never_impute`, so the null
+#: survives to the model instead of being quietly filled.
+#:
+#: The alternative — raising — would mean every caller had to attach weather
+#: before they could build anything, including the leakage tests, which have
+#: no opinion about weather at all.
+ENRICHMENT_COLUMNS: Final[tuple[str, ...]] = (
+    "weather_prior_wet_probability",
+    "weather_prior_precip_mm",
+    "weather_prior_temp_max_c",
+    "weather_prior_wind_kmh",
+    "weather_prior_years",
+    "weather_actual_precip_mm",
+    "weather_actual_temp_max_c",
+    "weather_actual_wind_kmh",
+    "long_run_pace_s",
+    "long_run_laps",
+    "best_lap_s",
+    "stint_pace_trend_s_per_lap",
+    "longest_stint_laps",
+    "stints",
+    "practice_laps",
+    "practice_sessions",
+)
 
 
 class BuildError(ValueError):
@@ -67,6 +100,12 @@ class FeatureMatrix:
     flags: pd.DataFrame
     target: pd.Series | None
     feature_names: tuple[str, ...]
+    #: Enrichment columns the input frame did not carry, so every feature
+    #: reading them is null throughout. Recorded rather than left to be
+    #: noticed: a matrix whose weather features are entirely absent is a
+    #: different experiment from one where they are present, and a results
+    #: file must be able to say which it was.
+    absent_sources: tuple[str, ...] = ()
 
     def __len__(self) -> int:
         return len(self.X)
@@ -219,6 +258,17 @@ def build(
         df = build_target(df)
     work = sort_canonically(df)
 
+    absent = tuple(c for c in ENRICHMENT_COLUMNS if c not in work.columns)
+    for column in absent:
+        work[column] = np.nan
+    if absent:
+        logger.info(
+            "building without %d enrichment column(s); features reading them "
+            "will be null throughout: %s",
+            len(absent),
+            ", ".join(absent),
+        )
+
     available = frozenset(work.columns)
     for f in resolve_order(features, registry=registry, available=available):
         series = f.fn(work)
@@ -259,6 +309,7 @@ def build(
         flags=flags,
         target=target,
         feature_names=names,
+        absent_sources=absent,
     )
 
 
@@ -292,6 +343,7 @@ def build_group(
 
 __all__ = [
     "BuildError",
+    "ENRICHMENT_COLUMNS",
     "FeatureMatrix",
     "KEY_COLUMNS",
     "TARGET_COLUMN",

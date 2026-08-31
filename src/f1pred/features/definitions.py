@@ -720,12 +720,68 @@ def practice_long_run_laps(df: pd.DataFrame) -> pd.Series:
 
 
 # --------------------------------------------------------------------------
+# Weather — the same source in two roles, kept apart (FR-206, FR-751a)
+# --------------------------------------------------------------------------
+#
+# One endpoint serves both. Ask ERA5 for the years before a race and you get a
+# climatological prior, which Constitution III.1 admits. Ask for the race day
+# and you get what happened, which III.2 forbids and which is the shape of the
+# defect that inflated every v0 number. Nothing in the response distinguishes
+# them, so `data.weather.climatological_prior` filters to seasons strictly
+# before the race's own — a cut-off derived from the race date, which no caller
+# can widen — and the race-day columns are registered POST_RACE below.
+#
+# Attach with `data.weather.attach(corpus, race_weather_table(archive, corpus))`.
+
+
+@feature(PRE, depends_on=["weather_prior_wet_probability"], never_impute=True)
+def weather_prior_wet(df: pd.DataFrame) -> pd.Series:
+    """How often this circuit is wet at this point in the calendar, historically.
+
+    Built only from years preceding the race. Sepang tops the corpus at 0.87,
+    which is the right answer and a useful sanity check on the whole
+    construction.
+    """
+    return pd.to_numeric(df["weather_prior_wet_probability"], errors="coerce")
+
+
+@feature(PRE, depends_on=["weather_prior_temp_max_c"], never_impute=True)
+def weather_prior_temp(df: pd.DataFrame) -> pd.Series:
+    """Typical maximum temperature at this circuit at this time of year."""
+    return pd.to_numeric(df["weather_prior_temp_max_c"], errors="coerce")
+
+
+@feature(PRE, depends_on=["weather_prior_wind_kmh"], never_impute=True)
+def weather_prior_wind(df: pd.DataFrame) -> pd.Series:
+    """Typical maximum wind speed at this circuit at this time of year."""
+    return pd.to_numeric(df["weather_prior_wind_kmh"], errors="coerce")
+
+
+# --------------------------------------------------------------------------
 # Post-race features — oracle set only (FR-207, Constitution III.2)
 # --------------------------------------------------------------------------
 #
 # These exist so FR-207's upper bound can be measured and so the leakage checks
 # of FR-204 and FR-205 have something real to catch. Nothing here may reach the
 # primary matrix, and the static check fails the build if it does.
+
+
+@feature(POST, depends_on=["weather_actual_precip_mm"])
+def weather_actual_precip(df: pd.DataFrame) -> pd.Series:
+    """Rain that actually fell on race day. **Post-race. Oracle set only.**
+
+    Registered so FR-207 can put a number on what a weather leak is worth —
+    the question v0 answered by accident, over four months, in the wrong
+    direction. The static check keeps it out of the primary matrix and the
+    behavioural check catches any pre-race feature that reads it.
+    """
+    return pd.to_numeric(df["weather_actual_precip_mm"], errors="coerce")
+
+
+@feature(POST, depends_on=["weather_actual_temp_max_c"])
+def weather_actual_temp(df: pd.DataFrame) -> pd.Series:
+    """Race-day maximum temperature. **Post-race. Oracle set only.**"""
+    return pd.to_numeric(df["weather_actual_temp_max_c"], errors="coerce")
 
 
 @feature(POST, depends_on=["classification_outcome"])

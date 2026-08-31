@@ -50,6 +50,13 @@ POST_RACE_COLUMNS: Final[tuple[str, ...]] = (
     "points",
     "final_lap_position",
     TARGET_COLUMN,
+    # FR-206: observed race weather. Listed here so the behavioural check
+    # actually perturbs it — without this a feature reading the race day's
+    # rainfall while declaring itself pre-race would pass both layers, which
+    # is the exact defect that sat in v0 for four months.
+    "weather_actual_precip_mm",
+    "weather_actual_temp_max_c",
+    "weather_actual_wind_kmh",
 )
 
 
@@ -150,12 +157,25 @@ def static_leakage_check(
 def perturb_race(
     df: pd.DataFrame, season: int, rnd: int, *, seed: int
 ) -> pd.DataFrame:
-    """Reassign one race's outcomes among its own entrants, deterministically.
+    """Rewrite one race's outcome, leaving every other race untouched.
 
-    A permutation rather than random values, so the race stays internally
-    consistent — the same set of finishing positions, laps, and statuses, given
-    to different cars. A feature that reads the current race's result will move;
-    one that genuinely reads only earlier races cannot.
+    Two kinds of post-race column need two different treatments, and getting
+    this wrong makes the whole check pass for the wrong reason.
+
+    **Driver-level** columns — finishing position, laps, status — vary within a
+    race, so they are *permuted* among the race's own starters. A permutation
+    keeps the race internally consistent: the same set of results, handed to
+    different cars.
+
+    **Race-level** columns — the weather, above all — hold one value shared by
+    every car in the race. Permuting those among rows is a no-op, so a feature
+    reading race-day rainfall while declaring itself pre-race would sail
+    through. They are instead *substituted* with the value from a different
+    race. This was found the way such things usually are: the negative control
+    for weather passed when it should have failed.
+
+    Race-level columns are detected rather than listed, so a post-race column
+    added later cannot quietly miss out on being perturbed.
     """
     out = df.copy()
     mask = (out["season"] == season) & (out["round"] == rnd)
@@ -173,15 +193,72 @@ def perturb_race(
             f"race {season} round {rnd} has {n} permutable rows; nothing to permute"
         )
 
-    rng = np.random.default_rng(seed)
-    order = rng.permutation(n)
-    while np.array_equal(order, np.arange(n)):  # a no-op permutation proves nothing
-        order = rng.permutation(n)
+    present = [c for c in POST_RACE_COLUMNS if c in out.columns]
+    in_race = out.loc[mask]
+    driver_level = [c for c in present if in_race[c].nunique(dropna=False) > 1]
+    race_level = [
+        c for c in present if c not in driver_level and c not in IDENTITY_COLUMNS
+    ]
 
-    columns = [c for c in POST_RACE_COLUMNS if c in out.columns]
-    block = out.loc[mask, columns].to_numpy(dtype=object)[order]
-    out.loc[mask, columns] = block
+    rng = np.random.default_rng(seed)
+    if driver_level:
+        order = rng.permutation(n)
+        while np.array_equal(order, np.arange(n)):  # a no-op proves nothing
+            order = rng.permutation(n)
+        block = out.loc[mask, driver_level].to_numpy(dtype=object)[order]
+        out.loc[mask, driver_level] = block
+
+    for column in race_level:
+        substitute = _substituted_value(out, mask, column, rng)
+        if substitute is _UNCHANGED:
+            continue
+        out.loc[mask, column] = substitute
+
     return out.astype(df.dtypes.to_dict())
+
+
+#: Post-race columns that decide whether a row exists at all. They are never
+#: substituted wholesale, only permuted. In a race where every starter was
+#: classified, `classification_outcome` is constant and so looks race-level —
+#: substituting it with "withdrawn" from another race deletes the entire field
+#: under FR-002, and the check then reports that it cannot compare the race
+#: rather than that a feature leaked.
+IDENTITY_COLUMNS: Final[tuple[str, ...]] = (
+    "classification_outcome",
+    "position_text",
+)
+
+
+#: Sentinel: this column cannot meaningfully be perturbed, so leave it alone.
+_UNCHANGED: Final[object] = object()
+
+
+def _substituted_value(
+    df: pd.DataFrame, mask: pd.Series, column: str, rng: np.random.Generator
+) -> object:
+    """A value for `column` that differs from the one this race actually had.
+
+    Taken from another race where possible, so the substitute stays inside the
+    range the data really contains — a rainfall figure that never occurred
+    anywhere would test the feature against an input it will never see.
+
+    Returns `_UNCHANGED` for a column that is null here and null everywhere
+    else. Such a column holds nothing to leak, and inventing a value for it
+    would only risk breaking its dtype: `final_lap_position` is a nullable
+    integer that is empty for most races by design (FR-001b).
+    """
+    current = df.loc[mask, column].iloc[0]
+    elsewhere = df.loc[~mask, column].dropna()
+    candidates = elsewhere[elsewhere != current] if not elsewhere.empty else elsewhere
+    if not candidates.empty:
+        return candidates.iloc[int(rng.integers(len(candidates)))]
+    if pd.isna(current):
+        return _UNCHANGED
+    if pd.api.types.is_float_dtype(df[column]):
+        return current + 7.5
+    if pd.api.types.is_integer_dtype(df[column]):
+        return current + 7
+    return _UNCHANGED
 
 
 def sample_races(df: pd.DataFrame, *, count: int, seed: int) -> list[tuple[int, int]]:
@@ -349,6 +426,7 @@ def run_all(
 __all__ = [
     "LeakageError",
     "LeakageReport",
+    "IDENTITY_COLUMNS",
     "POST_RACE_COLUMNS",
     "behavioural_leakage_check",
     "determinism_check",

@@ -16,6 +16,7 @@ from f1pred.config import (
 )
 from f1pred.data.schema import RACE_ROW_SCHEMA
 from f1pred.features.build import (
+    ENRICHMENT_COLUMNS,
     BuildError,
     build,
     build_primary,
@@ -49,7 +50,9 @@ class TestDependencyResolution:
         order = resolve_order(
             REGISTRY.primary(),
             registry=REGISTRY,
-            available=frozenset(RACE_ROW_SCHEMA) | {"target_position"},
+            available=frozenset(RACE_ROW_SCHEMA)
+            | {"target_position"}
+            | set(ENRICHMENT_COLUMNS),
         )
         seen: set[str] = set()
         for f in order:
@@ -371,3 +374,22 @@ class TestShrinkage:
         )
         with pytest.raises(BuildError, match="declares evidence"):
             build(corpus, features=reg.primary(), set_name="x", registry=reg)
+
+
+class TestEnrichmentAbsence:
+    """A matrix built without weather or telemetry says so."""
+
+    def test_absent_sources_are_recorded(self, built):
+        # The synthetic corpus carries no weather and no practice data, so
+        # every column from those passes should be listed.
+        assert "weather_prior_wet_probability" in built.absent_sources
+        assert "long_run_pace_s" in built.absent_sources
+
+    def test_features_reading_an_absent_source_are_null_not_filled(self, built):
+        assert built.X["weather_prior_wet"].isna().all()
+
+    def test_an_enriched_frame_records_no_absence_for_that_source(self, corpus):
+        enriched = corpus.copy()
+        for column in ENRICHMENT_COLUMNS:
+            enriched[column] = 1.0
+        assert build_primary(enriched).absent_sources == ()
