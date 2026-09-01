@@ -680,7 +680,7 @@ def positions_from_lap_page(page: Any) -> dict[str, int]:
 
 #: Retirements tied on this many completed laps cannot be separated by FR-001b:
 #: a driver who completed no lap appears in no lap's timing data. See the
-#: FR-001c note in spec §3.0.
+#: T-101e finding in spec §7.3, tracked as OQ-8.
 ZERO_LAPS: int = 0
 
 

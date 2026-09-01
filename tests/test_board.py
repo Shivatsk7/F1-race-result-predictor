@@ -23,9 +23,12 @@ import pytest
 import f1pred.features.definitions  # noqa: F401
 from f1pred.features.registry import REGISTRY
 
-SPEC_DIR = Path(__file__).resolve().parents[1] / "specs" / "001-core-predictor"
+ROOT = Path(__file__).resolve().parents[1]
+SPEC_DIR = ROOT / "specs" / "001-core-predictor"
 SPEC = (SPEC_DIR / "spec.md").read_text()
 TASKS = (SPEC_DIR / "tasks.md").read_text()
+PLAN = (SPEC_DIR / "plan.md").read_text()
+CONSTITUTION = (ROOT / ".specify" / "memory" / "constitution.md").read_text()
 
 TASK_ROW = re.compile(
     r"^\|\s*([☐☑◐⊘])\s*\*\*(T-[0-9a-z]+)\*\*\s*\|([^|]*)\|([^|]*)\|", re.M
@@ -132,6 +135,85 @@ class TestBoardMatchesCode:
         """
         assert re.search(r"\bseasons_since_regime_start\b", self.SOURCE)
         assert not re.search(r"\bseasons_since_regime\b", self.SOURCE)
+
+
+def defined_ids() -> set[str]:
+    """Every identifier the spec, the board, or the plan actually *defines*.
+
+    Each source declares its ids in one shape, so each is matched in that
+    shape rather than by a general search: a requirement is a spec table row,
+    a task is a board row, an acceptance criterion is a checklist entry, an
+    open question is a table row, and a decision is a plan heading. Matching a
+    bare mention instead would let a citation validate itself — the ghost id
+    appears in the source file, so it would be "defined" by being cited.
+    """
+    ids: set[str] = set(defined_requirements())
+    ids |= {m.group(1) for m in re.finditer(r"^\|\s*\*\*(US-\d+)", SPEC, re.M)}
+    ids |= set(re.findall(r"\*\*(AC-\d+)\*\*", SPEC))
+    ids |= set(re.findall(r"\*\*(US-\d+)[ —-]", SPEC))
+    ids |= {m.group(1) for m in re.finditer(r"^\|\s*\*\*(OQ-\d+)\*\*", SPEC, re.M)}
+    ids |= {tid for _s, tid, _n, _sat in task_rows()}
+    ids |= {m.group(1) for m in re.finditer(r"^###\s+(D-\d+)\b", PLAN, re.M)}
+    ids |= {m.group(1) for m in re.finditer(r"^###\s+(D-\d+)\b", CONSTITUTION, re.M)}
+    return ids
+
+
+class TestSourceCitations:
+    """A requirement id in a docstring must name a requirement that exists.
+
+    The board is checked against the spec above, and the code against the
+    board. Nothing checked the third edge: the ids the *source* cites. That
+    gap let `collect.py` point readers at "the FR-001c note in spec §3.0" for
+    eleven days — a requirement that was never written. The zero-lap finding
+    it meant is OQ-8, recorded in §7.3.
+
+    A citation is the cheapest kind of documentation and the easiest to leave
+    behind when a spec is amended, so it is worth a second of test time.
+    """
+
+    #: Package and test source, with the file each line came from.
+    SOURCES = [
+        (p.relative_to(ROOT), p.read_text())
+        for p in sorted((ROOT / "src").rglob("*.py")) + sorted((ROOT / "tests").rglob("*.py"))
+    ]
+
+    CITE = re.compile(r"\b((?:FR|NFR|AC|OQ|US|T|D)-\d+[a-z]?)\b")
+
+    #: This file names undefined ids on purpose, to prove the check rejects
+    #: them. The exemption is scoped to this file so the same id written in
+    #: the package — the actual defect — still fails. Each entry needs a
+    #: reason; an entry without one is a bug being hidden.
+    SELF_TEST_PATH = Path("tests") / "test_board.py"
+    ALLOWED_GHOSTS: dict[str, str] = {
+        "FR-001c": "the ghost citation this class was written for; asserted absent below",
+    }
+
+    def test_every_id_cited_in_source_is_defined(self):
+        defined = defined_ids()
+        ghosts: dict[str, str] = {}
+        for path, text in self.SOURCES:
+            for lineno, line in enumerate(text.splitlines(), 1):
+                for cid in self.CITE.findall(line):
+                    if cid in defined:
+                        continue
+                    if path == self.SELF_TEST_PATH and cid in self.ALLOWED_GHOSTS:
+                        continue
+                    ghosts.setdefault(cid, f"{path}:{lineno}")
+        assert not ghosts, (
+            f"source cites ids that no spec, board, or plan defines: {ghosts}. "
+            f"Either the id is a typo, or it was removed by an amendment and "
+            f"the citation was left behind."
+        )
+
+    def test_the_check_would_catch_a_ghost_citation(self):
+        """Guards the guard: an id nobody defines must be rejected.
+
+        Without this, a `defined_ids()` that accidentally matched bare
+        mentions would pass every citation — including the one this class
+        exists to catch — while still looking green.
+        """
+        assert "FR-001b" in defined_ids()
+        assert "FR-001c" not in defined_ids()
 
 
 class TestStatusDiscipline:
