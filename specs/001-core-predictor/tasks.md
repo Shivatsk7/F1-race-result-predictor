@@ -122,11 +122,14 @@ on the real corpus, and three deliberately leaky features — one declared, one
 hidden, one race-level — each make them fail. The firewall is proven to work
 *and* to be capable of failing, which is the whole of AC-2.
 
-**AC-19 is not met**, and it is not AC-2: telemetry coverage cannot be reported
-until T-214 finishes, and the benefit arm is T-216 in P4. The phase gate cites
-AC-2 alone, so the gate is satisfied while T-214 remains open — recorded
-explicitly, because a gate met with a task outstanding is exactly the kind of
-thing that gets misread later as the phase being finished.
+**AC-19 is not met here, and it is not AC-2.** Its coverage half is now done
+(T-214, 2026-09-01); its benefit half is T-216, which needs a trained model.
+**AC-19 moved to P4's gate on 2026-09-02** (owner decision) — the same move as
+AC-3, for the same reason: P2 cannot produce the model the criterion names.
+P2's gate cites AC-2 alone and always did, so the gate was satisfied while
+T-214 was still open — recorded explicitly, because a gate met with a task
+outstanding is exactly the kind of thing that gets misread later as the phase
+being finished.
 
 ---
 
@@ -146,8 +149,12 @@ thing that gets misread later as the phase being finished.
 | ☑ **T-309** | Segmentation by season, circuit type, overtaking tier | FR-505, FR-109 | Report breaks out all three — **DONE 2026-08-31.** By season, circuit type and overtaking tier. The tier breakdown is a strong independent check: grid order predicts best where overtaking is **very hard** (0.851) and worst where it is moderate (0.616), which is the real physical relationship falling out of separately-declared circuit attributes. |
 | ☑ **T-310** | JSON results emission | FR-506, FR-510 | Machine-readable file written to `results/`, recording `W` and the resolved season list — **DONE 2026-08-31.** `write_results` emits the record with the resolved season list and the FR-501a shortfall field. `results/baselines_2023_2025.json`. |
 | ☑ **T-311** | Explicit "does not beat baseline" verdict | FR-507, FR-305 | Verdict line rendered prominently, both directions; baselines appear in the main report body alongside the model, never in a footnote or appendix — **DONE 2026-08-31.** `verdict` is computed from the delta intervals, never written by hand, and states both directions. On the current run it reads DOES NOT BEAT THE GRID BASELINE — correctly, since no model exists yet and the only comparator is the standings baseline, which loses. |
-**Exit gate:** AC-3. **Baselines are evaluated here, before the model exists** —
-so the bar is set before there is any temptation to move it.
+**Exit gate:** all three baselines are scored and committed, with bootstrap CIs
+on every metric and every delta. **Baselines are evaluated here, before the
+model exists** — so the bar is set before there is any temptation to move it.
+**AC-3 itself sits on P4's gate** (owner decision, 2026-09-02): it names the
+model, and P4 is the phase that produces one. A gate that cannot be met by the
+phase it guards is not a gate — see the note under the headline below.
 
 **P3 COMPLETE** (2026-08-31). All twelve tasks done and validated against the
 real corpus, not fixtures. The harness scores every predictor through one
@@ -162,13 +169,15 @@ Headline, on the 2023-2025 holdout (70 races, 13 training seasons):
 | standings_order | 0.6128 | 0.5683 to 0.6576 |
 | random_order (1000 draws) | 0.0012 | -0.0494 to 0.0516 |
 
-**AC-3 is NOT ticked, and the gate as written cannot be met here.** It requires
+**AC-3 is not ticked here, and P3's gate no longer claims it.** It requires
 "model and all three baselines"; the model is T-401 in P4. Everything AC-3 asks
-for *other than the model* is in place and exercised. This is the same defect
+for *other than the model* is in place and exercised. This was the same defect
 class as T-216 sitting in P2 — a gate naming an artefact a later phase
-produces — and it is recorded rather than quietly ticked or quietly ignored.
-**Owner decision needed:** either AC-3 moves to P4's gate, or it is split so
-P3 owns the baseline half.
+produces — and it was recorded rather than quietly ticked or quietly ignored.
+**Resolved 2026-09-02 by owner decision: AC-3 moves whole to P4's gate.** It was
+not split, because the baseline half is already done and recorded in
+`results/baselines_2023_2025.json`; a second criterion covering it would add a
+place to look without adding any assurance.
 
 ---
 
@@ -187,8 +196,14 @@ P3 owns the baseline half.
 | ☐ **T-408** | Recency weighting with configurable decay | FR-406, D-10 | `sample_weight` applied; decay persisted as a hyperparameter; zero decay reproduces uniform weighting bit-for-bit |
 | ☐ **T-409** | **Regulation-transfer experiment** | FR-511, FR-511a, FR-512, AC-12 | Run over the **full archive, not the FR-508 window**, for all three resets (2014, 2017, 2022) against their preceding-season comparators; penalty at two decay settings; each result carries its actual training-season count; 2014 labelled `DIAGNOSTIC`, headline stated as `n=2`. |
 
-**Exit gate:** AC-4, AC-12. The headline answer exists and is committed,
-whichever way it falls — as does the measured cost of a regulation reset.
+**Exit gate:** AC-3, AC-4, AC-12, AC-19. The headline answer exists and is
+committed, whichever way it falls — as does the measured cost of a regulation
+reset. **AC-3 and AC-19 arrive here on 2026-09-02** (owner decision): both name
+the trained model, so P3 and P2 respectively could not meet them. AC-3 needs
+`evaluate` to report the model alongside all three baselines (T-406); AC-19
+needs the telemetry arm measured against the primary set (T-216). The baseline
+and coverage halves of the two are already done and committed, so what lands
+here is only the half that waits on T-401.
 
 ---
 
@@ -301,3 +316,4 @@ the spec is amended before the code diverges.*
 | 2026-08-31 | T-218, T-221 | FR-205, FR-206, NFR-03 | **A hole in the behavioural leakage check, found by the control that was supposed to be routine.** The check permuted post-race values among a race's drivers. That is right for anything that varies per car and useless for anything the race shares — so observed weather, which has one value per race, could be read by a feature declaring itself pre-race and neither layer would object. | The static layer cannot see it (the feature declares only a raw column) and the behavioural layer's perturbation was a no-op on it. Every race-level post-race quantity had the same exposure, not just weather. Worth recording because the control was written expecting a green tick: the check had been passing for eleven days against a class of leak it could not detect. Also added `absent_sources` to the built matrix — a frame built without weather or telemetry now says so, since a matrix whose weather features are entirely null is a different experiment from one where they are present. |
 | 2026-08-31 | T-219 | FR-212a, Constitution IX.2, IX.4, IX.5 | **FR-212a ratified by the owner**, read in full. Spec §3.2 leaves Draft and is ratified again; the ratifying party and date are recorded in the spec header. | The section was returned to Draft when FR-212a was added, because IX.3 forbids the drafting agent from ratifying its own text and IX.2 is explicit that approving a summary is not ratification. The owner had approved the *change* in conversation on the same day; this closes the gap between that and approving the wording, which is the distinction Article IX exists to enforce. |
 | 2026-08-31 | T-301..T-311 | AC-3, FR-301..305, FR-500..507 | **P3 complete. AC-3 left unticked because it cannot be met in P3.** The criterion requires "model and all three baselines"; the model is T-401 in P4. Everything else AC-3 names is in place and exercised. Owner decision needed: move AC-3 to P4's gate, or split it so P3 owns the baseline half. | This is the second instance of the same defect class the 2026-08-31 audit found with T-216 — a phase gate naming an artefact a later phase produces, which makes the gate unreachable from inside its own phase. Recorded rather than ticked, because ticking it would assert the model had been evaluated when no model exists, and ignoring it would leave the phase looking incomplete for the wrong reason. The substantive result is that the **grid baseline scores 0.6555** on the 2023-2025 holdout and the standings baseline is measurably *worse* at 0.6128 (delta -0.0427, CI excluding zero) — so the bar is the grid, and it is a high one. The random control's +0.0012 with an interval straddling zero is the check that the harness itself is sound. |
+| 2026-09-02 | T-406, T-216 | AC-3, AC-19, P2/P3/P4 exit gates | **Owner decision: AC-3 and AC-19 move whole to P4's gate.** Neither was split. P3's gate now names what P3 can actually deliver — three baselines scored with bootstrap CIs on every metric and delta — and P4's gate reads AC-3, AC-4, AC-12, AC-19. No requirement text changed; the criteria are unaltered, only the phase whose gate cites them. | Both criteria name the trained model, which does not exist until T-401, so each made the gate of an earlier phase unreachable by construction — the defect class already fixed once when T-216 moved out of P2. Splitting was rejected: the halves that do not need a model are already done and committed (`results/baselines_2023_2025.json` for AC-3, `results/telemetry_coverage_2018_2025.json` for AC-19), so a second criterion covering them would add a place to look without adding assurance. Moving keeps one criterion, checked once, in the phase that can answer it. |
