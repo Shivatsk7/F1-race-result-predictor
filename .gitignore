@@ -32,3 +32,6 @@ data/processed/
 # graphify knowledge-graph output is generated from the tree it describes.
 # It is regenerable, churns on every rebuild, and is not project source.
 graphify-out/
+
+# Claude Code per-machine settings (permission grants are personal).
+.claude/settings.local.json
