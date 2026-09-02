@@ -15,10 +15,12 @@ of them in under a second, so the check belongs here rather than in a habit.
 
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
 import pytest
+
 
 import f1pred.features.definitions  # noqa: F401
 from f1pred.features.registry import REGISTRY
@@ -265,3 +267,78 @@ class TestStatusDiscipline:
                 continue
             undated.append(m.group(2))
         assert not undated, f"completed tasks with no completion date: {undated}"
+
+
+class TestDocumentedNumbers:
+    """Every performance figure in the docs must resolve to a committed file.
+
+    FR-902 and AC-7 say so, and until this class existed it was a convention
+    rather than a check. Conventions about numbers are exactly what this
+    project failed at once already: the v0 README quoted figures the code could
+    not reproduce, which is the sentence the current README opens with.
+
+    The rule is deliberately blunt, in the manner of `TestBoardMatchesCode`
+    above: **any number written to four decimal places** in the README or on
+    the board must appear, rounded to four places, somewhere in the values of
+    some file under `results/`. Four places is the tell — this project writes
+    scores and intervals that way and writes nothing else that way, so the
+    pattern selects performance claims and skips row counts, season numbers and
+    hyperparameters without needing a list of which is which.
+
+    It found two the day it was written: `0.9625` and `0.6302`, the in-sample
+    and holdout scores that justify early stopping on the T-401 row. They came
+    from a diagnostic run by hand in a session and committed nowhere, so the
+    board's argument for its own design decision rested on a number no reader
+    could check. `evaluate/fit_diagnostic.py` now produces them.
+    """
+
+    #: A four-decimal number in the docs that legitimately has no results file.
+    #: Each entry needs a reason; an entry without one is a claim being hidden.
+    ALLOWED_UNSOURCED: dict[str, str] = {}
+
+    FOUR_DP = re.compile(r"[+-]?\d+\.\d{4}\b")
+
+    @staticmethod
+    def committed_values() -> set[float]:
+        values: set[float] = set()
+
+        def walk(node: object) -> None:
+            if isinstance(node, dict):
+                for v in node.values():
+                    walk(v)
+            elif isinstance(node, list):
+                for v in node:
+                    walk(v)
+            elif isinstance(node, (int, float)) and not isinstance(node, bool):
+                values.add(round(float(node), 4))
+
+        for path in sorted((ROOT / "results").glob("*.json")):
+            walk(json.loads(path.read_text()))
+        return values
+
+    @pytest.mark.parametrize("document", ["README.md", "specs/001-core-predictor/tasks.md"])
+    def test_every_four_decimal_figure_resolves_to_results(self, document):
+        committed = self.committed_values()
+        text = (ROOT / document).read_text()
+        unsourced = {
+            token
+            for token in (m.group(0) for m in self.FOUR_DP.finditer(text))
+            if token not in self.ALLOWED_UNSOURCED
+            and round(float(token), 4) not in committed
+        }
+        assert not unsourced, (
+            f"{document} quotes {sorted(unsourced)}, which resolve to no file "
+            f"in results/. Under FR-902 a figure that cannot cite a committed "
+            f"file does not get written down — either commit the run that "
+            f"produced it, or take the claim out."
+        )
+
+    def test_the_check_would_catch_an_unsourced_figure(self):
+        """Guards the guard: a number nothing produced must be rejected.
+
+        Without this, a `committed_values` that accidentally returned every
+        float — or an empty document — would pass while proving nothing.
+        """
+        committed = self.committed_values()
+        assert committed, "no results files were read; the check is vacuous"
+        assert round(0.123456789, 4) not in committed

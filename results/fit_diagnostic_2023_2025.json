@@ -1,0 +1,91 @@
+{
+  "generated": "2026-09-02",
+  "experiment": "fit_diagnostic",
+  "question": "does the model reproduce its training races rather than learn from them?",
+  "primary_metric": "spearman",
+  "wide_gap_threshold": 0.15,
+  "split": {
+    "window": {
+      "width": 16,
+      "as_of": "2026-09-03",
+      "seasons": [
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "first_season": 2010,
+      "last_season": 2025
+    },
+    "training_seasons": [
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022
+    ],
+    "holdout_seasons": [
+      2023,
+      2024,
+      2025
+    ],
+    "boundary_season": 2023,
+    "n_training_seasons": 13,
+    "n_holdout_seasons": 3,
+    "meets_constitutional_minimum": true,
+    "minimum_required": {
+      "total": 8,
+      "training": 5,
+      "holdout": 3
+    }
+  },
+  "corpus_rows": 6868,
+  "arms": {
+    "early_stopping": {
+      "arm": "early_stopping",
+      "early_stopping_rounds": 40,
+      "n_estimators_ceiling": 400,
+      "trees_kept": 5,
+      "in_sample": 0.7118870314811895,
+      "holdout": 0.6599311303468754,
+      "gap": 0.05195590113431403,
+      "memorising": false
+    },
+    "no_early_stopping": {
+      "arm": "no_early_stopping",
+      "early_stopping_rounds": null,
+      "n_estimators_ceiling": 400,
+      "trees_kept": 400,
+      "in_sample": 0.9625414046783006,
+      "holdout": 0.6302005012531325,
+      "gap": 0.3323409034251681,
+      "memorising": true
+    }
+  },
+  "grid_order_reference": {
+    "in_sample": 0.5887705204257134,
+    "holdout": 0.6554824034877108,
+    "gap": -0.06671188306199738
+  },
+  "finding": "Without early stopping the ranker scores 0.9625 on the races it trained on against 0.6302 on the holdout, a gap of 0.3323 over 400 trees \u2014 it is reproducing its training races. With early stopping the gap is 0.0520 over 5 trees and the holdout score rises to 0.6599. The grid baseline, which cannot memorise anything, shows a gap of -0.0667 on the same split, so the training seasons are not simply the easier races."
+}

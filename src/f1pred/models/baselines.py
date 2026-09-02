@@ -12,7 +12,7 @@ apart from the model (FR-304).
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Final
 
 import numpy as np

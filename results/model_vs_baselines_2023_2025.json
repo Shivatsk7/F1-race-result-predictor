@@ -4,7 +4,7 @@
   "split": {
     "window": {
       "width": 16,
-      "as_of": "2026-09-02",
+      "as_of": "2026-09-03",
       "seasons": [
         2010,
         2011,
@@ -755,7 +755,7 @@
       "n_jobs": 1,
       "trees_kept": 5
     },
-    "code_commit": "eb3efa127d182af8c37c868b57aca50b6e9c5ac2-dirty",
+    "code_commit": "7a748f5f071eb2f1f2d3dfcde8aa7debc1a7fce2",
     "evaluation_metrics": {
       "mae": {
         "point": 3.3737176274018377,

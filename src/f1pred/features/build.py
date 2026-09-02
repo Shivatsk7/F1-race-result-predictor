@@ -23,7 +23,6 @@ from f1pred.config import (
 from f1pred.data.target import build_target
 from f1pred.features import definitions as _definitions  # noqa: F401  (populates REGISTRY)
 from f1pred.features.priors import (
-    RACE_KEYS,
     prior_race_count,
     shrink_towards,
     sort_canonically,

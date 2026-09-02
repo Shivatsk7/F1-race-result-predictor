@@ -8,7 +8,7 @@
     "AC-19"
   ],
   "generated": "2026-09-02",
-  "code_commit": "e2f8def52d899c3e272cb562942c2a5081d974bc-dirty",
+  "code_commit": "7a748f5f071eb2f1f2d3dfcde8aa7debc1a7fce2-dirty",
   "question": "What do the telemetry features add, measured on the seasons the telemetry source covers?",
   "primary_metric": "spearman",
   "seasons": {
@@ -430,7 +430,7 @@
           "n_jobs": 1,
           "trees_kept": 9
         },
-        "code_commit": "e2f8def52d899c3e272cb562942c2a5081d974bc-dirty",
+        "code_commit": "7a748f5f071eb2f1f2d3dfcde8aa7debc1a7fce2-dirty",
         "evaluation_metrics": {
           "mae": {
             "point": 3.5509022556390972,
@@ -1304,7 +1304,7 @@
           "n_jobs": 1,
           "trees_kept": 41
         },
-        "code_commit": "e2f8def52d899c3e272cb562942c2a5081d974bc-dirty",
+        "code_commit": "7a748f5f071eb2f1f2d3dfcde8aa7debc1a7fce2-dirty",
         "evaluation_metrics": {
           "mae": {
             "point": 3.416917293233082,

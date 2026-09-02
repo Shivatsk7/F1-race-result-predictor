@@ -18,7 +18,7 @@ from __future__ import annotations
 import logging
 from collections.abc import Iterable, Sequence
 from pathlib import Path
-from typing import Any, Final
+from typing import Any
 
 from f1pred.config import RESULTS_DIR
 from f1pred.dataset import Experiment, prepare
@@ -33,6 +33,7 @@ from f1pred.models.baselines import (
 from f1pred.models.ranker import Hyperparameters, TrainedRanker, train
 
 logger = logging.getLogger(__name__)
+
 
 def baselines() -> tuple[Predictor, ...]:
     """FR-301 and FR-302, constructed here so no run can quietly drop one.

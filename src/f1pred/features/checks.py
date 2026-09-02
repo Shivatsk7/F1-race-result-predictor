@@ -27,7 +27,6 @@ import pandas as pd
 
 from f1pred.data.schema import NON_STARTER_OUTCOMES, ClassificationOutcome
 from f1pred.features.build import TARGET_COLUMN, build
-from f1pred.features.priors import RACE_KEYS, sort_canonically
 from f1pred.features.registry import (
     REGISTRY,
     Availability,
