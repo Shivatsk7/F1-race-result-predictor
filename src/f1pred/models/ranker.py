@@ -113,6 +113,19 @@ class Hyperparameters:
     #: Seasons held back from training to size the intervals.
     calibration_seasons: int = DEFAULT_CALIBRATION_SEASONS
 
+    #: Stop adding trees once the held-back seasons have not improved for this
+    #: many rounds, and fit the shipped model to the count that survived.
+    #: Without it the first honest run of this model scored 0.9625 in-sample
+    #: against 0.6302 on the holdout: 400 trees at depth 6 memorise 274 races
+    #: comfortably. `None` disables it and keeps every tree, which is what the
+    #: tests of the mechanism itself use.
+    #:
+    #: This is model selection, and it is deliberately confined to seasons
+    #: *inside* training. Choosing the tree count against the holdout would
+    #: spend the holdout — the number it then produced would be the best of
+    #: several looks at the answer, reported as though it were the first.
+    early_stopping_rounds: int | None = 40
+
     #: Single-threaded on purpose. XGBoost's histogram builder sums gradients
     #: in thread-completion order, so a multi-threaded fit is reproducible only
     #: for a fixed thread count — and FR-405 promises reproducibility from the
@@ -130,6 +143,11 @@ class Hyperparameters:
             raise ModelError(
                 f"interval_coverage must lie strictly between 0 and 1, got "
                 f"{self.interval_coverage}"
+            )
+        if self.early_stopping_rounds is not None and self.early_stopping_rounds < 1:
+            raise ModelError(
+                f"early_stopping_rounds must be positive or None, got "
+                f"{self.early_stopping_rounds}"
             )
         if self.calibration_seasons < 1:
             raise ModelError(
@@ -288,6 +306,9 @@ class TrainedRanker:
     training_rows: int
     training_date_range: tuple[str, str]
     code_commit: str
+    #: Trees actually kept. Differs from `params.n_estimators` whenever early
+    #: stopping fired, and it is the count that describes the shipped model.
+    trees: int = 0
     name: str = "xgboost_ranker"
     evaluation_metrics: dict[str, Any] = field(default_factory=dict)
 
@@ -355,7 +376,11 @@ class TrainedRanker:
                 {"name": n, "availability": declared.get(n, "unregistered")}
                 for n in self.feature_names
             ],
-            "hyperparameters": self.params.as_dict(),
+            # `trees_kept` sits with the hyperparameters because that is what
+            # it is: early stopping makes `n_estimators` a ceiling rather than
+            # a setting, and the count that survived is the one that describes
+            # this model.
+            "hyperparameters": {**self.params.as_dict(), "trees_kept": self.trees},
             "code_commit": self.code_commit,
             "evaluation_metrics": self.evaluation_metrics,
         }
@@ -442,9 +467,23 @@ def _fit(
     qid: np.ndarray,
     weights: np.ndarray,
     params: Hyperparameters,
+    *,
+    n_estimators: int | None = None,
+    watch: tuple[pd.DataFrame, np.ndarray, np.ndarray] | None = None,
 ) -> xgb.XGBRanker:
-    booster = xgb.XGBRanker(**params.booster_params())
-    booster.fit(X, y, qid=qid, sample_weight=weights, verbose=False)
+    """One fit. `watch` turns on early stopping against a held-back slice."""
+    settings = params.booster_params()
+    if n_estimators is not None:
+        settings["n_estimators"] = n_estimators
+    if watch is not None and params.early_stopping_rounds is not None:
+        settings["early_stopping_rounds"] = params.early_stopping_rounds
+        settings["eval_metric"] = "ndcg"
+    booster = xgb.XGBRanker(**settings)
+    kwargs: dict[str, Any] = {}
+    if watch is not None and params.early_stopping_rounds is not None:
+        watch_X, watch_y, watch_qid = watch
+        kwargs = {"eval_set": [(watch_X, watch_y)], "eval_qid": [watch_qid]}
+    booster.fit(X, y, qid=qid, sample_weight=weights, verbose=False, **kwargs)
     return booster
 
 
@@ -453,8 +492,13 @@ def _calibrate(
     features: Sequence[str],
     params: Hyperparameters,
     calibration_seasons: tuple[int, ...],
-) -> Interval:
-    """Size FR-402's band from a shadow fit that never saw the band's rows.
+) -> tuple[Interval, int]:
+    """Size FR-402's band, and pick the tree count, from one shadow fit.
+
+    Both jobs need the same thing — a model scored on seasons it did not train
+    on — so they share one fit rather than paying for two. The returned count
+    is the number of trees that were still helping when the held-back seasons
+    stopped improving; the shipped model is then fitted to exactly that many.
 
     The shadow model is trained on the training seasons *before* the
     calibration slice and scored on the slice, so the residuals measure a model
@@ -479,6 +523,19 @@ def _calibrate(
         _query_ids(_race_ids(proper)),
         recency_weights(race_seasons(proper), decay=params.recency_decay),
         params,
+        watch=(
+            holdback[list(features)],
+            relevance(holdback[TARGET_COLUMN], _race_ids(holdback)),
+            _query_ids(_race_ids(holdback)),
+        ),
+    )
+    # `best_iteration` is an index; the count of trees kept is one more. Absent
+    # when early stopping is off, in which case every tree was kept.
+    kept = (
+        int(shadow.best_iteration) + 1
+        if params.early_stopping_rounds is not None
+        and getattr(shadow, "best_iteration", None) is not None
+        else params.n_estimators
     )
 
     residuals: list[np.ndarray] = []
@@ -496,12 +553,15 @@ def _calibrate(
         raise ModelError("calibration slice produced no usable residuals")
 
     tail = (1.0 - params.interval_coverage) / 2.0
-    return Interval(
-        lower_offset=float(np.quantile(pooled, tail)),
-        upper_offset=float(np.quantile(pooled, 1.0 - tail)),
-        coverage=params.interval_coverage,
-        calibration_rows=int(pooled.size),
-        calibration_seasons=calibration_seasons,
+    return (
+        Interval(
+            lower_offset=float(np.quantile(pooled, tail)),
+            upper_offset=float(np.quantile(pooled, 1.0 - tail)),
+            coverage=params.interval_coverage,
+            calibration_rows=int(pooled.size),
+            calibration_seasons=calibration_seasons,
+        ),
+        kept,
     )
 
 
@@ -550,7 +610,7 @@ def train(
     # sizing intervals on a random slice would let the band see seasons the
     # shadow model was trained on.
     calibration = seasons[-params.calibration_seasons:]
-    interval = _calibrate(training, features, params, calibration)
+    interval, trees = _calibrate(training, features, params, calibration)
 
     race_ids = _race_ids(training)
     booster = _fit(
@@ -559,16 +619,18 @@ def train(
         _query_ids(race_ids),
         recency_weights(race_seasons(training), decay=params.recency_decay),
         params,
+        n_estimators=trees,
     )
 
     dates = pd.to_datetime(training["race_date"])
     logger.info(
-        "trained %s on %d rows across %d seasons (%s..%s), decay=%.3g",
+        "trained %s on %d rows across %d seasons (%s..%s), %d trees, decay=%.3g",
         name,
         len(training),
         len(seasons),
         seasons[0],
         seasons[-1],
+        trees,
         params.recency_decay,
     )
     return TrainedRanker(
@@ -583,6 +645,7 @@ def train(
             dates.max().date().isoformat(),
         ),
         code_commit=code_commit(repo),
+        trees=trees,
         name=name,
     )
 

@@ -1,13 +1,10 @@
 # Race Result Predictor
 
-> **Status: mid-rebuild (Phase P0 complete). Phase P1 is BLOCKED.**
-> Spec 001 is drafted but **not ratified**, and Constitution IX.1 prohibits
-> implementing against a Draft spec. The gate lifts when the owner has read
-> [`spec.md`](specs/001-core-predictor/spec.md) in full and ticked its
-> ratification checklist.
->
-> This project is being rebuilt spec-first. The README will carry the headline
-> result once Phase P4 produces it.
+> **Status: Phase P4 (model) in progress. Phases P0-P3 complete.**
+> Spec 001 is ratified. The corpus is collected (16 seasons, 2010-2025, 6,868
+> classified starts across 329 races), the feature registry and its leakage
+> firewall are in place, and the three baselines were scored *before* the model
+> existed so the bar could not move afterwards.
 >
 > **Governing documents** (note: `.specify/` is a hidden directory — `Cmd+Shift+.`
 > in Finder, or use the links):
@@ -16,10 +13,9 @@
 > [plan](specs/001-core-predictor/plan.md) ·
 > [tasks](specs/001-core-predictor/tasks.md)
 >
-> Deliberately, there are **no performance claims on this page yet.** The
-> previous version of this README claimed numbers the code could not reproduce.
-> Under [Constitution I.3](.specify/memory/constitution.md), a claim appears
-> here only once it resolves to a committed file in `results/`.
+> Every figure on this page resolves to a committed file in `results/`, under
+> [Constitution I.3](.specify/memory/constitution.md). The previous version of
+> this README claimed numbers the code could not reproduce.
 
 ---
 
@@ -33,6 +29,37 @@ measurably better than the starting grid alone — and can it state its
 uncertainty in probabilities that are actually calibrated?**
 
 A negative answer is a valid result and will be published as one.
+
+## The headline result
+
+**The model does not beat the starting grid.** *(AC-4, FR-507; source:
+[`results/model_vs_baselines_2023_2025.json`](results/model_vs_baselines_2023_2025.json))*
+
+Held out: the 70 races of 2023-2025, never seen in training. Trained on the 13
+seasons 2010-2022. The metric is Spearman rank correlation between predicted
+and actual finishing order — 1.0 is a perfect ordering, 0.0 is a coin toss.
+
+| predictor | Spearman | 95% CI |
+|---|---|---|
+| **model** (XGBoost ranker) | **0.6599** | 0.6169 to 0.7016 |
+| grid order | 0.6555 | 0.6050 to 0.7047 |
+| championship-standings order | 0.6128 | 0.5683 to 0.6576 |
+| random order (1000 seeded draws) | 0.0012 | -0.0494 to 0.0516 |
+
+**Model minus grid: +0.0044, 95% CI -0.0244 to +0.0318.** The interval contains
+zero, so the difference is not distinguishable from noise. Forty features, a
+16-season corpus and a trained ranker land in the same place as reading the
+grid sheet.
+
+Three things this does *not* say. It is not a claim that the model is worthless
+— it is far above the random floor, so it has learned something real; it has
+learned roughly what the grid already knew. It is not a claim that no model
+could do better. And its prediction intervals are **UNCALIBRATED**: their width
+has been fitted but never checked against how often the truth actually lands
+inside them, which is Phase P5's work.
+
+The random control is the check on the harness itself: a metric that flattered
+random orderings would be measuring something other than skill.
 
 ## Why this was rebuilt
 
@@ -74,7 +101,7 @@ made them detectable. The rebuild fixes the process, not just the code.
 ```
 .specify/memory/constitution.md   non-negotiable rules; specs must comply
 specs/001-core-predictor/
-  spec.md    WHAT and WHY  — 46 functional requirements
+  spec.md    WHAT and WHY  — 91 functional + 7 non-functional requirements
   plan.md    HOW           — architecture and design decisions
   tasks.md   ordered work  — every task traced to a requirement
 src/f1pred/                       implementation
