@@ -1,6 +1,6 @@
 # Race Result Predictor
 
-> **Status: Phase P4 (model) in progress. Phases P0-P3 complete.**
+> **Status: Phase P4 (model) complete. Phase P5 (simulation & calibration) next.**
 > Spec 001 is ratified. The corpus is collected (16 seasons, 2010-2025, 6,868
 > classified starts across 329 races), the feature registry and its leakage
 > firewall are in place, and the three baselines were scored *before* the model

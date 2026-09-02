@@ -1,0 +1,1042 @@
+{
+  "generated": "2026-09-02",
+  "primary_metric": "spearman",
+  "split": {
+    "window": {
+      "width": 16,
+      "as_of": "2026-09-02",
+      "seasons": [
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "first_season": 2010,
+      "last_season": 2025
+    },
+    "training_seasons": [
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022
+    ],
+    "holdout_seasons": [
+      2023,
+      2024,
+      2025
+    ],
+    "boundary_season": 2023,
+    "n_training_seasons": 13,
+    "n_holdout_seasons": 3,
+    "meets_constitutional_minimum": true,
+    "minimum_required": {
+      "total": 8,
+      "training": 5,
+      "holdout": 3
+    }
+  },
+  "holdout_races": 70,
+  "holdout_rows": 1387,
+  "predictors": {
+    "grid_order": {
+      "name": "grid_order",
+      "races_scored": 70,
+      "draws": 1,
+      "metrics": {
+        "mae": {
+          "point": 3.305981620718463,
+          "ci_low": 3.0403375104427734,
+          "ci_high": 3.5673786549707605,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "exact_accuracy": {
+          "point": 0.15545112781954887,
+          "ci_low": 0.13221146616541354,
+          "ci_high": 0.18165601503759396,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_1": {
+          "point": 0.36460317460317454,
+          "ci_low": 0.33384941520467837,
+          "ci_high": 0.3960186925647452,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_2": {
+          "point": 0.5368086883876358,
+          "ci_low": 0.5033802213868004,
+          "ci_high": 0.5722324561403509,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_3": {
+          "point": 0.6600083542188804,
+          "ci_low": 0.6256420217209692,
+          "ci_high": 0.6954996867167919,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "spearman": {
+          "point": 0.6554824034877108,
+          "ci_low": 0.6050203607758894,
+          "ci_high": 0.7047459141551357,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "top_3_set_accuracy": {
+          "point": 0.6809523809523809,
+          "ci_low": 0.6285714285714284,
+          "ci_high": 0.7333333333333333,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "top_5_set_accuracy": {
+          "point": 0.7542857142857143,
+          "ci_low": 0.7114285714285714,
+          "ci_high": 0.7942857142857142,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "podium_set_accuracy": {
+          "point": 0.24285714285714285,
+          "ci_low": 0.15714285714285714,
+          "ci_high": 0.34285714285714286,
+          "confidence": 0.95,
+          "excludes_zero": true
+        }
+      }
+    },
+    "standings_order": {
+      "name": "standings_order",
+      "races_scored": 70,
+      "draws": 1,
+      "metrics": {
+        "mae": {
+          "point": 3.7135171261487048,
+          "ci_low": 3.486970133667502,
+          "ci_high": 3.9401871345029247,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "exact_accuracy": {
+          "point": 0.11823725981620718,
+          "ci_low": 0.10128540100250627,
+          "ci_high": 0.13444214703425236,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_1": {
+          "point": 0.3012489557226399,
+          "ci_low": 0.2744820384294069,
+          "ci_high": 0.32948214285714283,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_2": {
+          "point": 0.4645655806182122,
+          "ci_low": 0.43279479949874683,
+          "ci_high": 0.4982902046783626,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_3": {
+          "point": 0.5884878863826233,
+          "ci_low": 0.5564475772765246,
+          "ci_high": 0.6215808270676692,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "spearman": {
+          "point": 0.6128156525768201,
+          "ci_low": 0.5682820022745941,
+          "ci_high": 0.6575831437838291,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "top_3_set_accuracy": {
+          "point": 0.5857142857142856,
+          "ci_low": 0.5332142857142859,
+          "ci_high": 0.6380952380952379,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "top_5_set_accuracy": {
+          "point": 0.6999999999999998,
+          "ci_low": 0.6571428571428571,
+          "ci_high": 0.7399999999999999,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "podium_set_accuracy": {
+          "point": 0.1,
+          "ci_low": 0.02857142857142857,
+          "ci_high": 0.17178571428571235,
+          "confidence": 0.95,
+          "excludes_zero": true
+        }
+      },
+      "delta_vs_grid_order": {
+        "mae": {
+          "point": 0.40753550543024225,
+          "ci_low": 0.1701931913116125,
+          "ci_high": 0.6635398913951545,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "exact_accuracy": {
+          "point": -0.037213868003341685,
+          "ci_low": -0.07142857142857142,
+          "ci_high": -0.007216060985797839,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_1": {
+          "point": -0.06335421888053468,
+          "ci_low": -0.102859649122807,
+          "ci_high": -0.02321125730994153,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_2": {
+          "point": -0.07224310776942355,
+          "ci_low": -0.11275062656641602,
+          "ci_high": -0.03239912280701758,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_3": {
+          "point": -0.0715204678362573,
+          "ci_low": -0.10984732664995822,
+          "ci_high": -0.03439348370927319,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "spearman": {
+          "point": -0.04266675091089067,
+          "ci_low": -0.08303472441608223,
+          "ci_high": -0.0026561098123460344,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "top_3_set_accuracy": {
+          "point": -0.09523809523809525,
+          "ci_low": -0.15238095238095242,
+          "ci_high": -0.03809523809523809,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "top_5_set_accuracy": {
+          "point": -0.054285714285714284,
+          "ci_low": -0.10571428571428572,
+          "ci_high": -0.002857142857142855,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "podium_set_accuracy": {
+          "point": -0.14285714285714285,
+          "ci_low": -0.2571428571428571,
+          "ci_high": -0.02857142857142857,
+          "confidence": 0.95,
+          "excludes_zero": true
+        }
+      }
+    },
+    "xgboost_ranker": {
+      "name": "xgboost_ranker",
+      "races_scored": 70,
+      "draws": 1,
+      "metrics": {
+        "mae": {
+          "point": 3.3737176274018377,
+          "ci_low": 3.1632614870509603,
+          "ci_high": 3.5998124477861317,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "exact_accuracy": {
+          "point": 0.13858395989974936,
+          "ci_low": 0.11955670426065163,
+          "ci_high": 0.1594862155388471,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_1": {
+          "point": 0.34636591478696743,
+          "ci_low": 0.3160147243107769,
+          "ci_high": 0.3759927944862155,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_2": {
+          "point": 0.5136048454469506,
+          "ci_low": 0.4829262740183792,
+          "ci_high": 0.5427054093567251,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_3": {
+          "point": 0.6415580618212197,
+          "ci_low": 0.6098068086883877,
+          "ci_high": 0.6717335004177108,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "spearman": {
+          "point": 0.6599311303468754,
+          "ci_low": 0.6168999283924095,
+          "ci_high": 0.7015992502264061,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "top_3_set_accuracy": {
+          "point": 0.7047619047619047,
+          "ci_low": 0.6523809523809523,
+          "ci_high": 0.7571428571428571,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "top_5_set_accuracy": {
+          "point": 0.7457142857142857,
+          "ci_low": 0.7114285714285715,
+          "ci_high": 0.7799999999999999,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "podium_set_accuracy": {
+          "point": 0.2857142857142857,
+          "ci_low": 0.18571428571428572,
+          "ci_high": 0.4,
+          "confidence": 0.95,
+          "excludes_zero": true
+        }
+      },
+      "delta_vs_grid_order": {
+        "mae": {
+          "point": 0.06773600668337511,
+          "ci_low": -0.10170551378446109,
+          "ci_high": 0.24080994152046745,
+          "confidence": 0.95,
+          "excludes_zero": false
+        },
+        "exact_accuracy": {
+          "point": -0.016867167919799496,
+          "ci_low": -0.04507706766917293,
+          "ci_high": 0.009609335839598937,
+          "confidence": 0.95,
+          "excludes_zero": false
+        },
+        "within_1": {
+          "point": -0.018237259816207184,
+          "ci_low": -0.054140559732665,
+          "ci_high": 0.01677986633249784,
+          "confidence": 0.95,
+          "excludes_zero": false
+        },
+        "within_2": {
+          "point": -0.023203842940685046,
+          "ci_low": -0.05282445697577275,
+          "ci_high": 0.004729427736006676,
+          "confidence": 0.95,
+          "excludes_zero": false
+        },
+        "within_3": {
+          "point": -0.018450292397660824,
+          "ci_low": -0.04857779866332497,
+          "ci_high": 0.011769214703425204,
+          "confidence": 0.95,
+          "excludes_zero": false
+        },
+        "spearman": {
+          "point": 0.0044487268591646935,
+          "ci_low": -0.024355115730502763,
+          "ci_high": 0.03180200501253128,
+          "confidence": 0.95,
+          "excludes_zero": false
+        },
+        "top_3_set_accuracy": {
+          "point": 0.023809523809523815,
+          "ci_low": -0.01904761904761905,
+          "ci_high": 0.06666666666666665,
+          "confidence": 0.95,
+          "excludes_zero": false
+        },
+        "top_5_set_accuracy": {
+          "point": -0.008571428571428565,
+          "ci_low": -0.04571428571428571,
+          "ci_high": 0.02857142857142857,
+          "confidence": 0.95,
+          "excludes_zero": false
+        },
+        "podium_set_accuracy": {
+          "point": 0.04285714285714286,
+          "ci_low": -0.05714285714285714,
+          "ci_high": 0.14285714285714285,
+          "confidence": 0.95,
+          "excludes_zero": false
+        }
+      }
+    },
+    "xgboost_ranker_oracle": {
+      "name": "xgboost_ranker_oracle",
+      "races_scored": 70,
+      "draws": 1,
+      "metrics": {
+        "mae": {
+          "point": 1.761111111111111,
+          "ci_low": 1.6171349206349208,
+          "ci_high": 1.9098995405179613,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "exact_accuracy": {
+          "point": 0.2870927318295739,
+          "ci_low": 0.2627067669172932,
+          "ci_high": 0.3109774436090225,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_1": {
+          "point": 0.5772848788638261,
+          "ci_low": 0.5432808061821222,
+          "ci_high": 0.6108874269005847,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_2": {
+          "point": 0.7506098579782791,
+          "ci_low": 0.7212195071010861,
+          "ci_high": 0.7809489348370928,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_3": {
+          "point": 0.8543400167084378,
+          "ci_low": 0.8296917293233084,
+          "ci_high": 0.8785028195488722,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "spearman": {
+          "point": 0.8891556622649059,
+          "ci_low": 0.8672890208715063,
+          "ci_high": 0.9091151987110633,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "top_3_set_accuracy": {
+          "point": 0.7333333333333332,
+          "ci_low": 0.6857142857142856,
+          "ci_high": 0.780952380952381,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "top_5_set_accuracy": {
+          "point": 0.7885714285714285,
+          "ci_low": 0.7514285714285712,
+          "ci_high": 0.8285714285714284,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "podium_set_accuracy": {
+          "point": 0.2857142857142857,
+          "ci_low": 0.18571428571428572,
+          "ci_high": 0.4,
+          "confidence": 0.95,
+          "excludes_zero": true
+        }
+      },
+      "delta_vs_grid_order": {
+        "mae": {
+          "point": -1.5448705096073518,
+          "ci_low": -1.7734799498746867,
+          "ci_high": -1.3070233918128655,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "exact_accuracy": {
+          "point": 0.13164160401002503,
+          "ci_low": 0.0969404761904762,
+          "ci_high": 0.16362249373433582,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_1": {
+          "point": 0.2126817042606516,
+          "ci_low": 0.17583082706766917,
+          "ci_high": 0.24842669172932322,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_2": {
+          "point": 0.21380116959064324,
+          "ci_low": 0.17763982873851294,
+          "ci_high": 0.2516976817042606,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_3": {
+          "point": 0.19433166248955722,
+          "ci_low": 0.15751785714285715,
+          "ci_high": 0.22928780284043435,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "spearman": {
+          "point": 0.23367325877719505,
+          "ci_low": 0.1924960931741117,
+          "ci_high": 0.27400701859691245,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "top_3_set_accuracy": {
+          "point": 0.05238095238095238,
+          "ci_low": 0.009523809523809518,
+          "ci_high": 0.09523809523809523,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "top_5_set_accuracy": {
+          "point": 0.03428571428571429,
+          "ci_low": -0.005714285714285713,
+          "ci_high": 0.07142857142857144,
+          "confidence": 0.95,
+          "excludes_zero": false
+        },
+        "podium_set_accuracy": {
+          "point": 0.04285714285714286,
+          "ci_low": -0.05714285714285714,
+          "ci_high": 0.14285714285714285,
+          "confidence": 0.95,
+          "excludes_zero": false
+        }
+      }
+    }
+  },
+  "segmentation": {
+    "grid_order": {
+      "season": {
+        "2023": 0.5818637502848027,
+        "2024": 0.730484913263551,
+        "2025": 0.6479636591478696
+      },
+      "circuit_type": {
+        "hybrid": 0.49711779448621546,
+        "permanent": 0.6646520393054246,
+        "street": 0.6848370927318296
+      },
+      "overtaking_tier": {
+        "easy": 0.6405495836778647,
+        "hard": 0.6912406015037595,
+        "moderate": 0.6156015037593985,
+        "very_hard": 0.8506265664160401
+      }
+    },
+    "standings_order": {
+      "season": {
+        "2023": 0.6203918888129413,
+        "2024": 0.6764662882696938,
+        "2025": 0.542220133667502
+      },
+      "circuit_type": {
+        "hybrid": 0.43909774436090226,
+        "permanent": 0.626808389259594,
+        "street": 0.6349624060150374
+      },
+      "overtaking_tier": {
+        "easy": 0.6073598318045754,
+        "hard": 0.6564661654135338,
+        "moderate": 0.5835213032581453,
+        "very_hard": 0.5979949874686716
+      }
+    },
+    "xgboost_ranker": {
+      "season": {
+        "2023": 0.6453748006379585,
+        "2024": 0.7136671335200746,
+        "2025": 0.6195384294068503
+      },
+      "circuit_type": {
+        "hybrid": 0.47794486215538834,
+        "permanent": 0.668735778064086,
+        "street": 0.6980924533556112
+      },
+      "overtaking_tier": {
+        "easy": 0.6464723189046786,
+        "hard": 0.7077443609022556,
+        "moderate": 0.6283208020050125,
+        "very_hard": 0.6972431077694236
+      }
+    },
+    "xgboost_ranker_oracle": {
+      "season": {
+        "2023": 0.8928229665071771,
+        "2024": 0.905358985699543,
+        "2025": 0.8695906432748538
+      },
+      "circuit_type": {
+        "hybrid": 0.9139933166248954,
+        "permanent": 0.8866905114448523,
+        "street": 0.8871762740183792
+      },
+      "overtaking_tier": {
+        "easy": 0.8782083084950227,
+        "hard": 0.8832080200501254,
+        "moderate": 0.8980158730158729,
+        "very_hard": 0.9418546365914785
+      }
+    }
+  },
+  "verdict": {
+    "metric": "spearman",
+    "reference": "grid_order",
+    "reference_score": 0.6554824034877108,
+    "beaten_by": [
+      {
+        "name": "xgboost_ranker_oracle",
+        "point": 0.23367325877719505,
+        "ci_low": 0.1924960931741117,
+        "ci_high": 0.27400701859691245,
+        "confidence": 0.95,
+        "excludes_zero": true
+      }
+    ],
+    "not_beaten_by": [
+      {
+        "name": "standings_order",
+        "point": -0.04266675091089067,
+        "ci_low": -0.08303472441608223,
+        "ci_high": -0.0026561098123460344,
+        "confidence": 0.95,
+        "excludes_zero": true
+      },
+      {
+        "name": "xgboost_ranker",
+        "point": 0.0044487268591646935,
+        "ci_low": -0.024355115730502763,
+        "ci_high": 0.03180200501253128,
+        "confidence": 0.95,
+        "excludes_zero": false
+      }
+    ],
+    "any_predictor_beats_the_grid": true
+  },
+  "label": "oracle_vs_primary",
+  "seasons": [
+    2010,
+    2011,
+    2012,
+    2013,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "corpus_rows": 6868,
+  "arms": {
+    "primary": {
+      "predictor": "xgboost_ranker",
+      "feature_set": "primary",
+      "n_features": 40,
+      "features": [
+        "grid_slot",
+        "grid_position_sq",
+        "grid_rank_vs_teammate",
+        "field_size",
+        "is_sprint_weekend",
+        "sprint_finish_pct",
+        "sprint_places_gained_pct",
+        "is_street_circuit",
+        "is_permanent_circuit",
+        "is_hybrid_circuit",
+        "overtaking_difficulty",
+        "grid_x_overtaking",
+        "grid_x_street",
+        "regime_id",
+        "seasons_since_regime_start",
+        "regime_is_major",
+        "driver_prior_races",
+        "constructor_prior_races",
+        "driver_finish_last3_pct",
+        "driver_finish_last5_pct",
+        "driver_grid_last3_pct",
+        "driver_points_last3_pct",
+        "driver_gain_last5_pct",
+        "driver_win_rate_season_pct",
+        "driver_podium_rate_season_pct",
+        "driver_points_per_race_season_pct",
+        "driver_elo_race_pct",
+        "driver_elo_quali_pct",
+        "constructor_points_per_race_season_pct",
+        "constructor_reliability_season_pct",
+        "constructor_finish_last3_pct",
+        "driver_circuit_finish_mean_pct",
+        "driver_circuit_grid_mean_pct",
+        "driver_circuit_best_finish_pct",
+        "constructor_circuit_finish_mean_pct",
+        "strength_rank_prior",
+        "overqualified_by_grid",
+        "weather_prior_wet",
+        "weather_prior_temp",
+        "weather_prior_wind"
+      ],
+      "corpus_rows": 6868,
+      "training_rows": 5481,
+      "training_seasons": [
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022
+      ],
+      "trees_kept": 5,
+      "absent_sources": [],
+      "metrics": {
+        "mae": {
+          "point": 3.3737176274018377,
+          "ci_low": 3.1632614870509603,
+          "ci_high": 3.5998124477861317,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "exact_accuracy": {
+          "point": 0.13858395989974936,
+          "ci_low": 0.11955670426065163,
+          "ci_high": 0.1594862155388471,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_1": {
+          "point": 0.34636591478696743,
+          "ci_low": 0.3160147243107769,
+          "ci_high": 0.3759927944862155,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_2": {
+          "point": 0.5136048454469506,
+          "ci_low": 0.4829262740183792,
+          "ci_high": 0.5427054093567251,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_3": {
+          "point": 0.6415580618212197,
+          "ci_low": 0.6098068086883877,
+          "ci_high": 0.6717335004177108,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "spearman": {
+          "point": 0.6599311303468754,
+          "ci_low": 0.6168999283924095,
+          "ci_high": 0.7015992502264061,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "top_3_set_accuracy": {
+          "point": 0.7047619047619047,
+          "ci_low": 0.6523809523809523,
+          "ci_high": 0.7571428571428571,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "top_5_set_accuracy": {
+          "point": 0.7457142857142857,
+          "ci_low": 0.7114285714285715,
+          "ci_high": 0.7799999999999999,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "podium_set_accuracy": {
+          "point": 0.2857142857142857,
+          "ci_low": 0.18571428571428572,
+          "ci_high": 0.4,
+          "confidence": 0.95,
+          "excludes_zero": true
+        }
+      },
+      "races_scored": 70
+    },
+    "oracle": {
+      "predictor": "xgboost_ranker_oracle",
+      "feature_set": "oracle",
+      "n_features": 44,
+      "features": [
+        "grid_slot",
+        "grid_position_sq",
+        "grid_rank_vs_teammate",
+        "field_size",
+        "is_sprint_weekend",
+        "sprint_finish_pct",
+        "sprint_places_gained_pct",
+        "is_street_circuit",
+        "is_permanent_circuit",
+        "is_hybrid_circuit",
+        "overtaking_difficulty",
+        "grid_x_overtaking",
+        "grid_x_street",
+        "regime_id",
+        "seasons_since_regime_start",
+        "regime_is_major",
+        "driver_prior_races",
+        "constructor_prior_races",
+        "driver_finish_last3_pct",
+        "driver_finish_last5_pct",
+        "driver_grid_last3_pct",
+        "driver_points_last3_pct",
+        "driver_gain_last5_pct",
+        "driver_win_rate_season_pct",
+        "driver_podium_rate_season_pct",
+        "driver_points_per_race_season_pct",
+        "driver_elo_race_pct",
+        "driver_elo_quali_pct",
+        "constructor_points_per_race_season_pct",
+        "constructor_reliability_season_pct",
+        "constructor_finish_last3_pct",
+        "driver_circuit_finish_mean_pct",
+        "driver_circuit_grid_mean_pct",
+        "driver_circuit_best_finish_pct",
+        "constructor_circuit_finish_mean_pct",
+        "strength_rank_prior",
+        "overqualified_by_grid",
+        "weather_prior_wet",
+        "weather_prior_temp",
+        "weather_prior_wind",
+        "weather_actual_precip",
+        "weather_actual_temp",
+        "finished_race",
+        "race_distance_share"
+      ],
+      "corpus_rows": 6868,
+      "training_rows": 5481,
+      "training_seasons": [
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022
+      ],
+      "trees_kept": 15,
+      "absent_sources": [],
+      "metrics": {
+        "mae": {
+          "point": 1.761111111111111,
+          "ci_low": 1.6171349206349208,
+          "ci_high": 1.9098995405179613,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "exact_accuracy": {
+          "point": 0.2870927318295739,
+          "ci_low": 0.2627067669172932,
+          "ci_high": 0.3109774436090225,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_1": {
+          "point": 0.5772848788638261,
+          "ci_low": 0.5432808061821222,
+          "ci_high": 0.6108874269005847,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_2": {
+          "point": 0.7506098579782791,
+          "ci_low": 0.7212195071010861,
+          "ci_high": 0.7809489348370928,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_3": {
+          "point": 0.8543400167084378,
+          "ci_low": 0.8296917293233084,
+          "ci_high": 0.8785028195488722,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "spearman": {
+          "point": 0.8891556622649059,
+          "ci_low": 0.8672890208715063,
+          "ci_high": 0.9091151987110633,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "top_3_set_accuracy": {
+          "point": 0.7333333333333332,
+          "ci_low": 0.6857142857142856,
+          "ci_high": 0.780952380952381,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "top_5_set_accuracy": {
+          "point": 0.7885714285714285,
+          "ci_low": 0.7514285714285712,
+          "ci_high": 0.8285714285714284,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "podium_set_accuracy": {
+          "point": 0.2857142857142857,
+          "ci_low": 0.18571428571428572,
+          "ci_high": 0.4,
+          "confidence": 0.95,
+          "excludes_zero": true
+        }
+      },
+      "races_scored": 70
+    }
+  },
+  "leak": {
+    "features_in_oracle_not_in_primary": [
+      {
+        "name": "weather_actual_precip",
+        "availability": "post_race",
+        "description": "Rain that actually fell on race day. **Post-race. Oracle set only.**"
+      },
+      {
+        "name": "weather_actual_temp",
+        "availability": "post_race",
+        "description": "Race-day maximum temperature. **Post-race. Oracle set only.**"
+      },
+      {
+        "name": "finished_race",
+        "availability": "post_race",
+        "description": "Whether the car was classified. Known only once the race has run."
+      },
+      {
+        "name": "race_distance_share",
+        "availability": "post_race",
+        "description": "Laps completed as a share of the winner's. Post-race by construction."
+      }
+    ],
+    "n_features_added": 4
+  },
+  "oracle_minus_primary": {
+    "mae": {
+      "point": -1.612606516290727,
+      "ci_low": -1.8295075187969927,
+      "ci_high": -1.406302631578947,
+      "confidence": 0.95,
+      "excludes_zero": true
+    },
+    "exact_accuracy": {
+      "point": 0.14850877192982456,
+      "ci_low": 0.11632706766917293,
+      "ci_high": 0.17918703007518796,
+      "confidence": 0.95,
+      "excludes_zero": true
+    },
+    "within_1": {
+      "point": 0.23091896407685886,
+      "ci_low": 0.1904821428571429,
+      "ci_high": 0.27415204678362576,
+      "confidence": 0.95,
+      "excludes_zero": true
+    },
+    "within_2": {
+      "point": 0.23700501253132833,
+      "ci_low": 0.20146835839598998,
+      "ci_high": 0.27475000000000005,
+      "confidence": 0.95,
+      "excludes_zero": true
+    },
+    "within_3": {
+      "point": 0.21278195488721807,
+      "ci_low": 0.18029323308270678,
+      "ci_high": 0.24620394736842108,
+      "confidence": 0.95,
+      "excludes_zero": true
+    },
+    "spearman": {
+      "point": 0.22922453191803038,
+      "ci_low": 0.19281174048566796,
+      "ci_high": 0.26681794296666034,
+      "confidence": 0.95,
+      "excludes_zero": true
+    },
+    "top_3_set_accuracy": {
+      "point": 0.02857142857142857,
+      "ci_low": -0.014285714285714292,
+      "ci_high": 0.07619047619047617,
+      "confidence": 0.95,
+      "excludes_zero": false
+    },
+    "top_5_set_accuracy": {
+      "point": 0.04285714285714286,
+      "ci_low": 0.005714285714285708,
+      "ci_high": 0.08,
+      "confidence": 0.95,
+      "excludes_zero": true
+    },
+    "podium_set_accuracy": {
+      "point": 0.0,
+      "ci_low": -0.10035714285714223,
+      "ci_high": 0.11428571428571428,
+      "confidence": 0.95,
+      "excludes_zero": false
+    }
+  },
+  "inflation": {
+    "metric": "spearman",
+    "primary": 0.6599311303468754,
+    "oracle": 0.8891556622649059,
+    "delta": 0.22922453191803038,
+    "ci_low": 0.19281174048566796,
+    "ci_high": 0.26681794296666034,
+    "excludes_zero": true,
+    "paired": true,
+    "statement": "Primary arm 0.6599 spearman, oracle arm 0.8892, on the identical 70-race holdout. Paired difference +0.2292 (95% CI +0.1928 to +0.2668, excludes zero). Knowing the answer inflates the primary metric by 0.2292 spearman. That is the scale of what a post-race feature buys \u2014 the size of v0's inflation, not a capability anything can be built on."
+  },
+  "admissibility": {
+    "oracle_arm": "INADMISSIBLE. The oracle arm reads post-race features and cannot be run before a race has happened. Its score is not a forecast and must never be quoted as model performance (FR-207). It exists here only to size the gap reported under `inflation`.",
+    "primary_arm": "Admissible. Pre-race features only, scored on the same holdout (FR-202, FR-304).",
+    "verdict_block": "The `verdict` block is the harness's standard FR-507 output and counts the oracle arm among the predictors that beat the grid. The oracle arm beat the grid by reading the result. Only the primary arm's line there is a claim about forecasting; for the size of the gap between them, read `inflation`."
+  }
+}

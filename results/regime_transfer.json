@@ -1,0 +1,4636 @@
+{
+  "generated": "2026-09-02",
+  "experiment": "regulation_transfer",
+  "primary_metric": "spearman",
+  "corpus": {
+    "source": "full collected archive",
+    "bound_to_rolling_window": false,
+    "reason": "FR-511: binding the experiment to a window that advances yearly would silently destroy observations as they age out",
+    "seasons": [
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "first_season": 2010,
+    "last_season": 2025,
+    "rows": 6868,
+    "absent_sources": []
+  },
+  "decay_settings": [
+    0.0,
+    0.25
+  ],
+  "runs": [
+    {
+      "recency_decay": 0.0,
+      "hyperparameters": {
+        "objective": "rank:pairwise",
+        "n_estimators": 400,
+        "max_depth": 6,
+        "learning_rate": 0.05,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8,
+        "min_child_weight": 3,
+        "reg_alpha": 0.1,
+        "reg_lambda": 1.0,
+        "seed": 20260815,
+        "recency_decay": 0.0,
+        "interval_coverage": 0.8,
+        "calibration_seasons": 2,
+        "early_stopping_rounds": 40,
+        "n_jobs": 1
+      },
+      "transitions": [
+        {
+          "reset_season": 2014,
+          "regime": {
+            "start_season": 2014,
+            "severity": "major",
+            "description": "V6 hybrid power units"
+          },
+          "label": "DIAGNOSTIC",
+          "meets_constitutional_minimum": false,
+          "supports_headline_claim": false,
+          "n_training_seasons": {
+            "transfer": 4,
+            "comparator": 3
+          },
+          "arms": {
+            "transfer": {
+              "split": {
+                "training_seasons": [
+                  2010,
+                  2011,
+                  2012,
+                  2013
+                ],
+                "n_training_seasons": 4,
+                "evaluated_season": 2014,
+                "holdout_seasons": [
+                  2014
+                ],
+                "boundary_season": 2014,
+                "meets_constitutional_minimum": false,
+                "minimum_required": {
+                  "training": 5
+                },
+                "label": "DIAGNOSTIC"
+              },
+              "races_scored": 19,
+              "rows_scored": 404,
+              "training_rows": 1797,
+              "trees_kept": 31,
+              "predictors": {
+                "grid_order": {
+                  "metrics": {
+                    "mae": {
+                      "point": 3.8448241816662865,
+                      "ci_low": 3.426279334700387,
+                      "ci_high": 4.263189412926255,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "exact_accuracy": {
+                      "point": 0.12693096377306903,
+                      "ci_low": 0.1015202779676464,
+                      "ci_high": 0.1522043745727956,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_1": {
+                      "point": 0.31764259132680184,
+                      "ci_low": 0.27620300751879695,
+                      "ci_high": 0.36175533530796683,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_2": {
+                      "point": 0.4809371914635072,
+                      "ci_low": 0.42161274398116505,
+                      "ci_high": 0.5415840738209159,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_3": {
+                      "point": 0.6123110807321333,
+                      "ci_low": 0.5519607731449836,
+                      "ci_high": 0.6719947596263386,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "spearman": {
+                      "point": 0.6053564876839242,
+                      "ci_low": 0.5293759112811582,
+                      "ci_high": 0.6774111080605366,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_3_set_accuracy": {
+                      "point": 0.6315789473684209,
+                      "ci_low": 0.4912280701754386,
+                      "ci_high": 0.7543859649122807,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_5_set_accuracy": {
+                      "point": 0.6842105263157896,
+                      "ci_low": 0.6,
+                      "ci_high": 0.7684210526315789,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "podium_set_accuracy": {
+                      "point": 0.2631578947368421,
+                      "ci_low": 0.10526315789473684,
+                      "ci_high": 0.47368421052631576,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    }
+                  }
+                },
+                "xgboost_ranker": {
+                  "metrics": {
+                    "mae": {
+                      "point": 3.784575074048758,
+                      "ci_low": 3.3397964608490924,
+                      "ci_high": 4.253869522290575,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "exact_accuracy": {
+                      "point": 0.11477937267410952,
+                      "ci_low": 0.08430071390597707,
+                      "ci_high": 0.14798511430090375,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_1": {
+                      "point": 0.2990468595731754,
+                      "ci_low": 0.262553163211058,
+                      "ci_high": 0.3362259816207185,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_2": {
+                      "point": 0.4857370699475962,
+                      "ci_low": 0.42589769879243566,
+                      "ci_high": 0.547719298245614,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_3": {
+                      "point": 0.5750854408749145,
+                      "ci_low": 0.5088118022328549,
+                      "ci_high": 0.6440926179084071,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "spearman": {
+                      "point": 0.6362469764273506,
+                      "ci_low": 0.5563709206323852,
+                      "ci_high": 0.7075666118330003,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_3_set_accuracy": {
+                      "point": 0.5438596491228069,
+                      "ci_low": 0.4385964912280701,
+                      "ci_high": 0.6491228070175439,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_5_set_accuracy": {
+                      "point": 0.6736842105263159,
+                      "ci_low": 0.6105263157894738,
+                      "ci_high": 0.7263157894736844,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "podium_set_accuracy": {
+                      "point": 0.10526315789473684,
+                      "ci_low": 0.0,
+                      "ci_high": 0.2631578947368421,
+                      "confidence": 0.95,
+                      "excludes_zero": false
+                    }
+                  }
+                }
+              },
+              "model_minus_grid": {
+                "mae": {
+                  "point": -0.06024910761752858,
+                  "ci_low": -0.3374339257233993,
+                  "ci_high": 0.21375408217513478,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "exact_accuracy": {
+                  "point": -0.01215159109895952,
+                  "ci_low": -0.038049669628617,
+                  "ci_high": 0.012417407154249258,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_1": {
+                  "point": -0.01859573175362648,
+                  "ci_low": -0.04881018834966199,
+                  "ci_high": 0.013933223209539004,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_2": {
+                  "point": 0.00479987848408901,
+                  "ci_low": -0.03554777094250777,
+                  "ci_high": 0.049533492822966506,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_3": {
+                  "point": -0.03722563985721879,
+                  "ci_low": -0.08017164122427277,
+                  "ci_high": 0.005329991645781051,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "spearman": {
+                  "point": 0.030890488743426404,
+                  "ci_low": -0.028928656919283913,
+                  "ci_high": 0.09881318503554619,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_3_set_accuracy": {
+                  "point": -0.08771929824561404,
+                  "ci_low": -0.21052631578947367,
+                  "ci_high": 0.017543859649122816,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_5_set_accuracy": {
+                  "point": -0.010526315789473687,
+                  "ci_low": -0.08421052631578947,
+                  "ci_high": 0.07368421052631578,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "podium_set_accuracy": {
+                  "point": -0.15789473684210525,
+                  "ci_low": -0.3684210526315789,
+                  "ci_high": 0.05263157894736842,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                }
+              }
+            },
+            "comparator": {
+              "split": {
+                "training_seasons": [
+                  2010,
+                  2011,
+                  2012
+                ],
+                "n_training_seasons": 3,
+                "evaluated_season": 2013,
+                "holdout_seasons": [
+                  2013
+                ],
+                "boundary_season": 2013,
+                "meets_constitutional_minimum": false,
+                "minimum_required": {
+                  "training": 5
+                },
+                "label": "DIAGNOSTIC"
+              },
+              "races_scored": 19,
+              "rows_scored": 417,
+              "training_rows": 1380,
+              "trees_kept": 14,
+              "predictors": {
+                "grid_order": {
+                  "metrics": {
+                    "mae": {
+                      "point": 3.653907496012759,
+                      "ci_low": 3.295055821371611,
+                      "ci_high": 4.033572567783094,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "exact_accuracy": {
+                      "point": 0.14376851218956482,
+                      "ci_low": 0.11027568922305765,
+                      "ci_high": 0.17514524948735447,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_1": {
+                      "point": 0.32114376851218956,
+                      "ci_low": 0.2618905217589428,
+                      "ci_high": 0.3809666210982,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_2": {
+                      "point": 0.46046935520619736,
+                      "ci_low": 0.3947339940760992,
+                      "ci_high": 0.5167748917748918,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_3": {
+                      "point": 0.6067441330599226,
+                      "ci_low": 0.5555935292777399,
+                      "ci_high": 0.6560719981772614,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "spearman": {
+                      "point": 0.6733216440310263,
+                      "ci_low": 0.6139885286338377,
+                      "ci_high": 0.7285550833605754,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_3_set_accuracy": {
+                      "point": 0.5789473684210525,
+                      "ci_low": 0.45614035087719296,
+                      "ci_high": 0.6842105263157895,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_5_set_accuracy": {
+                      "point": 0.6947368421052632,
+                      "ci_low": 0.6315789473684211,
+                      "ci_high": 0.7578947368421053,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "podium_set_accuracy": {
+                      "point": 0.15789473684210525,
+                      "ci_low": 0.0,
+                      "ci_high": 0.3157894736842105,
+                      "confidence": 0.95,
+                      "excludes_zero": false
+                    }
+                  }
+                },
+                "xgboost_ranker": {
+                  "metrics": {
+                    "mae": {
+                      "point": 4.25518341307815,
+                      "ci_low": 3.8962918660287085,
+                      "ci_high": 4.6379984051036685,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "exact_accuracy": {
+                      "point": 0.0861244019138756,
+                      "ci_low": 0.05023923444976077,
+                      "ci_high": 0.12200956937799044,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_1": {
+                      "point": 0.2514240145819093,
+                      "ci_low": 0.19617224880382775,
+                      "ci_high": 0.3038277511961722,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_2": {
+                      "point": 0.3931419457735247,
+                      "ci_low": 0.335725677830941,
+                      "ci_high": 0.4433811802232855,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_3": {
+                      "point": 0.5438596491228069,
+                      "ci_low": 0.48963317384370014,
+                      "ci_high": 0.5933014354066986,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "spearman": {
+                      "point": 0.5882165889030878,
+                      "ci_low": 0.5348420458260276,
+                      "ci_high": 0.6412404529109336,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_3_set_accuracy": {
+                      "point": 0.45614035087719307,
+                      "ci_low": 0.3684210526315789,
+                      "ci_high": 0.5438596491228069,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_5_set_accuracy": {
+                      "point": 0.5894736842105264,
+                      "ci_low": 0.4947368421052632,
+                      "ci_high": 0.6736842105263158,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "podium_set_accuracy": {
+                      "point": 0.0,
+                      "ci_low": 0.0,
+                      "ci_high": 0.0,
+                      "confidence": 0.95,
+                      "excludes_zero": false
+                    }
+                  }
+                }
+              },
+              "model_minus_grid": {
+                "mae": {
+                  "point": 0.6012759170653906,
+                  "ci_low": 0.2950558213716108,
+                  "ci_high": 0.909090909090909,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "exact_accuracy": {
+                  "point": -0.05764411027568923,
+                  "ci_low": -0.10332649806334016,
+                  "ci_high": -0.0047846889952153126,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "within_1": {
+                  "point": -0.06971975393028024,
+                  "ci_low": -0.12474367737525634,
+                  "ci_high": -0.014695830485304165,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "within_2": {
+                  "point": -0.06732740943267258,
+                  "ci_low": -0.10799726589200273,
+                  "ci_high": -0.02631578947368421,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "within_3": {
+                  "point": -0.06288448393711552,
+                  "ci_low": -0.11108168147641834,
+                  "ci_high": -0.013311688311688422,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "spearman": {
+                  "point": -0.08510505512793844,
+                  "ci_low": -0.13813270825284554,
+                  "ci_high": -0.036012734405183,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "top_3_set_accuracy": {
+                  "point": -0.12280701754385968,
+                  "ci_low": -0.22807017543859648,
+                  "ci_high": -0.01710526315789713,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "top_5_set_accuracy": {
+                  "point": -0.10526315789473684,
+                  "ci_low": -0.17894736842105263,
+                  "ci_high": -0.04210526315789472,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "podium_set_accuracy": {
+                  "point": -0.15789473684210525,
+                  "ci_low": -0.3157894736842105,
+                  "ci_high": 0.0,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                }
+              }
+            }
+          },
+          "penalty": {
+            "metric": "spearman",
+            "definition": "comparator score minus transfer score on the primary metric; positive means the reset season cost the model performance",
+            "pairing": "unavailable",
+            "pairing_reason": "the two arms are scored on different races (season R against season R-1), so a paired delta is undefined; bootstrap_delta refuses mismatched race sets rather than aligning them. Each arm is resampled independently within a replicate, which is wider than a paired interval and is the honest width.",
+            "interval_method": "unpaired race bootstrap, 2000 replicates, each arm resampled independently within a replicate",
+            "xgboost_ranker": {
+              "point": -0.04803038752426281,
+              "ci_low": -0.141059834420668,
+              "ci_high": 0.05614054332713768,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "grid_order": {
+              "point": 0.0679651563471021,
+              "ci_low": -0.027180262971578485,
+              "ci_high": 0.1662613207721638,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "all_metrics": {
+              "xgboost_ranker": {
+                "mae": {
+                  "point": 0.47060833902939203,
+                  "ci_low": -0.16570308346624119,
+                  "ci_high": 1.0663514847725366,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "exact_accuracy": {
+                  "point": -0.02865497076023392,
+                  "ci_low": -0.07682577656261866,
+                  "ci_high": 0.017407723855092257,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_1": {
+                  "point": -0.04762284499126607,
+                  "ci_low": -0.11582820688083849,
+                  "ci_high": 0.01671764638869897,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_2": {
+                  "point": -0.09259512417407151,
+                  "ci_low": -0.1781311232627022,
+                  "ci_high": -0.012722715880610733,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "within_3": {
+                  "point": -0.0312257917521076,
+                  "ci_low": -0.12112326270221002,
+                  "ci_high": 0.052418831168831066,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "spearman": {
+                  "point": -0.04803038752426281,
+                  "ci_low": -0.141059834420668,
+                  "ci_high": 0.05614054332713768,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_3_set_accuracy": {
+                  "point": -0.08771929824561386,
+                  "ci_low": -0.22807017543859653,
+                  "ci_high": 0.05263157894736842,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_5_set_accuracy": {
+                  "point": -0.08421052631578951,
+                  "ci_low": -0.1894736842105264,
+                  "ci_high": 0.021052631578947323,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "podium_set_accuracy": {
+                  "point": -0.10526315789473684,
+                  "ci_low": -0.2631578947368421,
+                  "ci_high": 0.0,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                }
+              },
+              "grid_order": {
+                "mae": {
+                  "point": -0.19091668565352737,
+                  "ci_low": -0.7550087339561016,
+                  "ci_high": 0.3873718386876281,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "exact_accuracy": {
+                  "point": 0.01683754841649579,
+                  "ci_low": -0.026025290498974667,
+                  "ci_high": 0.0568597630439735,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_1": {
+                  "point": 0.003501177185387727,
+                  "ci_low": -0.06952874610769344,
+                  "ci_high": 0.07610408597250701,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_2": {
+                  "point": -0.020467836257309857,
+                  "ci_low": -0.10636629452418932,
+                  "ci_high": 0.06350060757955495,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_3": {
+                  "point": -0.005566947672210665,
+                  "ci_low": -0.08867414748993695,
+                  "ci_high": 0.07361187058555464,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "spearman": {
+                  "point": 0.0679651563471021,
+                  "ci_low": -0.027180262971578485,
+                  "ci_high": 0.1662613207721638,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_3_set_accuracy": {
+                  "point": -0.05263157894736836,
+                  "ci_low": -0.22807017543859642,
+                  "ci_high": 0.14035087719298245,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_5_set_accuracy": {
+                  "point": 0.010526315789473606,
+                  "ci_low": -0.09473684210526323,
+                  "ci_high": 0.11578947368421044,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "podium_set_accuracy": {
+                  "point": -0.10526315789473684,
+                  "ci_low": -0.3684210526315789,
+                  "ci_high": 0.15789473684210525,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                }
+              }
+            }
+          },
+          "edge_over_grid": {
+            "metric": "spearman",
+            "definition": "how much of the model's advantage over the grid was lost across the reset: (comparator model minus comparator grid) minus (transfer model minus transfer grid). Positive means the model transferred worse than the grid did. A season that was simply harder to predict cancels, because it hurt both predictors inside the same arm",
+            "pairing": "paired within each arm, unpaired across them",
+            "pairing_reason": "the two arms are scored on different races (season R against season R-1), so a paired delta is undefined; bootstrap_delta refuses mismatched race sets rather than aligning them. Each arm is resampled independently within a replicate, which is wider than a paired interval and is the honest width.",
+            "per_arm": {
+              "transfer": {
+                "point": 0.030890488743426404,
+                "ci_low": -0.028928656919283913,
+                "ci_high": 0.09881318503554619,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "comparator": {
+                "point": -0.08510505512793844,
+                "ci_low": -0.13813270825284554,
+                "ci_high": -0.036012734405183,
+                "confidence": 0.95,
+                "excludes_zero": true
+              }
+            },
+            "lost_across_the_reset": {
+              "point": -0.11599554387136485,
+              "ci_low": -0.2007424368475122,
+              "ci_high": -0.03575024809174779,
+              "confidence": 0.95,
+              "excludes_zero": true
+            },
+            "all_metrics": {
+              "mae": {
+                "point": 0.6615250246829192,
+                "ci_low": 0.219696210222526,
+                "ci_high": 1.089885699096225,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "exact_accuracy": {
+                "point": -0.04549251917672971,
+                "ci_low": -0.09706842864737597,
+                "ci_high": 0.012944292549555534,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "within_1": {
+                "point": -0.05112402217665375,
+                "ci_low": -0.1118117262854105,
+                "ci_high": 0.012514145211513552,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "within_2": {
+                "point": -0.0721272879167616,
+                "ci_low": -0.12730652388547126,
+                "ci_high": -0.009963735095314032,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_3": {
+                "point": -0.025658844079896728,
+                "ci_low": -0.09004984051036685,
+                "ci_high": 0.04016803372066523,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "spearman": {
+                "point": -0.11599554387136485,
+                "ci_low": -0.2007424368475122,
+                "ci_high": -0.03575024809174779,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "top_3_set_accuracy": {
+                "point": -0.03508771929824564,
+                "ci_low": -0.1929824561403509,
+                "ci_high": 0.12280701754385967,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "top_5_set_accuracy": {
+                "point": -0.09473684210526315,
+                "ci_low": -0.2,
+                "ci_high": 3.729655473348715e-18,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "podium_set_accuracy": {
+                "point": 0.0,
+                "ci_low": -0.2631578947368421,
+                "ci_high": 0.2631578947368421,
+                "confidence": 0.95,
+                "excludes_zero": false
+              }
+            }
+          }
+        },
+        {
+          "reset_season": 2017,
+          "regime": {
+            "start_season": 2017,
+            "severity": "major",
+            "description": "wider cars and tyres"
+          },
+          "label": null,
+          "meets_constitutional_minimum": true,
+          "supports_headline_claim": true,
+          "n_training_seasons": {
+            "transfer": 7,
+            "comparator": 6
+          },
+          "arms": {
+            "transfer": {
+              "split": {
+                "training_seasons": [
+                  2010,
+                  2011,
+                  2012,
+                  2013,
+                  2014,
+                  2015,
+                  2016
+                ],
+                "n_training_seasons": 7,
+                "evaluated_season": 2017,
+                "holdout_seasons": [
+                  2017
+                ],
+                "boundary_season": 2017,
+                "meets_constitutional_minimum": true,
+                "minimum_required": {
+                  "training": 5
+                },
+                "label": null
+              },
+              "races_scored": 20,
+              "rows_scored": 399,
+              "training_rows": 3029,
+              "trees_kept": 22,
+              "predictors": {
+                "grid_order": {
+                  "metrics": {
+                    "mae": {
+                      "point": 3.855526315789473,
+                      "ci_low": 3.396565789473684,
+                      "ci_high": 4.379999999999999,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "exact_accuracy": {
+                      "point": 0.14078947368421055,
+                      "ci_low": 0.10750000000000001,
+                      "ci_high": 0.17236842105263156,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_1": {
+                      "point": 0.33618421052631575,
+                      "ci_low": 0.27852631578947373,
+                      "ci_high": 0.3922368421052631,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_2": {
+                      "point": 0.471578947368421,
+                      "ci_low": 0.39905592105263155,
+                      "ci_high": 0.5397434210526315,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_3": {
+                      "point": 0.5771052631578948,
+                      "ci_low": 0.5095526315789473,
+                      "ci_high": 0.6417105263157895,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "spearman": {
+                      "point": 0.5549122807017545,
+                      "ci_low": 0.46149561403508776,
+                      "ci_high": 0.6338370927318295,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_3_set_accuracy": {
+                      "point": 0.6833333333333333,
+                      "ci_low": 0.5833333333333333,
+                      "ci_high": 0.7833333333333332,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_5_set_accuracy": {
+                      "point": 0.7400000000000001,
+                      "ci_low": 0.67,
+                      "ci_high": 0.8100000000000002,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "podium_set_accuracy": {
+                      "point": 0.25,
+                      "ci_low": 0.1,
+                      "ci_high": 0.45,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    }
+                  }
+                },
+                "xgboost_ranker": {
+                  "metrics": {
+                    "mae": {
+                      "point": 3.974736842105263,
+                      "ci_low": 3.5542039473684213,
+                      "ci_high": 4.429855263157894,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "exact_accuracy": {
+                      "point": 0.10763157894736838,
+                      "ci_low": 0.0725,
+                      "ci_high": 0.15,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_1": {
+                      "point": 0.3507894736842106,
+                      "ci_low": 0.29499671052631576,
+                      "ci_high": 0.4082894736842104,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_2": {
+                      "point": 0.4886842105263157,
+                      "ci_low": 0.4211842105263157,
+                      "ci_high": 0.5512138157894736,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_3": {
+                      "point": 0.5563157894736843,
+                      "ci_low": 0.5013157894736843,
+                      "ci_high": 0.6075032894736844,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "spearman": {
+                      "point": 0.546516290726817,
+                      "ci_low": 0.45810839598997494,
+                      "ci_high": 0.6212556390977443,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_3_set_accuracy": {
+                      "point": 0.6333333333333333,
+                      "ci_low": 0.55,
+                      "ci_high": 0.7166666666666666,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_5_set_accuracy": {
+                      "point": 0.8,
+                      "ci_low": 0.7300000000000001,
+                      "ci_high": 0.8600000000000001,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "podium_set_accuracy": {
+                      "point": 0.1,
+                      "ci_low": 0.0,
+                      "ci_high": 0.25,
+                      "confidence": 0.95,
+                      "excludes_zero": false
+                    }
+                  }
+                }
+              },
+              "model_minus_grid": {
+                "mae": {
+                  "point": 0.11921052631578943,
+                  "ci_low": -0.12001973684210537,
+                  "ci_high": 0.3742565789473682,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "exact_accuracy": {
+                  "point": -0.03315789473684211,
+                  "ci_low": -0.0794736842105263,
+                  "ci_high": 0.015000000000000003,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_1": {
+                  "point": 0.014605263157894746,
+                  "ci_low": -0.027499999999999986,
+                  "ci_high": 0.05672039473684207,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_2": {
+                  "point": 0.017105263157894738,
+                  "ci_low": -0.02328947368421052,
+                  "ci_high": 0.05710526315789473,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_3": {
+                  "point": -0.020789473684210517,
+                  "ci_low": -0.06407894736842104,
+                  "ci_high": 0.022500000000000006,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "spearman": {
+                  "point": -0.008395989974937368,
+                  "ci_low": -0.047393483709273196,
+                  "ci_high": 0.030227443609022516,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_3_set_accuracy": {
+                  "point": -0.049999999999999996,
+                  "ci_low": -0.13333333333333336,
+                  "ci_high": 0.03333333333333333,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_5_set_accuracy": {
+                  "point": 0.06,
+                  "ci_low": 0.010000000000000004,
+                  "ci_high": 0.11000000000000001,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "podium_set_accuracy": {
+                  "point": -0.15,
+                  "ci_low": -0.35,
+                  "ci_high": 0.05,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                }
+              }
+            },
+            "comparator": {
+              "split": {
+                "training_seasons": [
+                  2010,
+                  2011,
+                  2012,
+                  2013,
+                  2014,
+                  2015
+                ],
+                "n_training_seasons": 6,
+                "evaluated_season": 2016,
+                "holdout_seasons": [
+                  2016
+                ],
+                "boundary_season": 2016,
+                "meets_constitutional_minimum": true,
+                "minimum_required": {
+                  "training": 5
+                },
+                "label": null
+              },
+              "races_scored": 21,
+              "rows_scored": 457,
+              "training_rows": 2572,
+              "trees_kept": 27,
+              "predictors": {
+                "grid_order": {
+                  "metrics": {
+                    "mae": {
+                      "point": 3.791341991341991,
+                      "ci_low": 3.219724799010514,
+                      "ci_high": 4.355621521335807,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "exact_accuracy": {
+                      "point": 0.14626881055452481,
+                      "ci_low": 0.11209441352298495,
+                      "ci_high": 0.1823464234178519,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_1": {
+                      "point": 0.3474129045557617,
+                      "ci_low": 0.28319830962688103,
+                      "ci_high": 0.41249381570810134,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_2": {
+                      "point": 0.5031849103277674,
+                      "ci_low": 0.43927772624201195,
+                      "ci_high": 0.5672077922077922,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_3": {
+                      "point": 0.6212224283652856,
+                      "ci_low": 0.5642210368996083,
+                      "ci_high": 0.6777131003916718,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "spearman": {
+                      "point": 0.6149942897899748,
+                      "ci_low": 0.5205261070519327,
+                      "ci_high": 0.7119611670339032,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_3_set_accuracy": {
+                      "point": 0.6984126984126983,
+                      "ci_low": 0.5714285714285714,
+                      "ci_high": 0.8095238095238095,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_5_set_accuracy": {
+                      "point": 0.6952380952380953,
+                      "ci_low": 0.6190476190476191,
+                      "ci_high": 0.7714285714285716,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "podium_set_accuracy": {
+                      "point": 0.38095238095238093,
+                      "ci_low": 0.19047619047619047,
+                      "ci_high": 0.5714285714285714,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    }
+                  }
+                },
+                "xgboost_ranker": {
+                  "metrics": {
+                    "mae": {
+                      "point": 3.950010307153165,
+                      "ci_low": 3.460188620902907,
+                      "ci_high": 4.4352195423623995,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "exact_accuracy": {
+                      "point": 0.10019583591012161,
+                      "ci_low": 0.06794449598021025,
+                      "ci_high": 0.13894068233353948,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_1": {
+                      "point": 0.2865903937332509,
+                      "ci_low": 0.23546433725005153,
+                      "ci_high": 0.33818284889713457,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_2": {
+                      "point": 0.4185734900020614,
+                      "ci_low": 0.37012987012987014,
+                      "ci_high": 0.4661951144094001,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_3": {
+                      "point": 0.556091527520099,
+                      "ci_low": 0.49290816326530607,
+                      "ci_high": 0.6197701504844362,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "spearman": {
+                      "point": 0.6360330527051677,
+                      "ci_low": 0.5535748638960474,
+                      "ci_high": 0.719045482141265,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_3_set_accuracy": {
+                      "point": 0.6349206349206348,
+                      "ci_low": 0.523809523809524,
+                      "ci_high": 0.7460317460317459,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_5_set_accuracy": {
+                      "point": 0.7142857142857144,
+                      "ci_low": 0.6380952380952382,
+                      "ci_high": 0.7904761904761906,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "podium_set_accuracy": {
+                      "point": 0.23809523809523808,
+                      "ci_low": 0.09523809523809523,
+                      "ci_high": 0.42857142857142855,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    }
+                  }
+                }
+              },
+              "model_minus_grid": {
+                "mae": {
+                  "point": 0.158668315811173,
+                  "ci_low": -0.06782570603999163,
+                  "ci_high": 0.3996547103689961,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "exact_accuracy": {
+                  "point": -0.046072974644403214,
+                  "ci_low": -0.09523809523809522,
+                  "ci_high": -0.002161925376211103,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "within_1": {
+                  "point": -0.060822510822510806,
+                  "ci_low": -0.12853561121418264,
+                  "ci_high": 0.00515357658214801,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_2": {
+                  "point": -0.08461142032570604,
+                  "ci_low": -0.12996521335807049,
+                  "ci_high": -0.03472196454339315,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "within_3": {
+                  "point": -0.06513090084518652,
+                  "ci_low": -0.10431328592042874,
+                  "ci_high": -0.02337121212121213,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "spearman": {
+                  "point": 0.021038762915193094,
+                  "ci_low": -0.013375374489300604,
+                  "ci_high": 0.05608386791371423,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_3_set_accuracy": {
+                  "point": -0.0634920634920635,
+                  "ci_low": -0.14285714285714288,
+                  "ci_high": 0.01587301587301587,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_5_set_accuracy": {
+                  "point": 0.01904761904761904,
+                  "ci_low": -0.04761904761904764,
+                  "ci_high": 0.08571428571428572,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "podium_set_accuracy": {
+                  "point": -0.14285714285714285,
+                  "ci_low": -0.3333333333333333,
+                  "ci_high": 0.0,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                }
+              }
+            }
+          },
+          "penalty": {
+            "metric": "spearman",
+            "definition": "comparator score minus transfer score on the primary metric; positive means the reset season cost the model performance",
+            "pairing": "unavailable",
+            "pairing_reason": "the two arms are scored on different races (season R against season R-1), so a paired delta is undefined; bootstrap_delta refuses mismatched race sets rather than aligning them. Each arm is resampled independently within a replicate, which is wider than a paired interval and is the honest width.",
+            "interval_method": "unpaired race bootstrap, 2000 replicates, each arm resampled independently within a replicate",
+            "xgboost_ranker": {
+              "point": 0.08951676197835079,
+              "ci_low": -0.02457822174012083,
+              "ci_high": 0.22426562771977937,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "grid_order": {
+              "point": 0.06008200908822037,
+              "ci_low": -0.0704635735300986,
+              "ci_high": 0.19920908779571733,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "all_metrics": {
+              "xgboost_ranker": {
+                "mae": {
+                  "point": -0.024726534952097978,
+                  "ci_low": -0.7442183665332165,
+                  "ci_high": 0.6415435897644554,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "exact_accuracy": {
+                  "point": -0.00743574303724677,
+                  "ci_low": -0.05895954849244322,
+                  "ci_high": 0.04712268156864014,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_1": {
+                  "point": -0.06419907995095969,
+                  "ci_low": -0.13794900129110643,
+                  "ci_high": 0.013128647511636036,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_2": {
+                  "point": -0.07011072052425432,
+                  "ci_low": -0.14819830555826793,
+                  "ci_high": 0.01602607235079028,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_3": {
+                  "point": -0.00022426195358526968,
+                  "ci_low": -0.08606960312035511,
+                  "ci_high": 0.08465138224348748,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "spearman": {
+                  "point": 0.08951676197835079,
+                  "ci_low": -0.02457822174012083,
+                  "ci_high": 0.22426562771977937,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_3_set_accuracy": {
+                  "point": 0.0015873015873014706,
+                  "ci_low": -0.12777777777777766,
+                  "ci_high": 0.1333333333333332,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_5_set_accuracy": {
+                  "point": -0.08571428571428563,
+                  "ci_low": -0.18238095238095242,
+                  "ci_high": 0.02047619047619043,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "podium_set_accuracy": {
+                  "point": 0.13809523809523808,
+                  "ci_low": -0.10476190476190478,
+                  "ci_high": 0.3761904761904762,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                }
+              },
+              "grid_order": {
+                "mae": {
+                  "point": -0.06418432444748223,
+                  "ci_low": -0.8194267934446485,
+                  "ci_high": 0.6987551373021293,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "exact_accuracy": {
+                  "point": 0.005479336870314266,
+                  "ci_low": -0.04319792921155703,
+                  "ci_high": 0.05090283066974792,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_1": {
+                  "point": 0.01122869402944593,
+                  "ci_low": -0.07573506140893357,
+                  "ci_high": 0.09961670477600919,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_2": {
+                  "point": 0.03160596295934637,
+                  "ci_low": -0.06386432667165745,
+                  "ci_high": 0.13086404390304768,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_3": {
+                  "point": 0.04411716520739084,
+                  "ci_low": -0.043662622465253896,
+                  "ci_high": 0.13324516784385204,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "spearman": {
+                  "point": 0.06008200908822037,
+                  "ci_low": -0.0704635735300986,
+                  "ci_high": 0.19920908779571733,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_3_set_accuracy": {
+                  "point": 0.015079365079364915,
+                  "ci_low": -0.14527777777777776,
+                  "ci_high": 0.16351190476190464,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_5_set_accuracy": {
+                  "point": -0.04476190476190478,
+                  "ci_low": -0.15952380952380962,
+                  "ci_high": 0.06285714285714294,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "podium_set_accuracy": {
+                  "point": 0.13095238095238093,
+                  "ci_low": -0.15714285714285714,
+                  "ci_high": 0.4214285714285714,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                }
+              }
+            }
+          },
+          "edge_over_grid": {
+            "metric": "spearman",
+            "definition": "how much of the model's advantage over the grid was lost across the reset: (comparator model minus comparator grid) minus (transfer model minus transfer grid). Positive means the model transferred worse than the grid did. A season that was simply harder to predict cancels, because it hurt both predictors inside the same arm",
+            "pairing": "paired within each arm, unpaired across them",
+            "pairing_reason": "the two arms are scored on different races (season R against season R-1), so a paired delta is undefined; bootstrap_delta refuses mismatched race sets rather than aligning them. Each arm is resampled independently within a replicate, which is wider than a paired interval and is the honest width.",
+            "per_arm": {
+              "transfer": {
+                "point": -0.008395989974937368,
+                "ci_low": -0.047393483709273196,
+                "ci_high": 0.030227443609022516,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "comparator": {
+                "point": 0.021038762915193094,
+                "ci_low": -0.013375374489300604,
+                "ci_high": 0.05608386791371423,
+                "confidence": 0.95,
+                "excludes_zero": false
+              }
+            },
+            "lost_across_the_reset": {
+              "point": 0.029434752890130464,
+              "ci_low": -0.023557191963533883,
+              "ci_high": 0.08396843888377069,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "all_metrics": {
+              "mae": {
+                "point": 0.03945778949538356,
+                "ci_low": -0.3076441509618201,
+                "ci_high": 0.3827700975924656,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "exact_accuracy": {
+                "point": -0.012915079907561106,
+                "ci_low": -0.08024951583504214,
+                "ci_high": 0.05527789780186395,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "within_1": {
+                "point": -0.07542777398040555,
+                "ci_low": -0.15820107967429395,
+                "ci_high": 0.006956154591022943,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "within_2": {
+                "point": -0.10171668348360077,
+                "ci_low": -0.16431761560285993,
+                "ci_high": -0.0361048237476809,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_3": {
+                "point": -0.044341427160976006,
+                "ci_low": -0.10350430459265043,
+                "ci_high": 0.01535041337109004,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "spearman": {
+                "point": 0.029434752890130464,
+                "ci_low": -0.023557191963533883,
+                "ci_high": 0.08396843888377069,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "top_3_set_accuracy": {
+                "point": -0.013492063492063507,
+                "ci_low": -0.126984126984127,
+                "ci_high": 0.10158730158730161,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "top_5_set_accuracy": {
+                "point": -0.04095238095238096,
+                "ci_low": -0.12001190476190478,
+                "ci_high": 0.046666666666666634,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "podium_set_accuracy": {
+                "point": 0.007142857142857145,
+                "ci_low": -0.24047619047619045,
+                "ci_high": 0.25476190476190474,
+                "confidence": 0.95,
+                "excludes_zero": false
+              }
+            }
+          }
+        },
+        {
+          "reset_season": 2022,
+          "regime": {
+            "start_season": 2022,
+            "severity": "major",
+            "description": "ground effect, full chassis reset"
+          },
+          "label": null,
+          "meets_constitutional_minimum": true,
+          "supports_headline_claim": true,
+          "n_training_seasons": {
+            "transfer": 12,
+            "comparator": 11
+          },
+          "arms": {
+            "transfer": {
+              "split": {
+                "training_seasons": [
+                  2010,
+                  2011,
+                  2012,
+                  2013,
+                  2014,
+                  2015,
+                  2016,
+                  2017,
+                  2018,
+                  2019,
+                  2020,
+                  2021
+                ],
+                "n_training_seasons": 12,
+                "evaluated_season": 2022,
+                "holdout_seasons": [
+                  2022
+                ],
+                "boundary_season": 2022,
+                "meets_constitutional_minimum": true,
+                "minimum_required": {
+                  "training": 5
+                },
+                "label": null
+              },
+              "races_scored": 22,
+              "rows_scored": 439,
+              "training_rows": 5042,
+              "trees_kept": 17,
+              "predictors": {
+                "grid_order": {
+                  "metrics": {
+                    "mae": {
+                      "point": 4.096411483253589,
+                      "ci_low": 3.660023923444976,
+                      "ci_high": 4.559090909090909,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "exact_accuracy": {
+                      "point": 0.13241626794258374,
+                      "ci_low": 0.09832535885167464,
+                      "ci_high": 0.16939294258373197,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_1": {
+                      "point": 0.32392344497607656,
+                      "ci_low": 0.27284389952153115,
+                      "ci_high": 0.3772757177033493,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_2": {
+                      "point": 0.4854066985645934,
+                      "ci_low": 0.4318181818181818,
+                      "ci_high": 0.5370813397129187,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_3": {
+                      "point": 0.5925837320574162,
+                      "ci_low": 0.5425837320574164,
+                      "ci_high": 0.6407894736842104,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "spearman": {
+                      "point": 0.4925951241740716,
+                      "ci_low": 0.4082587149692412,
+                      "ci_high": 0.5751304397357028,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_3_set_accuracy": {
+                      "point": 0.5606060606060604,
+                      "ci_low": 0.4848484848484848,
+                      "ci_high": 0.6363636363636362,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_5_set_accuracy": {
+                      "point": 0.6545454545454545,
+                      "ci_low": 0.5906818181818185,
+                      "ci_high": 0.7272727272727273,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "podium_set_accuracy": {
+                      "point": 0.045454545454545456,
+                      "ci_low": 0.0,
+                      "ci_high": 0.13636363636363635,
+                      "confidence": 0.95,
+                      "excludes_zero": false
+                    }
+                  }
+                },
+                "xgboost_ranker": {
+                  "metrics": {
+                    "mae": {
+                      "point": 3.792583732057416,
+                      "ci_low": 3.4640729665071763,
+                      "ci_high": 4.1364055023923445,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "exact_accuracy": {
+                      "point": 0.10933014354066986,
+                      "ci_low": 0.0840909090909091,
+                      "ci_high": 0.13660885167464112,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_1": {
+                      "point": 0.33062200956937804,
+                      "ci_low": 0.29090909090909095,
+                      "ci_high": 0.37033492822966513,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_2": {
+                      "point": 0.4811004784688995,
+                      "ci_low": 0.43337320574162685,
+                      "ci_high": 0.5274102870813396,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_3": {
+                      "point": 0.5925837320574163,
+                      "ci_low": 0.5448564593301435,
+                      "ci_high": 0.6413875598086124,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "spearman": {
+                      "point": 0.5770221007063111,
+                      "ci_low": 0.5072351332877649,
+                      "ci_high": 0.641215823650034,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_3_set_accuracy": {
+                      "point": 0.6363636363636362,
+                      "ci_low": 0.5454545454545454,
+                      "ci_high": 0.7272727272727271,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_5_set_accuracy": {
+                      "point": 0.7181818181818183,
+                      "ci_low": 0.6727272727272727,
+                      "ci_high": 0.7727272727272727,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "podium_set_accuracy": {
+                      "point": 0.13636363636363635,
+                      "ci_low": 0.0,
+                      "ci_high": 0.2727272727272727,
+                      "confidence": 0.95,
+                      "excludes_zero": false
+                    }
+                  }
+                }
+              },
+              "model_minus_grid": {
+                "mae": {
+                  "point": -0.3038277511961723,
+                  "ci_low": -0.606255980861244,
+                  "ci_high": 0.005263157894736799,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "exact_accuracy": {
+                  "point": -0.023086124401913873,
+                  "ci_low": -0.057177033492822965,
+                  "ci_high": 0.011363636363636366,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_1": {
+                  "point": 0.006698564593301432,
+                  "ci_low": -0.02739533492822967,
+                  "ci_high": 0.04095394736842081,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_2": {
+                  "point": -0.004306220095693791,
+                  "ci_low": -0.049760765550239235,
+                  "ci_high": 0.039114832535885144,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_3": {
+                  "point": 2.523234146875356e-18,
+                  "ci_low": -0.03636363636363637,
+                  "ci_high": 0.03863636363636364,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "spearman": {
+                  "point": 0.08442697653223968,
+                  "ci_low": 0.020800580997949417,
+                  "ci_high": 0.14932102984734563,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "top_3_set_accuracy": {
+                  "point": 0.07575757575757575,
+                  "ci_low": -0.01515151515151515,
+                  "ci_high": 0.1666666666666667,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_5_set_accuracy": {
+                  "point": 0.06363636363636363,
+                  "ci_low": 0.018181818181818184,
+                  "ci_high": 0.10909090909090911,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "podium_set_accuracy": {
+                  "point": 0.09090909090909091,
+                  "ci_low": -0.09090909090909091,
+                  "ci_high": 0.2727272727272727,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                }
+              }
+            },
+            "comparator": {
+              "split": {
+                "training_seasons": [
+                  2010,
+                  2011,
+                  2012,
+                  2013,
+                  2014,
+                  2015,
+                  2016,
+                  2017,
+                  2018,
+                  2019,
+                  2020
+                ],
+                "n_training_seasons": 11,
+                "evaluated_season": 2021,
+                "holdout_seasons": [
+                  2021
+                ],
+                "boundary_season": 2021,
+                "meets_constitutional_minimum": true,
+                "minimum_required": {
+                  "training": 5
+                },
+                "label": null
+              },
+              "races_scored": 22,
+              "rows_scored": 437,
+              "training_rows": 4605,
+              "trees_kept": 24,
+              "predictors": {
+                "grid_order": {
+                  "metrics": {
+                    "mae": {
+                      "point": 3.5416267942583732,
+                      "ci_low": 3.066333732057417,
+                      "ci_high": 4.098654306220096,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "exact_accuracy": {
+                      "point": 0.13983253588516745,
+                      "ci_low": 0.10167464114832535,
+                      "ci_high": 0.18146531100478464,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_1": {
+                      "point": 0.3572966507177034,
+                      "ci_low": 0.28708133971291866,
+                      "ci_high": 0.42703349282296643,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_2": {
+                      "point": 0.5287081339712918,
+                      "ci_low": 0.45870514354066994,
+                      "ci_high": 0.6035915071770335,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_3": {
+                      "point": 0.6435406698564594,
+                      "ci_low": 0.5746381578947369,
+                      "ci_high": 0.7035944976076557,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "spearman": {
+                      "point": 0.59833675096833,
+                      "ci_low": 0.49157723855092267,
+                      "ci_high": 0.6895722260195944,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_3_set_accuracy": {
+                      "point": 0.5909090909090907,
+                      "ci_low": 0.4696969696969697,
+                      "ci_high": 0.6969696969696969,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_5_set_accuracy": {
+                      "point": 0.6363636363636364,
+                      "ci_low": 0.5636363636363636,
+                      "ci_high": 0.7090909090909091,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "podium_set_accuracy": {
+                      "point": 0.18181818181818182,
+                      "ci_low": 0.045454545454545456,
+                      "ci_high": 0.3193181818181756,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    }
+                  }
+                },
+                "xgboost_ranker": {
+                  "metrics": {
+                    "mae": {
+                      "point": 3.3511961722488026,
+                      "ci_low": 2.881818181818182,
+                      "ci_high": 3.9587260765550236,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "exact_accuracy": {
+                      "point": 0.1529904306220096,
+                      "ci_low": 0.1240340909090909,
+                      "ci_high": 0.18409389952153107,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_1": {
+                      "point": 0.36279904306220095,
+                      "ci_low": 0.29485645933014354,
+                      "ci_high": 0.4297906698564593,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_2": {
+                      "point": 0.5355263157894737,
+                      "ci_low": 0.46432416267942594,
+                      "ci_high": 0.6025119617224881,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_3": {
+                      "point": 0.6733253588516747,
+                      "ci_low": 0.6029754784688997,
+                      "ci_high": 0.7295514354066984,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "spearman": {
+                      "point": 0.6494417862838916,
+                      "ci_low": 0.5451925267714741,
+                      "ci_high": 0.7321044087491455,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_3_set_accuracy": {
+                      "point": 0.712121212121212,
+                      "ci_low": 0.5909090909090909,
+                      "ci_high": 0.8181818181818182,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_5_set_accuracy": {
+                      "point": 0.6545454545454545,
+                      "ci_low": 0.5818181818181818,
+                      "ci_high": 0.7272727272727274,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "podium_set_accuracy": {
+                      "point": 0.36363636363636365,
+                      "ci_low": 0.18181818181818182,
+                      "ci_high": 0.5909090909090909,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    }
+                  }
+                }
+              },
+              "model_minus_grid": {
+                "mae": {
+                  "point": -0.19043062200956937,
+                  "ci_low": -0.555065789473684,
+                  "ci_high": 0.12918660287081346,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "exact_accuracy": {
+                  "point": 0.013157894736842113,
+                  "ci_low": -0.03242224880382774,
+                  "ci_high": 0.05454545454545454,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_1": {
+                  "point": 0.005502392344497607,
+                  "ci_low": -0.0728468899521531,
+                  "ci_high": 0.08639952153110028,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_2": {
+                  "point": 0.006818181818181821,
+                  "ci_low": -0.06136363636363637,
+                  "ci_high": 0.06823863636363606,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_3": {
+                  "point": 0.0297846889952153,
+                  "ci_low": -0.015909090909090925,
+                  "ci_high": 0.0818181818181818,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "spearman": {
+                  "point": 0.051105035315561625,
+                  "ci_low": -0.006381863750284784,
+                  "ci_high": 0.11668176122123486,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_3_set_accuracy": {
+                  "point": 0.1212121212121212,
+                  "ci_low": 0.030303030303030297,
+                  "ci_high": 0.22727272727272724,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "top_5_set_accuracy": {
+                  "point": 0.018181818181818188,
+                  "ci_low": -0.04545454545454544,
+                  "ci_high": 0.08181818181818183,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "podium_set_accuracy": {
+                  "point": 0.18181818181818182,
+                  "ci_low": 0.0,
+                  "ci_high": 0.4090909090909091,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                }
+              }
+            }
+          },
+          "penalty": {
+            "metric": "spearman",
+            "definition": "comparator score minus transfer score on the primary metric; positive means the reset season cost the model performance",
+            "pairing": "unavailable",
+            "pairing_reason": "the two arms are scored on different races (season R against season R-1), so a paired delta is undefined; bootstrap_delta refuses mismatched race sets rather than aligning them. Each arm is resampled independently within a replicate, which is wider than a paired interval and is the honest width.",
+            "interval_method": "unpaired race bootstrap, 2000 replicates, each arm resampled independently within a replicate",
+            "xgboost_ranker": {
+              "point": 0.0724196855775805,
+              "ci_low": -0.044126509455457034,
+              "ci_high": 0.18560947824105717,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "grid_order": {
+              "point": 0.10574162679425836,
+              "ci_low": -0.021773182957393597,
+              "ci_high": 0.2397858282068808,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "all_metrics": {
+              "xgboost_ranker": {
+                "mae": {
+                  "point": -0.44138755980861344,
+                  "ci_low": -1.066058612440191,
+                  "ci_high": 0.19501794258373376,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "exact_accuracy": {
+                  "point": 0.04366028708133973,
+                  "ci_low": 0.0008373205741626915,
+                  "ci_high": 0.0843301435406698,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "within_1": {
+                  "point": 0.032177033492822915,
+                  "ci_low": -0.04880681818181819,
+                  "ci_high": 0.11102870813397121,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_2": {
+                  "point": 0.054425837320574266,
+                  "ci_low": -0.028594497607655558,
+                  "ci_high": 0.13985944976076536,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_3": {
+                  "point": 0.08074162679425834,
+                  "ci_low": -0.004189593301435407,
+                  "ci_high": 0.16064593301435404,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "spearman": {
+                  "point": 0.0724196855775805,
+                  "ci_low": -0.044126509455457034,
+                  "ci_high": 0.18560947824105717,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_3_set_accuracy": {
+                  "point": 0.0757575757575758,
+                  "ci_low": -0.06060606060606055,
+                  "ci_high": 0.2124999999999982,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_5_set_accuracy": {
+                  "point": -0.06363636363636371,
+                  "ci_low": -0.15454545454545454,
+                  "ci_high": 0.036363636363636376,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "podium_set_accuracy": {
+                  "point": 0.2272727272727273,
+                  "ci_low": 0.0,
+                  "ci_high": 0.5,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                }
+              },
+              "grid_order": {
+                "mae": {
+                  "point": -0.5547846889952157,
+                  "ci_low": -1.2555203349282285,
+                  "ci_high": 0.11867224880382736,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "exact_accuracy": {
+                  "point": 0.00741626794258371,
+                  "ci_low": -0.04916866028708132,
+                  "ci_high": 0.06245514354066979,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_1": {
+                  "point": 0.03337320574162683,
+                  "ci_low": -0.055992822966507094,
+                  "ci_high": 0.12226375598086119,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_2": {
+                  "point": 0.043301435406698396,
+                  "ci_low": -0.04558612440191411,
+                  "ci_high": 0.13649820574162663,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_3": {
+                  "point": 0.0509569377990432,
+                  "ci_low": -0.028364234449760703,
+                  "ci_high": 0.1318211722488036,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "spearman": {
+                  "point": 0.10574162679425836,
+                  "ci_low": -0.021773182957393597,
+                  "ci_high": 0.2397858282068808,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_3_set_accuracy": {
+                  "point": 0.030303030303030276,
+                  "ci_low": -0.10606060606060602,
+                  "ci_high": 0.16666666666666663,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_5_set_accuracy": {
+                  "point": -0.018181818181818188,
+                  "ci_low": -0.11818181818181828,
+                  "ci_high": 0.09090909090909083,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "podium_set_accuracy": {
+                  "point": 0.13636363636363635,
+                  "ci_low": -0.045454545454545456,
+                  "ci_high": 0.3181818181818182,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                }
+              }
+            }
+          },
+          "edge_over_grid": {
+            "metric": "spearman",
+            "definition": "how much of the model's advantage over the grid was lost across the reset: (comparator model minus comparator grid) minus (transfer model minus transfer grid). Positive means the model transferred worse than the grid did. A season that was simply harder to predict cancels, because it hurt both predictors inside the same arm",
+            "pairing": "paired within each arm, unpaired across them",
+            "pairing_reason": "the two arms are scored on different races (season R against season R-1), so a paired delta is undefined; bootstrap_delta refuses mismatched race sets rather than aligning them. Each arm is resampled independently within a replicate, which is wider than a paired interval and is the honest width.",
+            "per_arm": {
+              "transfer": {
+                "point": 0.08442697653223968,
+                "ci_low": 0.020800580997949417,
+                "ci_high": 0.14932102984734563,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "comparator": {
+                "point": 0.051105035315561625,
+                "ci_low": -0.006381863750284784,
+                "ci_high": 0.11668176122123486,
+                "confidence": 0.95,
+                "excludes_zero": false
+              }
+            },
+            "lost_across_the_reset": {
+              "point": -0.03332194121667806,
+              "ci_low": -0.12676720209614942,
+              "ci_high": 0.057896445659603564,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "all_metrics": {
+              "mae": {
+                "point": 0.11339712918660291,
+                "ci_low": -0.38469497607655484,
+                "ci_high": 0.6012619617224878,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "exact_accuracy": {
+                "point": 0.03624401913875599,
+                "ci_low": -0.021546052631578924,
+                "ci_high": 0.09067583732057415,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "within_1": {
+                "point": -0.0011961722488038253,
+                "ci_low": -0.08435107655502387,
+                "ci_high": 0.08839712918660289,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "within_2": {
+                "point": 0.011124401913875613,
+                "ci_low": -0.07093301435406694,
+                "ci_high": 0.0881578947368421,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "within_3": {
+                "point": 0.029784688995215296,
+                "ci_low": -0.03181818181818182,
+                "ci_high": 0.09318779904306215,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "spearman": {
+                "point": -0.03332194121667806,
+                "ci_low": -0.12676720209614942,
+                "ci_high": 0.057896445659603564,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "top_3_set_accuracy": {
+                "point": 0.045454545454545456,
+                "ci_low": -0.09090909090909091,
+                "ci_high": 0.18181818181818182,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "top_5_set_accuracy": {
+                "point": -0.04545454545454544,
+                "ci_low": -0.11818181818181818,
+                "ci_high": 0.036363636363636355,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "podium_set_accuracy": {
+                "point": 0.09090909090909091,
+                "ci_low": -0.18181818181818182,
+                "ci_high": 0.36363636363636365,
+                "confidence": 0.95,
+                "excludes_zero": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "recency_decay": 0.25,
+      "hyperparameters": {
+        "objective": "rank:pairwise",
+        "n_estimators": 400,
+        "max_depth": 6,
+        "learning_rate": 0.05,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8,
+        "min_child_weight": 3,
+        "reg_alpha": 0.1,
+        "reg_lambda": 1.0,
+        "seed": 20260815,
+        "recency_decay": 0.25,
+        "interval_coverage": 0.8,
+        "calibration_seasons": 2,
+        "early_stopping_rounds": 40,
+        "n_jobs": 1
+      },
+      "transitions": [
+        {
+          "reset_season": 2014,
+          "regime": {
+            "start_season": 2014,
+            "severity": "major",
+            "description": "V6 hybrid power units"
+          },
+          "label": "DIAGNOSTIC",
+          "meets_constitutional_minimum": false,
+          "supports_headline_claim": false,
+          "n_training_seasons": {
+            "transfer": 4,
+            "comparator": 3
+          },
+          "arms": {
+            "transfer": {
+              "split": {
+                "training_seasons": [
+                  2010,
+                  2011,
+                  2012,
+                  2013
+                ],
+                "n_training_seasons": 4,
+                "evaluated_season": 2014,
+                "holdout_seasons": [
+                  2014
+                ],
+                "boundary_season": 2014,
+                "meets_constitutional_minimum": false,
+                "minimum_required": {
+                  "training": 5
+                },
+                "label": "DIAGNOSTIC"
+              },
+              "races_scored": 19,
+              "rows_scored": 404,
+              "training_rows": 1797,
+              "trees_kept": 42,
+              "predictors": {
+                "grid_order": {
+                  "metrics": {
+                    "mae": {
+                      "point": 3.8448241816662865,
+                      "ci_low": 3.426279334700387,
+                      "ci_high": 4.263189412926255,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "exact_accuracy": {
+                      "point": 0.12693096377306903,
+                      "ci_low": 0.1015202779676464,
+                      "ci_high": 0.1522043745727956,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_1": {
+                      "point": 0.31764259132680184,
+                      "ci_low": 0.27620300751879695,
+                      "ci_high": 0.36175533530796683,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_2": {
+                      "point": 0.4809371914635072,
+                      "ci_low": 0.42161274398116505,
+                      "ci_high": 0.5415840738209159,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_3": {
+                      "point": 0.6123110807321333,
+                      "ci_low": 0.5519607731449836,
+                      "ci_high": 0.6719947596263386,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "spearman": {
+                      "point": 0.6053564876839242,
+                      "ci_low": 0.5293759112811582,
+                      "ci_high": 0.6774111080605366,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_3_set_accuracy": {
+                      "point": 0.6315789473684209,
+                      "ci_low": 0.4912280701754386,
+                      "ci_high": 0.7543859649122807,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_5_set_accuracy": {
+                      "point": 0.6842105263157896,
+                      "ci_low": 0.6,
+                      "ci_high": 0.7684210526315789,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "podium_set_accuracy": {
+                      "point": 0.2631578947368421,
+                      "ci_low": 0.10526315789473684,
+                      "ci_high": 0.47368421052631576,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    }
+                  }
+                },
+                "xgboost_ranker": {
+                  "metrics": {
+                    "mae": {
+                      "point": 4.001799954431534,
+                      "ci_low": 3.5685401002506265,
+                      "ci_high": 4.461139591402749,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "exact_accuracy": {
+                      "point": 0.11406926406926406,
+                      "ci_low": 0.07552688539530646,
+                      "ci_high": 0.15607285258601047,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_1": {
+                      "point": 0.26875901875901875,
+                      "ci_low": 0.22077779676463882,
+                      "ci_high": 0.31776505658084614,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_2": {
+                      "point": 0.4286511733880155,
+                      "ci_low": 0.38091621098200046,
+                      "ci_high": 0.4776714513556618,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_3": {
+                      "point": 0.5640730614414826,
+                      "ci_low": 0.5197574428495481,
+                      "ci_high": 0.6094450140502771,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "spearman": {
+                      "point": 0.6026241615737971,
+                      "ci_low": 0.5273429126175121,
+                      "ci_high": 0.6745292936571778,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_3_set_accuracy": {
+                      "point": 0.5263157894736841,
+                      "ci_low": 0.4385964912280702,
+                      "ci_high": 0.6140350877192983,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_5_set_accuracy": {
+                      "point": 0.6105263157894737,
+                      "ci_low": 0.5578947368421052,
+                      "ci_high": 0.6631578947368421,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "podium_set_accuracy": {
+                      "point": 0.05263157894736842,
+                      "ci_low": 0.0,
+                      "ci_high": 0.15789473684210525,
+                      "confidence": 0.95,
+                      "excludes_zero": false
+                    }
+                  }
+                }
+              },
+              "model_minus_grid": {
+                "mae": {
+                  "point": 0.15697577276524652,
+                  "ci_low": -0.08189280018227382,
+                  "ci_high": 0.38293460925039874,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "exact_accuracy": {
+                  "point": -0.012861699703804968,
+                  "ci_low": -0.048066188197767146,
+                  "ci_high": 0.022031499202551777,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_1": {
+                  "point": -0.04888357256778309,
+                  "ci_low": -0.09457773220931116,
+                  "ci_high": -0.007796005164426222,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "within_2": {
+                  "point": -0.05228601807549176,
+                  "ci_low": -0.10495746943115364,
+                  "ci_high": -0.0037203804966962836,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "within_3": {
+                  "point": -0.048238019290650865,
+                  "ci_low": -0.0870860864281917,
+                  "ci_high": -0.006842864737601586,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "spearman": {
+                  "point": -0.002732326110127166,
+                  "ci_low": -0.051363938839744876,
+                  "ci_high": 0.05399600703934363,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_3_set_accuracy": {
+                  "point": -0.10526315789473684,
+                  "ci_low": -0.22807017543859653,
+                  "ci_high": 0.017543859649122803,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_5_set_accuracy": {
+                  "point": -0.07368421052631581,
+                  "ci_low": -0.1578947368421053,
+                  "ci_high": 0.021052631578947333,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "podium_set_accuracy": {
+                  "point": -0.21052631578947367,
+                  "ci_low": -0.47368421052631576,
+                  "ci_high": 0.0,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                }
+              }
+            },
+            "comparator": {
+              "split": {
+                "training_seasons": [
+                  2010,
+                  2011,
+                  2012
+                ],
+                "n_training_seasons": 3,
+                "evaluated_season": 2013,
+                "holdout_seasons": [
+                  2013
+                ],
+                "boundary_season": 2013,
+                "meets_constitutional_minimum": false,
+                "minimum_required": {
+                  "training": 5
+                },
+                "label": "DIAGNOSTIC"
+              },
+              "races_scored": 19,
+              "rows_scored": 417,
+              "training_rows": 1380,
+              "trees_kept": 14,
+              "predictors": {
+                "grid_order": {
+                  "metrics": {
+                    "mae": {
+                      "point": 3.653907496012759,
+                      "ci_low": 3.295055821371611,
+                      "ci_high": 4.033572567783094,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "exact_accuracy": {
+                      "point": 0.14376851218956482,
+                      "ci_low": 0.11027568922305765,
+                      "ci_high": 0.17514524948735447,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_1": {
+                      "point": 0.32114376851218956,
+                      "ci_low": 0.2618905217589428,
+                      "ci_high": 0.3809666210982,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_2": {
+                      "point": 0.46046935520619736,
+                      "ci_low": 0.3947339940760992,
+                      "ci_high": 0.5167748917748918,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_3": {
+                      "point": 0.6067441330599226,
+                      "ci_low": 0.5555935292777399,
+                      "ci_high": 0.6560719981772614,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "spearman": {
+                      "point": 0.6733216440310263,
+                      "ci_low": 0.6139885286338377,
+                      "ci_high": 0.7285550833605754,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_3_set_accuracy": {
+                      "point": 0.5789473684210525,
+                      "ci_low": 0.45614035087719296,
+                      "ci_high": 0.6842105263157895,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_5_set_accuracy": {
+                      "point": 0.6947368421052632,
+                      "ci_low": 0.6315789473684211,
+                      "ci_high": 0.7578947368421053,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "podium_set_accuracy": {
+                      "point": 0.15789473684210525,
+                      "ci_low": 0.0,
+                      "ci_high": 0.3157894736842105,
+                      "confidence": 0.95,
+                      "excludes_zero": false
+                    }
+                  }
+                },
+                "xgboost_ranker": {
+                  "metrics": {
+                    "mae": {
+                      "point": 4.285030758714969,
+                      "ci_low": 3.91860902255639,
+                      "ci_high": 4.679425837320573,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "exact_accuracy": {
+                      "point": 0.10549100022784234,
+                      "ci_low": 0.08133971291866028,
+                      "ci_high": 0.12918660287081338,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_1": {
+                      "point": 0.235019366598314,
+                      "ci_low": 0.19617224880382772,
+                      "ci_high": 0.2727415128730918,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_2": {
+                      "point": 0.40282524493050803,
+                      "ci_low": 0.35497835497835495,
+                      "ci_high": 0.4506721348826612,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_3": {
+                      "point": 0.5225563909774437,
+                      "ci_low": 0.4665071770334928,
+                      "ci_high": 0.575187969924812,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "spearman": {
+                      "point": 0.5881809266248625,
+                      "ci_low": 0.5246362447621029,
+                      "ci_high": 0.6508068590448454,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_3_set_accuracy": {
+                      "point": 0.40350877192982454,
+                      "ci_low": 0.35087719298245607,
+                      "ci_high": 0.47368421052631576,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_5_set_accuracy": {
+                      "point": 0.6421052631578947,
+                      "ci_low": 0.5578947368421052,
+                      "ci_high": 0.7157894736842106,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "podium_set_accuracy": {
+                      "point": 0.0,
+                      "ci_low": 0.0,
+                      "ci_high": 0.0,
+                      "confidence": 0.95,
+                      "excludes_zero": false
+                    }
+                  }
+                }
+              },
+              "model_minus_grid": {
+                "mae": {
+                  "point": 0.6311232627022101,
+                  "ci_low": 0.2296536796536797,
+                  "ci_high": 1.0221120984278877,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "exact_accuracy": {
+                  "point": -0.03827751196172249,
+                  "ci_low": -0.069377990430622,
+                  "ci_high": -0.0023923444976076563,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "within_1": {
+                  "point": -0.08612440191387559,
+                  "ci_low": -0.13642344497607647,
+                  "ci_high": -0.03588516746411483,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "within_2": {
+                  "point": -0.05764411027568923,
+                  "ci_low": -0.10766119845067214,
+                  "ci_high": -0.005012531328320796,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "within_3": {
+                  "point": -0.08418774208247894,
+                  "ci_low": -0.13297163362952835,
+                  "ci_high": -0.03393711551606295,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "spearman": {
+                  "point": -0.08514071740616365,
+                  "ci_low": -0.15735816814764186,
+                  "ci_high": -0.011524042319236863,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "top_3_set_accuracy": {
+                  "point": -0.1754385964912281,
+                  "ci_low": -0.2982456140350877,
+                  "ci_high": -0.05263157894736842,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "top_5_set_accuracy": {
+                  "point": -0.05263157894736842,
+                  "ci_low": -0.12631578947368421,
+                  "ci_high": 0.010526315789473694,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "podium_set_accuracy": {
+                  "point": -0.15789473684210525,
+                  "ci_low": -0.3157894736842105,
+                  "ci_high": 0.0,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                }
+              }
+            }
+          },
+          "penalty": {
+            "metric": "spearman",
+            "definition": "comparator score minus transfer score on the primary metric; positive means the reset season cost the model performance",
+            "pairing": "unavailable",
+            "pairing_reason": "the two arms are scored on different races (season R against season R-1), so a paired delta is undefined; bootstrap_delta refuses mismatched race sets rather than aligning them. Each arm is resampled independently within a replicate, which is wider than a paired interval and is the honest width.",
+            "interval_method": "unpaired race bootstrap, 2000 replicates, each arm resampled independently within a replicate",
+            "xgboost_ranker": {
+              "point": -0.014443234948934514,
+              "ci_low": -0.11733964434207443,
+              "ci_high": 0.09180139995297153,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "grid_order": {
+              "point": 0.0679651563471021,
+              "ci_low": -0.027180262971578485,
+              "ci_high": 0.1662613207721638,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "all_metrics": {
+              "xgboost_ranker": {
+                "mae": {
+                  "point": 0.28323080428343506,
+                  "ci_low": -0.35602320194425374,
+                  "ci_high": 0.897484810511126,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "exact_accuracy": {
+                  "point": -0.008578263841421713,
+                  "ci_low": -0.056885680109364345,
+                  "ci_high": 0.0365108794714057,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_1": {
+                  "point": -0.033739652160704764,
+                  "ci_low": -0.09548587377534741,
+                  "ci_high": 0.029011923748765784,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_2": {
+                  "point": -0.025825928457507474,
+                  "ci_low": -0.09569577352472095,
+                  "ci_high": 0.040982285258601044,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_3": {
+                  "point": -0.04151667046403895,
+                  "ci_low": -0.11490971747550717,
+                  "ci_high": 0.030108699779752193,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "spearman": {
+                  "point": -0.014443234948934514,
+                  "ci_low": -0.11733964434207443,
+                  "ci_high": 0.09180139995297153,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_3_set_accuracy": {
+                  "point": -0.12280701754385953,
+                  "ci_low": -0.2280701754385966,
+                  "ci_high": -0.017543859649122806,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "top_5_set_accuracy": {
+                  "point": 0.03157894736842104,
+                  "ci_low": -0.06315789473684219,
+                  "ci_high": 0.12631578947368427,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "podium_set_accuracy": {
+                  "point": -0.05263157894736842,
+                  "ci_low": -0.15789473684210525,
+                  "ci_high": 0.0,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                }
+              },
+              "grid_order": {
+                "mae": {
+                  "point": -0.19091668565352737,
+                  "ci_low": -0.7550087339561016,
+                  "ci_high": 0.3873718386876281,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "exact_accuracy": {
+                  "point": 0.01683754841649579,
+                  "ci_low": -0.026025290498974667,
+                  "ci_high": 0.0568597630439735,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_1": {
+                  "point": 0.003501177185387727,
+                  "ci_low": -0.06952874610769344,
+                  "ci_high": 0.07610408597250701,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_2": {
+                  "point": -0.020467836257309857,
+                  "ci_low": -0.10636629452418932,
+                  "ci_high": 0.06350060757955495,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_3": {
+                  "point": -0.005566947672210665,
+                  "ci_low": -0.08867414748993695,
+                  "ci_high": 0.07361187058555464,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "spearman": {
+                  "point": 0.0679651563471021,
+                  "ci_low": -0.027180262971578485,
+                  "ci_high": 0.1662613207721638,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_3_set_accuracy": {
+                  "point": -0.05263157894736836,
+                  "ci_low": -0.22807017543859642,
+                  "ci_high": 0.14035087719298245,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_5_set_accuracy": {
+                  "point": 0.010526315789473606,
+                  "ci_low": -0.09473684210526323,
+                  "ci_high": 0.11578947368421044,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "podium_set_accuracy": {
+                  "point": -0.10526315789473684,
+                  "ci_low": -0.3684210526315789,
+                  "ci_high": 0.15789473684210525,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                }
+              }
+            }
+          },
+          "edge_over_grid": {
+            "metric": "spearman",
+            "definition": "how much of the model's advantage over the grid was lost across the reset: (comparator model minus comparator grid) minus (transfer model minus transfer grid). Positive means the model transferred worse than the grid did. A season that was simply harder to predict cancels, because it hurt both predictors inside the same arm",
+            "pairing": "paired within each arm, unpaired across them",
+            "pairing_reason": "the two arms are scored on different races (season R against season R-1), so a paired delta is undefined; bootstrap_delta refuses mismatched race sets rather than aligning them. Each arm is resampled independently within a replicate, which is wider than a paired interval and is the honest width.",
+            "per_arm": {
+              "transfer": {
+                "point": -0.002732326110127166,
+                "ci_low": -0.051363938839744876,
+                "ci_high": 0.05399600703934363,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "comparator": {
+                "point": -0.08514071740616365,
+                "ci_low": -0.15735816814764186,
+                "ci_high": -0.011524042319236863,
+                "confidence": 0.95,
+                "excludes_zero": true
+              }
+            },
+            "lost_across_the_reset": {
+              "point": -0.08240839129603648,
+              "ci_low": -0.16817959603667818,
+              "ci_high": 0.008672122216234503,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "all_metrics": {
+              "mae": {
+                "point": 0.47414748993696354,
+                "ci_low": 0.006212690817953941,
+                "ci_high": 0.9357718159033948,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "exact_accuracy": {
+                "point": -0.025415812257917517,
+                "ci_low": -0.07063140806561857,
+                "ci_high": 0.022106117566643848,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "within_1": {
+                "point": -0.0372408293460925,
+                "ci_low": -0.09996544391281231,
+                "ci_high": 0.026784385205437827,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "within_2": {
+                "point": -0.005358092200197465,
+                "ci_low": -0.07303106250474668,
+                "ci_high": 0.06592684362421204,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "within_3": {
+                "point": -0.03594972279182807,
+                "ci_low": -0.0998775347459558,
+                "ci_high": 0.026236709197235492,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "spearman": {
+                "point": -0.08240839129603648,
+                "ci_low": -0.16817959603667818,
+                "ci_high": 0.008672122216234503,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "top_3_set_accuracy": {
+                "point": -0.07017543859649125,
+                "ci_low": -0.24561403508771928,
+                "ci_high": 0.10526315789473684,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "top_5_set_accuracy": {
+                "point": 0.021052631578947392,
+                "ci_low": -0.09473684210526315,
+                "ci_high": 0.12631578947368424,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "podium_set_accuracy": {
+                "point": 0.05263157894736842,
+                "ci_low": -0.21052631578947367,
+                "ci_high": 0.3157894736842105,
+                "confidence": 0.95,
+                "excludes_zero": false
+              }
+            }
+          }
+        },
+        {
+          "reset_season": 2017,
+          "regime": {
+            "start_season": 2017,
+            "severity": "major",
+            "description": "wider cars and tyres"
+          },
+          "label": null,
+          "meets_constitutional_minimum": true,
+          "supports_headline_claim": true,
+          "n_training_seasons": {
+            "transfer": 7,
+            "comparator": 6
+          },
+          "arms": {
+            "transfer": {
+              "split": {
+                "training_seasons": [
+                  2010,
+                  2011,
+                  2012,
+                  2013,
+                  2014,
+                  2015,
+                  2016
+                ],
+                "n_training_seasons": 7,
+                "evaluated_season": 2017,
+                "holdout_seasons": [
+                  2017
+                ],
+                "boundary_season": 2017,
+                "meets_constitutional_minimum": true,
+                "minimum_required": {
+                  "training": 5
+                },
+                "label": null
+              },
+              "races_scored": 20,
+              "rows_scored": 399,
+              "training_rows": 3029,
+              "trees_kept": 50,
+              "predictors": {
+                "grid_order": {
+                  "metrics": {
+                    "mae": {
+                      "point": 3.855526315789473,
+                      "ci_low": 3.396565789473684,
+                      "ci_high": 4.379999999999999,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "exact_accuracy": {
+                      "point": 0.14078947368421055,
+                      "ci_low": 0.10750000000000001,
+                      "ci_high": 0.17236842105263156,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_1": {
+                      "point": 0.33618421052631575,
+                      "ci_low": 0.27852631578947373,
+                      "ci_high": 0.3922368421052631,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_2": {
+                      "point": 0.471578947368421,
+                      "ci_low": 0.39905592105263155,
+                      "ci_high": 0.5397434210526315,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_3": {
+                      "point": 0.5771052631578948,
+                      "ci_low": 0.5095526315789473,
+                      "ci_high": 0.6417105263157895,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "spearman": {
+                      "point": 0.5549122807017545,
+                      "ci_low": 0.46149561403508776,
+                      "ci_high": 0.6338370927318295,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_3_set_accuracy": {
+                      "point": 0.6833333333333333,
+                      "ci_low": 0.5833333333333333,
+                      "ci_high": 0.7833333333333332,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_5_set_accuracy": {
+                      "point": 0.7400000000000001,
+                      "ci_low": 0.67,
+                      "ci_high": 0.8100000000000002,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "podium_set_accuracy": {
+                      "point": 0.25,
+                      "ci_low": 0.1,
+                      "ci_high": 0.45,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    }
+                  }
+                },
+                "xgboost_ranker": {
+                  "metrics": {
+                    "mae": {
+                      "point": 4.049736842105264,
+                      "ci_low": 3.5650000000000004,
+                      "ci_high": 4.5701118421052636,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "exact_accuracy": {
+                      "point": 0.1025,
+                      "ci_low": 0.06250000000000001,
+                      "ci_high": 0.14499999999999996,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_1": {
+                      "point": 0.3034210526315789,
+                      "ci_low": 0.24681907894736846,
+                      "ci_high": 0.35592105263157897,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_2": {
+                      "point": 0.4885526315789474,
+                      "ci_low": 0.4324901315789475,
+                      "ci_high": 0.5485526315789473,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_3": {
+                      "point": 0.5713157894736842,
+                      "ci_low": 0.5138157894736842,
+                      "ci_high": 0.63,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "spearman": {
+                      "point": 0.5363659147869673,
+                      "ci_low": 0.43165100250626576,
+                      "ci_high": 0.6305357142857142,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_3_set_accuracy": {
+                      "point": 0.5999999999999999,
+                      "ci_low": 0.5166666666666666,
+                      "ci_high": 0.6666666666666665,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_5_set_accuracy": {
+                      "point": 0.78,
+                      "ci_low": 0.7097500000000004,
+                      "ci_high": 0.85,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "podium_set_accuracy": {
+                      "point": 0.0,
+                      "ci_low": 0.0,
+                      "ci_high": 0.0,
+                      "confidence": 0.95,
+                      "excludes_zero": false
+                    }
+                  }
+                }
+              },
+              "model_minus_grid": {
+                "mae": {
+                  "point": 0.19421052631578964,
+                  "ci_low": -0.16157894736842096,
+                  "ci_high": 0.5426513157894738,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "exact_accuracy": {
+                  "point": -0.038289473684210526,
+                  "ci_low": -0.08657894736842106,
+                  "ci_high": 0.004999999999999996,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_1": {
+                  "point": -0.03276315789473684,
+                  "ci_low": -0.08776315789473683,
+                  "ci_high": 0.020000000000000004,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_2": {
+                  "point": 0.01697368421052632,
+                  "ci_low": -0.04961513157894733,
+                  "ci_high": 0.0825,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_3": {
+                  "point": -0.005789473684210511,
+                  "ci_low": -0.0606611842105263,
+                  "ci_high": 0.04750000000000001,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "spearman": {
+                  "point": -0.018546365914787005,
+                  "ci_low": -0.07604072681704266,
+                  "ci_high": 0.04251691729323299,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_3_set_accuracy": {
+                  "point": -0.08333333333333334,
+                  "ci_low": -0.16666666666666669,
+                  "ci_high": -0.01666666666666667,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "top_5_set_accuracy": {
+                  "point": 0.039999999999999994,
+                  "ci_low": -0.01000000000000002,
+                  "ci_high": 0.09000000000000001,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "podium_set_accuracy": {
+                  "point": -0.25,
+                  "ci_low": -0.45,
+                  "ci_high": -0.1,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                }
+              }
+            },
+            "comparator": {
+              "split": {
+                "training_seasons": [
+                  2010,
+                  2011,
+                  2012,
+                  2013,
+                  2014,
+                  2015
+                ],
+                "n_training_seasons": 6,
+                "evaluated_season": 2016,
+                "holdout_seasons": [
+                  2016
+                ],
+                "boundary_season": 2016,
+                "meets_constitutional_minimum": true,
+                "minimum_required": {
+                  "training": 5
+                },
+                "label": null
+              },
+              "races_scored": 21,
+              "rows_scored": 457,
+              "training_rows": 2572,
+              "trees_kept": 25,
+              "predictors": {
+                "grid_order": {
+                  "metrics": {
+                    "mae": {
+                      "point": 3.791341991341991,
+                      "ci_low": 3.219724799010514,
+                      "ci_high": 4.355621521335807,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "exact_accuracy": {
+                      "point": 0.14626881055452481,
+                      "ci_low": 0.11209441352298495,
+                      "ci_high": 0.1823464234178519,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_1": {
+                      "point": 0.3474129045557617,
+                      "ci_low": 0.28319830962688103,
+                      "ci_high": 0.41249381570810134,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_2": {
+                      "point": 0.5031849103277674,
+                      "ci_low": 0.43927772624201195,
+                      "ci_high": 0.5672077922077922,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_3": {
+                      "point": 0.6212224283652856,
+                      "ci_low": 0.5642210368996083,
+                      "ci_high": 0.6777131003916718,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "spearman": {
+                      "point": 0.6149942897899748,
+                      "ci_low": 0.5205261070519327,
+                      "ci_high": 0.7119611670339032,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_3_set_accuracy": {
+                      "point": 0.6984126984126983,
+                      "ci_low": 0.5714285714285714,
+                      "ci_high": 0.8095238095238095,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_5_set_accuracy": {
+                      "point": 0.6952380952380953,
+                      "ci_low": 0.6190476190476191,
+                      "ci_high": 0.7714285714285716,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "podium_set_accuracy": {
+                      "point": 0.38095238095238093,
+                      "ci_low": 0.19047619047619047,
+                      "ci_high": 0.5714285714285714,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    }
+                  }
+                },
+                "xgboost_ranker": {
+                  "metrics": {
+                    "mae": {
+                      "point": 3.7846217274788696,
+                      "ci_low": 3.220789527932385,
+                      "ci_high": 4.32170892599464,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "exact_accuracy": {
+                      "point": 0.1351370851370851,
+                      "ci_low": 0.10732529375386518,
+                      "ci_high": 0.16296639868068435,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_1": {
+                      "point": 0.3022778808493094,
+                      "ci_low": 0.25898088023088023,
+                      "ci_high": 0.34952690166975875,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_2": {
+                      "point": 0.45504019789734074,
+                      "ci_low": 0.3901932591218306,
+                      "ci_high": 0.5226886209029066,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_3": {
+                      "point": 0.5716656359513502,
+                      "ci_low": 0.4983482787054216,
+                      "ci_high": 0.6459570191713049,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "spearman": {
+                      "point": 0.6518982379721184,
+                      "ci_low": 0.5610052446191709,
+                      "ci_high": 0.74426369424408,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_3_set_accuracy": {
+                      "point": 0.6349206349206348,
+                      "ci_low": 0.5238095238095238,
+                      "ci_high": 0.7301587301587301,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_5_set_accuracy": {
+                      "point": 0.7523809523809525,
+                      "ci_low": 0.6761904761904762,
+                      "ci_high": 0.8285714285714285,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "podium_set_accuracy": {
+                      "point": 0.19047619047619047,
+                      "ci_low": 0.047619047619047616,
+                      "ci_high": 0.38095238095238093,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    }
+                  }
+                }
+              },
+              "model_minus_grid": {
+                "mae": {
+                  "point": -0.006720263863120978,
+                  "ci_low": -0.244004329004329,
+                  "ci_high": 0.23707482993197268,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "exact_accuracy": {
+                  "point": -0.011131725417439703,
+                  "ci_low": -0.04390847247990105,
+                  "ci_high": 0.017357245928674277,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_1": {
+                  "point": -0.04513502370645228,
+                  "ci_low": -0.10192769532055246,
+                  "ci_high": 0.007536848072562349,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_2": {
+                  "point": -0.048144712430426714,
+                  "ci_low": -0.08317872603586889,
+                  "ci_high": -0.013203463203463193,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "within_3": {
+                  "point": -0.049556792413935256,
+                  "ci_low": -0.09078540507111932,
+                  "ci_high": -0.00809369202226347,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "spearman": {
+                  "point": 0.036903948182143674,
+                  "ci_low": -0.010672279937562675,
+                  "ci_high": 0.08591592971700841,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_3_set_accuracy": {
+                  "point": -0.0634920634920635,
+                  "ci_low": -0.14285714285714288,
+                  "ci_high": -2.64338815386942e-18,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "top_5_set_accuracy": {
+                  "point": 0.05714285714285715,
+                  "ci_low": -0.009523809523809516,
+                  "ci_high": 0.13333333333333333,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "podium_set_accuracy": {
+                  "point": -0.19047619047619047,
+                  "ci_low": -0.38095238095238093,
+                  "ci_high": -0.047619047619047616,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                }
+              }
+            }
+          },
+          "penalty": {
+            "metric": "spearman",
+            "definition": "comparator score minus transfer score on the primary metric; positive means the reset season cost the model performance",
+            "pairing": "unavailable",
+            "pairing_reason": "the two arms are scored on different races (season R against season R-1), so a paired delta is undefined; bootstrap_delta refuses mismatched race sets rather than aligning them. Each arm is resampled independently within a replicate, which is wider than a paired interval and is the honest width.",
+            "interval_method": "unpaired race bootstrap, 2000 replicates, each arm resampled independently within a replicate",
+            "xgboost_ranker": {
+              "point": 0.11553232318515116,
+              "ci_low": -0.019941530138162914,
+              "ci_high": 0.2552145701634097,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "grid_order": {
+              "point": 0.06008200908822037,
+              "ci_low": -0.0704635735300986,
+              "ci_high": 0.19920908779571733,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "all_metrics": {
+              "xgboost_ranker": {
+                "mae": {
+                  "point": -0.26511511462639437,
+                  "ci_low": -0.9960404393017172,
+                  "ci_high": 0.49316879590751733,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "exact_accuracy": {
+                  "point": 0.03263708513708512,
+                  "ci_low": -0.016656243558029287,
+                  "ci_high": 0.07955805504019785,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_1": {
+                  "point": -0.0011431717822695253,
+                  "ci_low": -0.07331000051535767,
+                  "ci_high": 0.07635244021851152,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_2": {
+                  "point": -0.03351243368160667,
+                  "ci_low": -0.12381820148314517,
+                  "ci_high": 0.0534102111338953,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_3": {
+                  "point": 0.00034984647766600485,
+                  "ci_low": -0.09599004274756147,
+                  "ci_high": 0.09728491344703735,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "spearman": {
+                  "point": 0.11553232318515116,
+                  "ci_low": -0.019941530138162914,
+                  "ci_high": 0.2552145701634097,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_3_set_accuracy": {
+                  "point": 0.03492063492063491,
+                  "ci_low": -0.09365079365079354,
+                  "ci_high": 0.16666666666666663,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_5_set_accuracy": {
+                  "point": -0.027619047619047543,
+                  "ci_low": -0.12667857142857145,
+                  "ci_high": 0.07761904761904759,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "podium_set_accuracy": {
+                  "point": 0.19047619047619047,
+                  "ci_low": 0.047619047619047616,
+                  "ci_high": 0.38095238095238093,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                }
+              },
+              "grid_order": {
+                "mae": {
+                  "point": -0.06418432444748223,
+                  "ci_low": -0.8194267934446485,
+                  "ci_high": 0.6987551373021293,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "exact_accuracy": {
+                  "point": 0.005479336870314266,
+                  "ci_low": -0.04319792921155703,
+                  "ci_high": 0.05090283066974792,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_1": {
+                  "point": 0.01122869402944593,
+                  "ci_low": -0.07573506140893357,
+                  "ci_high": 0.09961670477600919,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_2": {
+                  "point": 0.03160596295934637,
+                  "ci_low": -0.06386432667165745,
+                  "ci_high": 0.13086404390304768,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_3": {
+                  "point": 0.04411716520739084,
+                  "ci_low": -0.043662622465253896,
+                  "ci_high": 0.13324516784385204,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "spearman": {
+                  "point": 0.06008200908822037,
+                  "ci_low": -0.0704635735300986,
+                  "ci_high": 0.19920908779571733,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_3_set_accuracy": {
+                  "point": 0.015079365079364915,
+                  "ci_low": -0.14527777777777776,
+                  "ci_high": 0.16351190476190464,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_5_set_accuracy": {
+                  "point": -0.04476190476190478,
+                  "ci_low": -0.15952380952380962,
+                  "ci_high": 0.06285714285714294,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "podium_set_accuracy": {
+                  "point": 0.13095238095238093,
+                  "ci_low": -0.15714285714285714,
+                  "ci_high": 0.4214285714285714,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                }
+              }
+            }
+          },
+          "edge_over_grid": {
+            "metric": "spearman",
+            "definition": "how much of the model's advantage over the grid was lost across the reset: (comparator model minus comparator grid) minus (transfer model minus transfer grid). Positive means the model transferred worse than the grid did. A season that was simply harder to predict cancels, because it hurt both predictors inside the same arm",
+            "pairing": "paired within each arm, unpaired across them",
+            "pairing_reason": "the two arms are scored on different races (season R against season R-1), so a paired delta is undefined; bootstrap_delta refuses mismatched race sets rather than aligning them. Each arm is resampled independently within a replicate, which is wider than a paired interval and is the honest width.",
+            "per_arm": {
+              "transfer": {
+                "point": -0.018546365914787005,
+                "ci_low": -0.07604072681704266,
+                "ci_high": 0.04251691729323299,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "comparator": {
+                "point": 0.036903948182143674,
+                "ci_low": -0.010672279937562675,
+                "ci_high": 0.08591592971700841,
+                "confidence": 0.95,
+                "excludes_zero": false
+              }
+            },
+            "lost_across_the_reset": {
+              "point": 0.05545031409693068,
+              "ci_low": -0.02200364972283896,
+              "ci_high": 0.13134402423336713,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "all_metrics": {
+              "mae": {
+                "point": -0.2009307901789106,
+                "ci_low": -0.6315183996246028,
+                "ci_high": 0.2443470404908369,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "exact_accuracy": {
+                "point": 0.027157748266770823,
+                "ci_low": -0.02791581768273497,
+                "ci_high": 0.08380317812930593,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "within_1": {
+                "point": -0.01237186581171544,
+                "ci_low": -0.09107773831223077,
+                "ci_high": 0.06616413666742606,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "within_2": {
+                "point": -0.06511839664095304,
+                "ci_low": -0.13805732065553494,
+                "ci_high": 0.00841646730462517,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "within_3": {
+                "point": -0.043767318729724745,
+                "ci_low": -0.10986185973591986,
+                "ci_high": 0.025010949994032684,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "spearman": {
+                "point": 0.05545031409693068,
+                "ci_low": -0.02200364972283896,
+                "ci_high": 0.13134402423336713,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "top_3_set_accuracy": {
+                "point": 0.01984126984126984,
+                "ci_low": -0.09285714285714286,
+                "ci_high": 0.11825396825396828,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "top_5_set_accuracy": {
+                "point": 0.017142857142857154,
+                "ci_low": -0.06952380952380952,
+                "ci_high": 0.10523809523809524,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "podium_set_accuracy": {
+                "point": 0.059523809523809534,
+                "ci_low": -0.1857142857142857,
+                "ci_high": 0.3047619047619048,
+                "confidence": 0.95,
+                "excludes_zero": false
+              }
+            }
+          }
+        },
+        {
+          "reset_season": 2022,
+          "regime": {
+            "start_season": 2022,
+            "severity": "major",
+            "description": "ground effect, full chassis reset"
+          },
+          "label": null,
+          "meets_constitutional_minimum": true,
+          "supports_headline_claim": true,
+          "n_training_seasons": {
+            "transfer": 12,
+            "comparator": 11
+          },
+          "arms": {
+            "transfer": {
+              "split": {
+                "training_seasons": [
+                  2010,
+                  2011,
+                  2012,
+                  2013,
+                  2014,
+                  2015,
+                  2016,
+                  2017,
+                  2018,
+                  2019,
+                  2020,
+                  2021
+                ],
+                "n_training_seasons": 12,
+                "evaluated_season": 2022,
+                "holdout_seasons": [
+                  2022
+                ],
+                "boundary_season": 2022,
+                "meets_constitutional_minimum": true,
+                "minimum_required": {
+                  "training": 5
+                },
+                "label": null
+              },
+              "races_scored": 22,
+              "rows_scored": 439,
+              "training_rows": 5042,
+              "trees_kept": 2,
+              "predictors": {
+                "grid_order": {
+                  "metrics": {
+                    "mae": {
+                      "point": 4.096411483253589,
+                      "ci_low": 3.660023923444976,
+                      "ci_high": 4.559090909090909,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "exact_accuracy": {
+                      "point": 0.13241626794258374,
+                      "ci_low": 0.09832535885167464,
+                      "ci_high": 0.16939294258373197,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_1": {
+                      "point": 0.32392344497607656,
+                      "ci_low": 0.27284389952153115,
+                      "ci_high": 0.3772757177033493,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_2": {
+                      "point": 0.4854066985645934,
+                      "ci_low": 0.4318181818181818,
+                      "ci_high": 0.5370813397129187,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_3": {
+                      "point": 0.5925837320574162,
+                      "ci_low": 0.5425837320574164,
+                      "ci_high": 0.6407894736842104,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "spearman": {
+                      "point": 0.4925951241740716,
+                      "ci_low": 0.4082587149692412,
+                      "ci_high": 0.5751304397357028,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_3_set_accuracy": {
+                      "point": 0.5606060606060604,
+                      "ci_low": 0.4848484848484848,
+                      "ci_high": 0.6363636363636362,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_5_set_accuracy": {
+                      "point": 0.6545454545454545,
+                      "ci_low": 0.5906818181818185,
+                      "ci_high": 0.7272727272727273,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "podium_set_accuracy": {
+                      "point": 0.045454545454545456,
+                      "ci_low": 0.0,
+                      "ci_high": 0.13636363636363635,
+                      "confidence": 0.95,
+                      "excludes_zero": false
+                    }
+                  }
+                },
+                "xgboost_ranker": {
+                  "metrics": {
+                    "mae": {
+                      "point": 4.099282296650718,
+                      "ci_low": 3.7114055023923447,
+                      "ci_high": 4.491004784688995,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "exact_accuracy": {
+                      "point": 0.10478468899521533,
+                      "ci_low": 0.07523923444976079,
+                      "ci_high": 0.13636363636363635,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_1": {
+                      "point": 0.291866028708134,
+                      "ci_low": 0.25,
+                      "ci_high": 0.3314593301435407,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_2": {
+                      "point": 0.4418660287081341,
+                      "ci_low": 0.40322966507177027,
+                      "ci_high": 0.4782296650717703,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_3": {
+                      "point": 0.5490430622009569,
+                      "ci_low": 0.4990430622009569,
+                      "ci_high": 0.5945215311004783,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "spearman": {
+                      "point": 0.5223513328776487,
+                      "ci_low": 0.4438038277511961,
+                      "ci_high": 0.5995933014354067,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_3_set_accuracy": {
+                      "point": 0.6515151515151515,
+                      "ci_low": 0.5454545454545454,
+                      "ci_high": 0.7575757575757577,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_5_set_accuracy": {
+                      "point": 0.6909090909090909,
+                      "ci_low": 0.6363636363636364,
+                      "ci_high": 0.7454545454545456,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "podium_set_accuracy": {
+                      "point": 0.2727272727272727,
+                      "ci_low": 0.09090909090909091,
+                      "ci_high": 0.45454545454545453,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    }
+                  }
+                }
+              },
+              "model_minus_grid": {
+                "mae": {
+                  "point": 0.0028708133971291957,
+                  "ci_low": -0.38811004784688985,
+                  "ci_high": 0.3581877990430618,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "exact_accuracy": {
+                  "point": -0.027631578947368417,
+                  "ci_low": -0.06399521531100476,
+                  "ci_high": 0.0068181818181818205,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_1": {
+                  "point": -0.03205741626794258,
+                  "ci_low": -0.06866626794258375,
+                  "ci_high": 0.0063397129186602815,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_2": {
+                  "point": -0.04354066985645933,
+                  "ci_low": -0.09319078947368421,
+                  "ci_high": 0.006818181818181814,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_3": {
+                  "point": -0.043540669856459324,
+                  "ci_low": -0.09354066985645931,
+                  "ci_high": 0.009090909090909087,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "spearman": {
+                  "point": 0.029756208703577113,
+                  "ci_low": -0.03962747778537253,
+                  "ci_high": 0.10342902711323752,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_3_set_accuracy": {
+                  "point": 0.09090909090909093,
+                  "ci_low": -0.030303030303030297,
+                  "ci_high": 0.22727272727272727,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_5_set_accuracy": {
+                  "point": 0.03636363636363636,
+                  "ci_low": -0.03636363636363637,
+                  "ci_high": 0.10909090909090911,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "podium_set_accuracy": {
+                  "point": 0.22727272727272727,
+                  "ci_low": 0.09090909090909091,
+                  "ci_high": 0.4090909090909091,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                }
+              }
+            },
+            "comparator": {
+              "split": {
+                "training_seasons": [
+                  2010,
+                  2011,
+                  2012,
+                  2013,
+                  2014,
+                  2015,
+                  2016,
+                  2017,
+                  2018,
+                  2019,
+                  2020
+                ],
+                "n_training_seasons": 11,
+                "evaluated_season": 2021,
+                "holdout_seasons": [
+                  2021
+                ],
+                "boundary_season": 2021,
+                "meets_constitutional_minimum": true,
+                "minimum_required": {
+                  "training": 5
+                },
+                "label": null
+              },
+              "races_scored": 22,
+              "rows_scored": 437,
+              "training_rows": 4605,
+              "trees_kept": 24,
+              "predictors": {
+                "grid_order": {
+                  "metrics": {
+                    "mae": {
+                      "point": 3.5416267942583732,
+                      "ci_low": 3.066333732057417,
+                      "ci_high": 4.098654306220096,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "exact_accuracy": {
+                      "point": 0.13983253588516745,
+                      "ci_low": 0.10167464114832535,
+                      "ci_high": 0.18146531100478464,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_1": {
+                      "point": 0.3572966507177034,
+                      "ci_low": 0.28708133971291866,
+                      "ci_high": 0.42703349282296643,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_2": {
+                      "point": 0.5287081339712918,
+                      "ci_low": 0.45870514354066994,
+                      "ci_high": 0.6035915071770335,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_3": {
+                      "point": 0.6435406698564594,
+                      "ci_low": 0.5746381578947369,
+                      "ci_high": 0.7035944976076557,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "spearman": {
+                      "point": 0.59833675096833,
+                      "ci_low": 0.49157723855092267,
+                      "ci_high": 0.6895722260195944,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_3_set_accuracy": {
+                      "point": 0.5909090909090907,
+                      "ci_low": 0.4696969696969697,
+                      "ci_high": 0.6969696969696969,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_5_set_accuracy": {
+                      "point": 0.6363636363636364,
+                      "ci_low": 0.5636363636363636,
+                      "ci_high": 0.7090909090909091,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "podium_set_accuracy": {
+                      "point": 0.18181818181818182,
+                      "ci_low": 0.045454545454545456,
+                      "ci_high": 0.3193181818181756,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    }
+                  }
+                },
+                "xgboost_ranker": {
+                  "metrics": {
+                    "mae": {
+                      "point": 3.4808612440191395,
+                      "ci_low": 3.061722488038278,
+                      "ci_high": 3.9402332535885165,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "exact_accuracy": {
+                      "point": 0.09138755980861245,
+                      "ci_low": 0.06434808612440193,
+                      "ci_high": 0.11866028708133972,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_1": {
+                      "point": 0.34294258373205744,
+                      "ci_low": 0.29005980861244024,
+                      "ci_high": 0.4005980861244019,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_2": {
+                      "point": 0.4941387559808612,
+                      "ci_low": 0.4358522727272728,
+                      "ci_high": 0.5492882775119617,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "within_3": {
+                      "point": 0.6336124401913875,
+                      "ci_low": 0.569372009569378,
+                      "ci_high": 0.6909090909090908,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "spearman": {
+                      "point": 0.6469013442697653,
+                      "ci_low": 0.5631274208247894,
+                      "ci_high": 0.7216695146958305,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_3_set_accuracy": {
+                      "point": 0.6363636363636364,
+                      "ci_low": 0.5151515151515151,
+                      "ci_high": 0.7575757575757575,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "top_5_set_accuracy": {
+                      "point": 0.6272727272727274,
+                      "ci_low": 0.5543181818181823,
+                      "ci_high": 0.7090909090909092,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    },
+                    "podium_set_accuracy": {
+                      "point": 0.2727272727272727,
+                      "ci_low": 0.09090909090909091,
+                      "ci_high": 0.45454545454545453,
+                      "confidence": 0.95,
+                      "excludes_zero": true
+                    }
+                  }
+                }
+              },
+              "model_minus_grid": {
+                "mae": {
+                  "point": -0.0607655502392344,
+                  "ci_low": -0.45173444976076527,
+                  "ci_high": 0.2897607655502391,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "exact_accuracy": {
+                  "point": -0.04844497607655502,
+                  "ci_low": -0.0868480861244019,
+                  "ci_high": -0.007775119617224876,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "within_1": {
+                  "point": -0.014354066985645932,
+                  "ci_low": -0.07237440191387559,
+                  "ci_high": 0.05251794258373205,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_2": {
+                  "point": -0.034569377990430625,
+                  "ci_low": -0.1007177033492823,
+                  "ci_high": 0.029665071770334915,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_3": {
+                  "point": -0.009928229665071803,
+                  "ci_low": -0.0681818181818182,
+                  "ci_high": 0.04234449760765547,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "spearman": {
+                  "point": 0.048564593301435414,
+                  "ci_low": -0.013512189564821149,
+                  "ci_high": 0.11932786511733871,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_3_set_accuracy": {
+                  "point": 0.04545454545454548,
+                  "ci_low": -0.06098484848484782,
+                  "ci_high": 0.15151515151515155,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_5_set_accuracy": {
+                  "point": -0.009090909090909077,
+                  "ci_low": -0.08181818181818179,
+                  "ci_high": 0.06363636363636363,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "podium_set_accuracy": {
+                  "point": 0.09090909090909091,
+                  "ci_low": -0.09090909090909091,
+                  "ci_high": 0.2727272727272727,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                }
+              }
+            }
+          },
+          "penalty": {
+            "metric": "spearman",
+            "definition": "comparator score minus transfer score on the primary metric; positive means the reset season cost the model performance",
+            "pairing": "unavailable",
+            "pairing_reason": "the two arms are scored on different races (season R against season R-1), so a paired delta is undefined; bootstrap_delta refuses mismatched race sets rather than aligning them. Each arm is resampled independently within a replicate, which is wider than a paired interval and is the honest width.",
+            "interval_method": "unpaired race bootstrap, 2000 replicates, each arm resampled independently within a replicate",
+            "xgboost_ranker": {
+              "point": 0.12455001139211663,
+              "ci_low": 0.015009968102073551,
+              "ci_high": 0.238928286625655,
+              "confidence": 0.95,
+              "excludes_zero": true
+            },
+            "grid_order": {
+              "point": 0.10574162679425836,
+              "ci_low": -0.021773182957393597,
+              "ci_high": 0.2397858282068808,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "all_metrics": {
+              "xgboost_ranker": {
+                "mae": {
+                  "point": -0.6184210526315783,
+                  "ci_low": -1.2319078947368434,
+                  "ci_high": -0.050693779904306534,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "exact_accuracy": {
+                  "point": -0.01339712918660288,
+                  "ci_low": -0.05633971291866022,
+                  "ci_high": 0.027272727272727254,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_1": {
+                  "point": 0.05107655502392344,
+                  "ci_low": -0.013403110047846861,
+                  "ci_high": 0.12440490430622006,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_2": {
+                  "point": 0.05227272727272714,
+                  "ci_low": -0.015559210526315715,
+                  "ci_high": 0.12093899521531098,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_3": {
+                  "point": 0.08456937799043063,
+                  "ci_low": 0.005738636363636162,
+                  "ci_high": 0.16340311004784674,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "spearman": {
+                  "point": 0.12455001139211663,
+                  "ci_low": 0.015009968102073551,
+                  "ci_high": 0.238928286625655,
+                  "confidence": 0.95,
+                  "excludes_zero": true
+                },
+                "top_3_set_accuracy": {
+                  "point": -0.015151515151515138,
+                  "ci_low": -0.18181818181818166,
+                  "ci_high": 0.15151515151515138,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_5_set_accuracy": {
+                  "point": -0.06363636363636349,
+                  "ci_low": -0.16363636363636347,
+                  "ci_high": 0.036363636363636265,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "podium_set_accuracy": {
+                  "point": 0.0,
+                  "ci_low": -0.2727272727272727,
+                  "ci_high": 0.2727272727272727,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                }
+              },
+              "grid_order": {
+                "mae": {
+                  "point": -0.5547846889952157,
+                  "ci_low": -1.2555203349282285,
+                  "ci_high": 0.11867224880382736,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "exact_accuracy": {
+                  "point": 0.00741626794258371,
+                  "ci_low": -0.04916866028708132,
+                  "ci_high": 0.06245514354066979,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_1": {
+                  "point": 0.03337320574162683,
+                  "ci_low": -0.055992822966507094,
+                  "ci_high": 0.12226375598086119,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_2": {
+                  "point": 0.043301435406698396,
+                  "ci_low": -0.04558612440191411,
+                  "ci_high": 0.13649820574162663,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "within_3": {
+                  "point": 0.0509569377990432,
+                  "ci_low": -0.028364234449760703,
+                  "ci_high": 0.1318211722488036,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "spearman": {
+                  "point": 0.10574162679425836,
+                  "ci_low": -0.021773182957393597,
+                  "ci_high": 0.2397858282068808,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_3_set_accuracy": {
+                  "point": 0.030303030303030276,
+                  "ci_low": -0.10606060606060602,
+                  "ci_high": 0.16666666666666663,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "top_5_set_accuracy": {
+                  "point": -0.018181818181818188,
+                  "ci_low": -0.11818181818181828,
+                  "ci_high": 0.09090909090909083,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                },
+                "podium_set_accuracy": {
+                  "point": 0.13636363636363635,
+                  "ci_low": -0.045454545454545456,
+                  "ci_high": 0.3181818181818182,
+                  "confidence": 0.95,
+                  "excludes_zero": false
+                }
+              }
+            }
+          },
+          "edge_over_grid": {
+            "metric": "spearman",
+            "definition": "how much of the model's advantage over the grid was lost across the reset: (comparator model minus comparator grid) minus (transfer model minus transfer grid). Positive means the model transferred worse than the grid did. A season that was simply harder to predict cancels, because it hurt both predictors inside the same arm",
+            "pairing": "paired within each arm, unpaired across them",
+            "pairing_reason": "the two arms are scored on different races (season R against season R-1), so a paired delta is undefined; bootstrap_delta refuses mismatched race sets rather than aligning them. Each arm is resampled independently within a replicate, which is wider than a paired interval and is the honest width.",
+            "per_arm": {
+              "transfer": {
+                "point": 0.029756208703577113,
+                "ci_low": -0.03962747778537253,
+                "ci_high": 0.10342902711323752,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "comparator": {
+                "point": 0.048564593301435414,
+                "ci_low": -0.013512189564821149,
+                "ci_high": 0.11932786511733871,
+                "confidence": 0.95,
+                "excludes_zero": false
+              }
+            },
+            "lost_across_the_reset": {
+              "point": 0.018808384597858302,
+              "ci_low": -0.08293546365914782,
+              "ci_high": 0.12115971747550683,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "all_metrics": {
+              "mae": {
+                "point": -0.06363636363636359,
+                "ci_low": -0.6041267942583728,
+                "ci_high": 0.4792464114832533,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "exact_accuracy": {
+                "point": -0.020813397129186603,
+                "ci_low": -0.0730891148325359,
+                "ci_high": 0.036244019138755974,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "within_1": {
+                "point": 0.01770334928229665,
+                "ci_low": -0.054545454545454536,
+                "ci_high": 0.09737440191387557,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "within_2": {
+                "point": 0.008971291866028706,
+                "ci_low": -0.07571770334928231,
+                "ci_high": 0.0893720095693779,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "within_3": {
+                "point": 0.033612440191387524,
+                "ci_low": -0.03971590909090913,
+                "ci_high": 0.10873504784688988,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "spearman": {
+                "point": 0.018808384597858302,
+                "ci_low": -0.08293546365914782,
+                "ci_high": 0.12115971747550683,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "top_3_set_accuracy": {
+                "point": -0.04545454545454545,
+                "ci_low": -0.21212121212121215,
+                "ci_high": 0.12121212121212122,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "top_5_set_accuracy": {
+                "point": -0.04545454545454544,
+                "ci_low": -0.14545454545454548,
+                "ci_high": 0.05454545454545454,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "podium_set_accuracy": {
+                "point": -0.13636363636363635,
+                "ci_low": -0.40909090909090906,
+                "ci_high": 0.09204545454544838,
+                "confidence": 0.95,
+                "excludes_zero": false
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "headline": {
+    "metric": "spearman",
+    "n": 2,
+    "transitions": [
+      2017,
+      2022
+    ],
+    "diagnostic_transitions": [
+      2014
+    ],
+    "pairing": "unavailable",
+    "statement": "Regulation-transfer penalty measured on n=2 compliant transition(s) [2017, 2022]; [2014] reported as DIAGNOSTIC and excluded from this count (FR-511a). Two observations are two observations: they are not averaged into a rate.",
+    "by_decay": {
+      "0": {
+        "observations": [
+          {
+            "reset_season": 2017,
+            "n_training_seasons": 7,
+            "penalty": {
+              "point": 0.08951676197835079,
+              "ci_low": -0.02457822174012083,
+              "ci_high": 0.22426562771977937,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "grid_penalty": {
+              "point": 0.06008200908822037,
+              "ci_low": -0.0704635735300986,
+              "ci_high": 0.19920908779571733,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "edge_lost_across_the_reset": {
+              "point": 0.029434752890130464,
+              "ci_low": -0.023557191963533883,
+              "ci_high": 0.08396843888377069,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "label": null
+          },
+          {
+            "reset_season": 2022,
+            "n_training_seasons": 12,
+            "penalty": {
+              "point": 0.0724196855775805,
+              "ci_low": -0.044126509455457034,
+              "ci_high": 0.18560947824105717,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "grid_penalty": {
+              "point": 0.10574162679425836,
+              "ci_low": -0.021773182957393597,
+              "ci_high": 0.2397858282068808,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "edge_lost_across_the_reset": {
+              "point": -0.03332194121667806,
+              "ci_low": -0.12676720209614942,
+              "ci_high": 0.057896445659603564,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "label": null
+          }
+        ],
+        "diagnostics": [
+          {
+            "reset_season": 2014,
+            "n_training_seasons": 4,
+            "penalty": {
+              "point": -0.04803038752426281,
+              "ci_low": -0.141059834420668,
+              "ci_high": 0.05614054332713768,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "grid_penalty": {
+              "point": 0.0679651563471021,
+              "ci_low": -0.027180262971578485,
+              "ci_high": 0.1662613207721638,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "edge_lost_across_the_reset": {
+              "point": -0.11599554387136485,
+              "ci_low": -0.2007424368475122,
+              "ci_high": -0.03575024809174779,
+              "confidence": 0.95,
+              "excludes_zero": true
+            },
+            "label": "DIAGNOSTIC"
+          }
+        ]
+      },
+      "0.25": {
+        "observations": [
+          {
+            "reset_season": 2017,
+            "n_training_seasons": 7,
+            "penalty": {
+              "point": 0.11553232318515116,
+              "ci_low": -0.019941530138162914,
+              "ci_high": 0.2552145701634097,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "grid_penalty": {
+              "point": 0.06008200908822037,
+              "ci_low": -0.0704635735300986,
+              "ci_high": 0.19920908779571733,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "edge_lost_across_the_reset": {
+              "point": 0.05545031409693068,
+              "ci_low": -0.02200364972283896,
+              "ci_high": 0.13134402423336713,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "label": null
+          },
+          {
+            "reset_season": 2022,
+            "n_training_seasons": 12,
+            "penalty": {
+              "point": 0.12455001139211663,
+              "ci_low": 0.015009968102073551,
+              "ci_high": 0.238928286625655,
+              "confidence": 0.95,
+              "excludes_zero": true
+            },
+            "grid_penalty": {
+              "point": 0.10574162679425836,
+              "ci_low": -0.021773182957393597,
+              "ci_high": 0.2397858282068808,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "edge_lost_across_the_reset": {
+              "point": 0.018808384597858302,
+              "ci_low": -0.08293546365914782,
+              "ci_high": 0.12115971747550683,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "label": null
+          }
+        ],
+        "diagnostics": [
+          {
+            "reset_season": 2014,
+            "n_training_seasons": 4,
+            "penalty": {
+              "point": -0.014443234948934514,
+              "ci_low": -0.11733964434207443,
+              "ci_high": 0.09180139995297153,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "grid_penalty": {
+              "point": 0.0679651563471021,
+              "ci_low": -0.027180262971578485,
+              "ci_high": 0.1662613207721638,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "edge_lost_across_the_reset": {
+              "point": -0.08240839129603648,
+              "ci_low": -0.16817959603667818,
+              "ci_high": 0.008672122216234503,
+              "confidence": 0.95,
+              "excludes_zero": false
+            },
+            "label": "DIAGNOSTIC"
+          }
+        ]
+      }
+    }
+  },
+  "recency_weighting": {
+    "reference_decay": 0.0,
+    "comparisons": [
+      {
+        "reset_season": 2014,
+        "recency_decay": 0.25,
+        "label": "DIAGNOSTIC",
+        "penalty_at_zero_decay": -0.04803038752426281,
+        "penalty_at_this_decay": -0.014443234948934514,
+        "change": 0.033587152575328294,
+        "reduced_the_penalty": false
+      },
+      {
+        "reset_season": 2017,
+        "recency_decay": 0.25,
+        "label": null,
+        "penalty_at_zero_decay": 0.08951676197835079,
+        "penalty_at_this_decay": 0.11553232318515116,
+        "change": 0.026015561206800375,
+        "reduced_the_penalty": false
+      },
+      {
+        "reset_season": 2022,
+        "recency_decay": 0.25,
+        "label": null,
+        "penalty_at_zero_decay": 0.0724196855775805,
+        "penalty_at_this_decay": 0.12455001139211663,
+        "change": 0.05213032581453614,
+        "reduced_the_penalty": false
+      }
+    ],
+    "reduced_the_penalty_on_every_compliant_transition": false,
+    "compliant_transitions_considered": [
+      2017,
+      2022
+    ]
+  }
+}

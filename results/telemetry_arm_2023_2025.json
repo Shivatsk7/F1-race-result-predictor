@@ -1,0 +1,2039 @@
+{
+  "task": "T-216",
+  "requirements": [
+    "FR-213",
+    "FR-214",
+    "FR-215",
+    "FR-501",
+    "AC-19"
+  ],
+  "generated": "2026-09-02",
+  "code_commit": "e2f8def52d899c3e272cb562942c2a5081d974bc-dirty",
+  "question": "What do the telemetry features add, measured on the seasons the telemetry source covers?",
+  "primary_metric": "spearman",
+  "seasons": {
+    "source_start_season": 2018,
+    "telemetry_covered": [
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "n_telemetry_covered": 8,
+    "collected_corpus_seasons": [
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "n_collected_corpus_seasons": 16,
+    "seasons_this_arm_cannot_speak_about": [
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017
+    ],
+    "training_seasons": [
+      2018,
+      2019,
+      2020,
+      2021,
+      2022
+    ],
+    "holdout_seasons": [
+      2023,
+      2024,
+      2025
+    ],
+    "reduced_season_count": "Every number in this file rests on 8 of the corpus's 16 collected seasons (2018-2025), because FR-214 leaves the telemetry features undefined before 2018.",
+    "not_the_headline_run": "Both arms train on the covered seasons only, so the 'primary' arm here is a like-for-like control and not the project's model. Neither arm's score is comparable with results/model_vs_baselines_2023_2025.json, which rests on the full corpus; only the delta between the two arms is."
+  },
+  "split": {
+    "window": {
+      "width": 8,
+      "as_of": "2026-09-03",
+      "seasons": [
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "first_season": 2018,
+      "last_season": 2025
+    },
+    "training_seasons": [
+      2018,
+      2019,
+      2020,
+      2021,
+      2022
+    ],
+    "holdout_seasons": [
+      2023,
+      2024,
+      2025
+    ],
+    "boundary_season": 2023,
+    "n_training_seasons": 5,
+    "n_holdout_seasons": 3,
+    "meets_constitutional_minimum": true,
+    "minimum_required": {
+      "total": 8,
+      "training": 5,
+      "holdout": 3
+    }
+  },
+  "arms": {
+    "primary": {
+      "feature_set": "primary",
+      "n_features": 40,
+      "predictor": "xgboost_ranker_primary",
+      "corpus_rows": 3440,
+      "absent_sources": [],
+      "metrics": {
+        "mae": {
+          "point": 3.5509022556390972,
+          "ci_low": 3.3169135338345868,
+          "ci_high": 3.787748120300752,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "exact_accuracy": {
+          "point": 0.11813700918964078,
+          "ci_low": 0.10210515873015873,
+          "ci_high": 0.13390841687552216,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_1": {
+          "point": 0.32428571428571434,
+          "ci_low": 0.29563909774436087,
+          "ci_high": 0.35244360902255634,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_2": {
+          "point": 0.48775271512113616,
+          "ci_low": 0.45770937761069336,
+          "ci_high": 0.5196258354218882,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_3": {
+          "point": 0.6168170426065163,
+          "ci_low": 0.5868020050125315,
+          "ci_high": 0.6483580827067668,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "spearman": {
+          "point": 0.6371990901623806,
+          "ci_low": 0.5902862250163223,
+          "ci_high": 0.6827932067563866,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "top_3_set_accuracy": {
+          "point": 0.5857142857142857,
+          "ci_low": 0.5332142857142859,
+          "ci_high": 0.6428571428571428,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "top_5_set_accuracy": {
+          "point": 0.7142857142857143,
+          "ci_low": 0.677142857142857,
+          "ci_high": 0.7542857142857141,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "podium_set_accuracy": {
+          "point": 0.11428571428571428,
+          "ci_low": 0.04285714285714286,
+          "ci_high": 0.2,
+          "confidence": 0.95,
+          "excludes_zero": true
+        }
+      },
+      "delta_vs_grid_order": {
+        "mae": {
+          "point": 0.2449206349206349,
+          "ci_low": 0.04633813700918961,
+          "ci_high": 0.44241248955722645,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "exact_accuracy": {
+          "point": -0.0373141186299081,
+          "ci_low": -0.06438220551378447,
+          "ci_high": -0.010566102756892248,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_1": {
+          "point": -0.04031746031746032,
+          "ci_low": -0.07885693400167082,
+          "ci_high": -0.0015783208020050238,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_2": {
+          "point": -0.04905597326649958,
+          "ci_low": -0.08282424812030076,
+          "ci_high": -0.015937656641604025,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_3": {
+          "point": -0.043191311612364246,
+          "ci_low": -0.0738639306599833,
+          "ci_high": -0.012545217209690908,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "spearman": {
+          "point": -0.018283313325330147,
+          "ci_low": -0.050298140308755096,
+          "ci_high": 0.014441355489564201,
+          "confidence": 0.95,
+          "excludes_zero": false
+        },
+        "top_3_set_accuracy": {
+          "point": -0.09523809523809525,
+          "ci_low": -0.15714285714285717,
+          "ci_high": -0.028571428571428577,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "top_5_set_accuracy": {
+          "point": -0.04,
+          "ci_low": -0.08571428571428573,
+          "ci_high": 0.00857142857142857,
+          "confidence": 0.95,
+          "excludes_zero": false
+        },
+        "podium_set_accuracy": {
+          "point": -0.12857142857142856,
+          "ci_low": -0.24285714285714285,
+          "ci_high": -0.014285714285714285,
+          "confidence": 0.95,
+          "excludes_zero": true
+        }
+      },
+      "model": {
+        "training_date_range": [
+          "2018-03-25",
+          "2022-11-20"
+        ],
+        "training_rows": 2053,
+        "features": [
+          {
+            "name": "grid_slot",
+            "availability": "pre_race"
+          },
+          {
+            "name": "grid_position_sq",
+            "availability": "pre_race"
+          },
+          {
+            "name": "grid_rank_vs_teammate",
+            "availability": "pre_race"
+          },
+          {
+            "name": "field_size",
+            "availability": "pre_race"
+          },
+          {
+            "name": "is_sprint_weekend",
+            "availability": "pre_race"
+          },
+          {
+            "name": "sprint_finish_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "sprint_places_gained_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "is_street_circuit",
+            "availability": "pre_race"
+          },
+          {
+            "name": "is_permanent_circuit",
+            "availability": "pre_race"
+          },
+          {
+            "name": "is_hybrid_circuit",
+            "availability": "pre_race"
+          },
+          {
+            "name": "overtaking_difficulty",
+            "availability": "pre_race"
+          },
+          {
+            "name": "grid_x_overtaking",
+            "availability": "pre_race"
+          },
+          {
+            "name": "grid_x_street",
+            "availability": "pre_race"
+          },
+          {
+            "name": "regime_id",
+            "availability": "pre_race"
+          },
+          {
+            "name": "seasons_since_regime_start",
+            "availability": "pre_race"
+          },
+          {
+            "name": "regime_is_major",
+            "availability": "pre_race"
+          },
+          {
+            "name": "driver_prior_races",
+            "availability": "pre_race"
+          },
+          {
+            "name": "constructor_prior_races",
+            "availability": "pre_race"
+          },
+          {
+            "name": "driver_finish_last3_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "driver_finish_last5_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "driver_grid_last3_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "driver_points_last3_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "driver_gain_last5_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "driver_win_rate_season_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "driver_podium_rate_season_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "driver_points_per_race_season_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "driver_elo_race_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "driver_elo_quali_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "constructor_points_per_race_season_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "constructor_reliability_season_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "constructor_finish_last3_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "driver_circuit_finish_mean_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "driver_circuit_grid_mean_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "driver_circuit_best_finish_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "constructor_circuit_finish_mean_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "strength_rank_prior",
+            "availability": "pre_race"
+          },
+          {
+            "name": "overqualified_by_grid",
+            "availability": "pre_race"
+          },
+          {
+            "name": "weather_prior_wet",
+            "availability": "pre_race"
+          },
+          {
+            "name": "weather_prior_temp",
+            "availability": "pre_race"
+          },
+          {
+            "name": "weather_prior_wind",
+            "availability": "pre_race"
+          }
+        ],
+        "hyperparameters": {
+          "objective": "rank:pairwise",
+          "n_estimators": 400,
+          "max_depth": 6,
+          "learning_rate": 0.05,
+          "subsample": 0.8,
+          "colsample_bytree": 0.8,
+          "min_child_weight": 3,
+          "reg_alpha": 0.1,
+          "reg_lambda": 1.0,
+          "seed": 20260815,
+          "recency_decay": 0.0,
+          "interval_coverage": 0.8,
+          "calibration_seasons": 3,
+          "early_stopping_rounds": 40,
+          "n_jobs": 1,
+          "trees_kept": 9
+        },
+        "code_commit": "e2f8def52d899c3e272cb562942c2a5081d974bc-dirty",
+        "evaluation_metrics": {
+          "mae": {
+            "point": 3.5509022556390972,
+            "ci_low": 3.3169135338345868,
+            "ci_high": 3.787748120300752,
+            "confidence": 0.95,
+            "excludes_zero": true
+          },
+          "exact_accuracy": {
+            "point": 0.11813700918964078,
+            "ci_low": 0.10210515873015873,
+            "ci_high": 0.13390841687552216,
+            "confidence": 0.95,
+            "excludes_zero": true
+          },
+          "within_1": {
+            "point": 0.32428571428571434,
+            "ci_low": 0.29563909774436087,
+            "ci_high": 0.35244360902255634,
+            "confidence": 0.95,
+            "excludes_zero": true
+          },
+          "within_2": {
+            "point": 0.48775271512113616,
+            "ci_low": 0.45770937761069336,
+            "ci_high": 0.5196258354218882,
+            "confidence": 0.95,
+            "excludes_zero": true
+          },
+          "within_3": {
+            "point": 0.6168170426065163,
+            "ci_low": 0.5868020050125315,
+            "ci_high": 0.6483580827067668,
+            "confidence": 0.95,
+            "excludes_zero": true
+          },
+          "spearman": {
+            "point": 0.6371990901623806,
+            "ci_low": 0.5902862250163223,
+            "ci_high": 0.6827932067563866,
+            "confidence": 0.95,
+            "excludes_zero": true
+          },
+          "top_3_set_accuracy": {
+            "point": 0.5857142857142857,
+            "ci_low": 0.5332142857142859,
+            "ci_high": 0.6428571428571428,
+            "confidence": 0.95,
+            "excludes_zero": true
+          },
+          "top_5_set_accuracy": {
+            "point": 0.7142857142857143,
+            "ci_low": 0.677142857142857,
+            "ci_high": 0.7542857142857141,
+            "confidence": 0.95,
+            "excludes_zero": true
+          },
+          "podium_set_accuracy": {
+            "point": 0.11428571428571428,
+            "ci_low": 0.04285714285714286,
+            "ci_high": 0.2,
+            "confidence": 0.95,
+            "excludes_zero": true
+          }
+        }
+      },
+      "evaluation": {
+        "generated": "2026-09-02",
+        "primary_metric": "spearman",
+        "split": {
+          "window": {
+            "width": 8,
+            "as_of": "2026-09-03",
+            "seasons": [
+              2018,
+              2019,
+              2020,
+              2021,
+              2022,
+              2023,
+              2024,
+              2025
+            ],
+            "first_season": 2018,
+            "last_season": 2025
+          },
+          "training_seasons": [
+            2018,
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "holdout_seasons": [
+            2023,
+            2024,
+            2025
+          ],
+          "boundary_season": 2023,
+          "n_training_seasons": 5,
+          "n_holdout_seasons": 3,
+          "meets_constitutional_minimum": true,
+          "minimum_required": {
+            "total": 8,
+            "training": 5,
+            "holdout": 3
+          }
+        },
+        "holdout_races": 70,
+        "holdout_rows": 1387,
+        "predictors": {
+          "grid_order": {
+            "name": "grid_order",
+            "races_scored": 70,
+            "draws": 1,
+            "metrics": {
+              "mae": {
+                "point": 3.305981620718463,
+                "ci_low": 3.0403375104427734,
+                "ci_high": 3.5673786549707605,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "exact_accuracy": {
+                "point": 0.15545112781954887,
+                "ci_low": 0.13221146616541354,
+                "ci_high": 0.18165601503759396,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_1": {
+                "point": 0.36460317460317454,
+                "ci_low": 0.33384941520467837,
+                "ci_high": 0.3960186925647452,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_2": {
+                "point": 0.5368086883876358,
+                "ci_low": 0.5033802213868004,
+                "ci_high": 0.5722324561403509,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_3": {
+                "point": 0.6600083542188804,
+                "ci_low": 0.6256420217209692,
+                "ci_high": 0.6954996867167919,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "spearman": {
+                "point": 0.6554824034877108,
+                "ci_low": 0.6050203607758894,
+                "ci_high": 0.7047459141551357,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "top_3_set_accuracy": {
+                "point": 0.6809523809523809,
+                "ci_low": 0.6285714285714284,
+                "ci_high": 0.7333333333333333,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "top_5_set_accuracy": {
+                "point": 0.7542857142857143,
+                "ci_low": 0.7114285714285714,
+                "ci_high": 0.7942857142857142,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "podium_set_accuracy": {
+                "point": 0.24285714285714285,
+                "ci_low": 0.15714285714285714,
+                "ci_high": 0.34285714285714286,
+                "confidence": 0.95,
+                "excludes_zero": true
+              }
+            }
+          },
+          "standings_order": {
+            "name": "standings_order",
+            "races_scored": 70,
+            "draws": 1,
+            "metrics": {
+              "mae": {
+                "point": 3.7135171261487048,
+                "ci_low": 3.486970133667502,
+                "ci_high": 3.9401871345029247,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "exact_accuracy": {
+                "point": 0.11823725981620718,
+                "ci_low": 0.10128540100250627,
+                "ci_high": 0.13444214703425236,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_1": {
+                "point": 0.3012489557226399,
+                "ci_low": 0.2744820384294069,
+                "ci_high": 0.32948214285714283,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_2": {
+                "point": 0.4645655806182122,
+                "ci_low": 0.43279479949874683,
+                "ci_high": 0.4982902046783626,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_3": {
+                "point": 0.5884878863826233,
+                "ci_low": 0.5564475772765246,
+                "ci_high": 0.6215808270676692,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "spearman": {
+                "point": 0.6128156525768201,
+                "ci_low": 0.5682820022745941,
+                "ci_high": 0.6575831437838291,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "top_3_set_accuracy": {
+                "point": 0.5857142857142856,
+                "ci_low": 0.5332142857142859,
+                "ci_high": 0.6380952380952379,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "top_5_set_accuracy": {
+                "point": 0.6999999999999998,
+                "ci_low": 0.6571428571428571,
+                "ci_high": 0.7399999999999999,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "podium_set_accuracy": {
+                "point": 0.1,
+                "ci_low": 0.02857142857142857,
+                "ci_high": 0.17178571428571235,
+                "confidence": 0.95,
+                "excludes_zero": true
+              }
+            },
+            "delta_vs_grid_order": {
+              "mae": {
+                "point": 0.40753550543024225,
+                "ci_low": 0.1701931913116125,
+                "ci_high": 0.6635398913951545,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "exact_accuracy": {
+                "point": -0.037213868003341685,
+                "ci_low": -0.07142857142857142,
+                "ci_high": -0.007216060985797839,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_1": {
+                "point": -0.06335421888053468,
+                "ci_low": -0.102859649122807,
+                "ci_high": -0.02321125730994153,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_2": {
+                "point": -0.07224310776942355,
+                "ci_low": -0.11275062656641602,
+                "ci_high": -0.03239912280701758,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_3": {
+                "point": -0.0715204678362573,
+                "ci_low": -0.10984732664995822,
+                "ci_high": -0.03439348370927319,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "spearman": {
+                "point": -0.04266675091089067,
+                "ci_low": -0.08303472441608223,
+                "ci_high": -0.0026561098123460344,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "top_3_set_accuracy": {
+                "point": -0.09523809523809525,
+                "ci_low": -0.15238095238095242,
+                "ci_high": -0.03809523809523809,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "top_5_set_accuracy": {
+                "point": -0.054285714285714284,
+                "ci_low": -0.10571428571428572,
+                "ci_high": -0.002857142857142855,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "podium_set_accuracy": {
+                "point": -0.14285714285714285,
+                "ci_low": -0.2571428571428571,
+                "ci_high": -0.02857142857142857,
+                "confidence": 0.95,
+                "excludes_zero": true
+              }
+            }
+          },
+          "xgboost_ranker_primary": {
+            "name": "xgboost_ranker_primary",
+            "races_scored": 70,
+            "draws": 1,
+            "metrics": {
+              "mae": {
+                "point": 3.5509022556390972,
+                "ci_low": 3.3169135338345868,
+                "ci_high": 3.787748120300752,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "exact_accuracy": {
+                "point": 0.11813700918964078,
+                "ci_low": 0.10210515873015873,
+                "ci_high": 0.13390841687552216,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_1": {
+                "point": 0.32428571428571434,
+                "ci_low": 0.29563909774436087,
+                "ci_high": 0.35244360902255634,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_2": {
+                "point": 0.48775271512113616,
+                "ci_low": 0.45770937761069336,
+                "ci_high": 0.5196258354218882,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_3": {
+                "point": 0.6168170426065163,
+                "ci_low": 0.5868020050125315,
+                "ci_high": 0.6483580827067668,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "spearman": {
+                "point": 0.6371990901623806,
+                "ci_low": 0.5902862250163223,
+                "ci_high": 0.6827932067563866,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "top_3_set_accuracy": {
+                "point": 0.5857142857142857,
+                "ci_low": 0.5332142857142859,
+                "ci_high": 0.6428571428571428,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "top_5_set_accuracy": {
+                "point": 0.7142857142857143,
+                "ci_low": 0.677142857142857,
+                "ci_high": 0.7542857142857141,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "podium_set_accuracy": {
+                "point": 0.11428571428571428,
+                "ci_low": 0.04285714285714286,
+                "ci_high": 0.2,
+                "confidence": 0.95,
+                "excludes_zero": true
+              }
+            },
+            "delta_vs_grid_order": {
+              "mae": {
+                "point": 0.2449206349206349,
+                "ci_low": 0.04633813700918961,
+                "ci_high": 0.44241248955722645,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "exact_accuracy": {
+                "point": -0.0373141186299081,
+                "ci_low": -0.06438220551378447,
+                "ci_high": -0.010566102756892248,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_1": {
+                "point": -0.04031746031746032,
+                "ci_low": -0.07885693400167082,
+                "ci_high": -0.0015783208020050238,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_2": {
+                "point": -0.04905597326649958,
+                "ci_low": -0.08282424812030076,
+                "ci_high": -0.015937656641604025,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_3": {
+                "point": -0.043191311612364246,
+                "ci_low": -0.0738639306599833,
+                "ci_high": -0.012545217209690908,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "spearman": {
+                "point": -0.018283313325330147,
+                "ci_low": -0.050298140308755096,
+                "ci_high": 0.014441355489564201,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "top_3_set_accuracy": {
+                "point": -0.09523809523809525,
+                "ci_low": -0.15714285714285717,
+                "ci_high": -0.028571428571428577,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "top_5_set_accuracy": {
+                "point": -0.04,
+                "ci_low": -0.08571428571428573,
+                "ci_high": 0.00857142857142857,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "podium_set_accuracy": {
+                "point": -0.12857142857142856,
+                "ci_low": -0.24285714285714285,
+                "ci_high": -0.014285714285714285,
+                "confidence": 0.95,
+                "excludes_zero": true
+              }
+            }
+          }
+        },
+        "segmentation": {
+          "grid_order": {
+            "season": {
+              "2023": 0.5818637502848027,
+              "2024": 0.730484913263551,
+              "2025": 0.6479636591478696
+            },
+            "circuit_type": {
+              "hybrid": 0.49711779448621546,
+              "permanent": 0.6646520393054246,
+              "street": 0.6848370927318296
+            },
+            "overtaking_tier": {
+              "easy": 0.6405495836778647,
+              "hard": 0.6912406015037595,
+              "moderate": 0.6156015037593985,
+              "very_hard": 0.8506265664160401
+            }
+          },
+          "standings_order": {
+            "season": {
+              "2023": 0.6203918888129413,
+              "2024": 0.6764662882696938,
+              "2025": 0.542220133667502
+            },
+            "circuit_type": {
+              "hybrid": 0.43909774436090226,
+              "permanent": 0.626808389259594,
+              "street": 0.6349624060150374
+            },
+            "overtaking_tier": {
+              "easy": 0.6073598318045754,
+              "hard": 0.6564661654135338,
+              "moderate": 0.5835213032581453,
+              "very_hard": 0.5979949874686716
+            }
+          },
+          "xgboost_ranker_primary": {
+            "season": {
+              "2023": 0.6264183185235817,
+              "2024": 0.7086435451373531,
+              "2025": 0.5756370091896407
+            },
+            "circuit_type": {
+              "hybrid": 0.48253968253968244,
+              "permanent": 0.6357344768571043,
+              "street": 0.692495126705653
+            },
+            "overtaking_tier": {
+              "easy": 0.6071015133742285,
+              "hard": 0.6895363408521303,
+              "moderate": 0.6057748538011696,
+              "very_hard": 0.7704260651629072
+            }
+          }
+        },
+        "verdict": {
+          "metric": "spearman",
+          "reference": "grid_order",
+          "reference_score": 0.6554824034877108,
+          "beaten_by": [],
+          "not_beaten_by": [
+            {
+              "name": "standings_order",
+              "point": -0.04266675091089067,
+              "ci_low": -0.08303472441608223,
+              "ci_high": -0.0026561098123460344,
+              "confidence": 0.95,
+              "excludes_zero": true
+            },
+            {
+              "name": "xgboost_ranker_primary",
+              "point": -0.018283313325330147,
+              "ci_low": -0.050298140308755096,
+              "ci_high": 0.014441355489564201,
+              "confidence": 0.95,
+              "excludes_zero": false
+            }
+          ],
+          "any_predictor_beats_the_grid": false
+        }
+      }
+    },
+    "primary+telemetry": {
+      "feature_set": "primary+telemetry",
+      "n_features": 44,
+      "predictor": "xgboost_ranker_primary_telemetry",
+      "corpus_rows": 3440,
+      "absent_sources": [],
+      "metrics": {
+        "mae": {
+          "point": 3.416917293233082,
+          "ci_low": 3.2157744360902254,
+          "ci_high": 3.6193477443609026,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "exact_accuracy": {
+          "point": 0.1406892230576441,
+          "ci_low": 0.12498715538847116,
+          "ci_high": 0.15787218045112775,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_1": {
+          "point": 0.36345029239766086,
+          "ci_low": 0.3447135547201336,
+          "ci_high": 0.3825867794486215,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_2": {
+          "point": 0.5153759398496242,
+          "ci_low": 0.4896983082706767,
+          "ci_high": 0.5425272556390976,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "within_3": {
+          "point": 0.6176482873851296,
+          "ci_low": 0.5921366959064328,
+          "ci_high": 0.6448383458646616,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "spearman": {
+          "point": 0.6542943493186748,
+          "ci_low": 0.6105797950759251,
+          "ci_high": 0.6967748257197615,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "top_3_set_accuracy": {
+          "point": 0.6142857142857143,
+          "ci_low": 0.5619047619047618,
+          "ci_high": 0.6666666666666666,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "top_5_set_accuracy": {
+          "point": 0.7399999999999999,
+          "ci_low": 0.7057142857142857,
+          "ci_high": 0.7742857142857141,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "podium_set_accuracy": {
+          "point": 0.14285714285714285,
+          "ci_low": 0.07142857142857142,
+          "ci_high": 0.22857142857142856,
+          "confidence": 0.95,
+          "excludes_zero": true
+        }
+      },
+      "delta_vs_grid_order": {
+        "mae": {
+          "point": 0.11093567251461989,
+          "ci_low": -0.0653694653299916,
+          "ci_high": 0.2894812030075187,
+          "confidence": 0.95,
+          "excludes_zero": false
+        },
+        "exact_accuracy": {
+          "point": -0.01476190476190476,
+          "ci_low": -0.041579887218045106,
+          "ci_high": 0.011672305764410997,
+          "confidence": 0.95,
+          "excludes_zero": false
+        },
+        "within_1": {
+          "point": -0.0011528822055137872,
+          "ci_low": -0.03455701754385963,
+          "ci_high": 0.03275971177944859,
+          "confidence": 0.95,
+          "excludes_zero": false
+        },
+        "within_2": {
+          "point": -0.0214327485380117,
+          "ci_low": -0.05794246031746031,
+          "ci_high": 0.015866541353383456,
+          "confidence": 0.95,
+          "excludes_zero": false
+        },
+        "within_3": {
+          "point": -0.042360066833751056,
+          "ci_low": -0.07358051378446115,
+          "ci_high": -0.008440058479532175,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "spearman": {
+          "point": -0.0011880541690360558,
+          "ci_low": -0.03101011457214466,
+          "ci_high": 0.028423037636107033,
+          "confidence": 0.95,
+          "excludes_zero": false
+        },
+        "top_3_set_accuracy": {
+          "point": -0.06666666666666665,
+          "ci_low": -0.11904761904761903,
+          "ci_high": -0.014285714285714285,
+          "confidence": 0.95,
+          "excludes_zero": true
+        },
+        "top_5_set_accuracy": {
+          "point": -0.014285714285714282,
+          "ci_low": -0.060000000000000005,
+          "ci_high": 0.02857142857142857,
+          "confidence": 0.95,
+          "excludes_zero": false
+        },
+        "podium_set_accuracy": {
+          "point": -0.1,
+          "ci_low": -0.2,
+          "ci_high": -0.014285714285714285,
+          "confidence": 0.95,
+          "excludes_zero": true
+        }
+      },
+      "model": {
+        "training_date_range": [
+          "2018-03-25",
+          "2022-11-20"
+        ],
+        "training_rows": 2053,
+        "features": [
+          {
+            "name": "grid_slot",
+            "availability": "pre_race"
+          },
+          {
+            "name": "grid_position_sq",
+            "availability": "pre_race"
+          },
+          {
+            "name": "grid_rank_vs_teammate",
+            "availability": "pre_race"
+          },
+          {
+            "name": "field_size",
+            "availability": "pre_race"
+          },
+          {
+            "name": "is_sprint_weekend",
+            "availability": "pre_race"
+          },
+          {
+            "name": "sprint_finish_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "sprint_places_gained_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "is_street_circuit",
+            "availability": "pre_race"
+          },
+          {
+            "name": "is_permanent_circuit",
+            "availability": "pre_race"
+          },
+          {
+            "name": "is_hybrid_circuit",
+            "availability": "pre_race"
+          },
+          {
+            "name": "overtaking_difficulty",
+            "availability": "pre_race"
+          },
+          {
+            "name": "grid_x_overtaking",
+            "availability": "pre_race"
+          },
+          {
+            "name": "grid_x_street",
+            "availability": "pre_race"
+          },
+          {
+            "name": "regime_id",
+            "availability": "pre_race"
+          },
+          {
+            "name": "seasons_since_regime_start",
+            "availability": "pre_race"
+          },
+          {
+            "name": "regime_is_major",
+            "availability": "pre_race"
+          },
+          {
+            "name": "driver_prior_races",
+            "availability": "pre_race"
+          },
+          {
+            "name": "constructor_prior_races",
+            "availability": "pre_race"
+          },
+          {
+            "name": "driver_finish_last3_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "driver_finish_last5_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "driver_grid_last3_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "driver_points_last3_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "driver_gain_last5_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "driver_win_rate_season_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "driver_podium_rate_season_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "driver_points_per_race_season_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "driver_elo_race_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "driver_elo_quali_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "constructor_points_per_race_season_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "constructor_reliability_season_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "constructor_finish_last3_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "driver_circuit_finish_mean_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "driver_circuit_grid_mean_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "driver_circuit_best_finish_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "constructor_circuit_finish_mean_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "strength_rank_prior",
+            "availability": "pre_race"
+          },
+          {
+            "name": "overqualified_by_grid",
+            "availability": "pre_race"
+          },
+          {
+            "name": "weather_prior_wet",
+            "availability": "pre_race"
+          },
+          {
+            "name": "weather_prior_temp",
+            "availability": "pre_race"
+          },
+          {
+            "name": "weather_prior_wind",
+            "availability": "pre_race"
+          },
+          {
+            "name": "practice_long_run_pace_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "practice_stint_trend_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "practice_best_lap_pct",
+            "availability": "pre_race"
+          },
+          {
+            "name": "practice_long_run_laps",
+            "availability": "pre_race"
+          }
+        ],
+        "hyperparameters": {
+          "objective": "rank:pairwise",
+          "n_estimators": 400,
+          "max_depth": 6,
+          "learning_rate": 0.05,
+          "subsample": 0.8,
+          "colsample_bytree": 0.8,
+          "min_child_weight": 3,
+          "reg_alpha": 0.1,
+          "reg_lambda": 1.0,
+          "seed": 20260815,
+          "recency_decay": 0.0,
+          "interval_coverage": 0.8,
+          "calibration_seasons": 3,
+          "early_stopping_rounds": 40,
+          "n_jobs": 1,
+          "trees_kept": 41
+        },
+        "code_commit": "e2f8def52d899c3e272cb562942c2a5081d974bc-dirty",
+        "evaluation_metrics": {
+          "mae": {
+            "point": 3.416917293233082,
+            "ci_low": 3.2157744360902254,
+            "ci_high": 3.6193477443609026,
+            "confidence": 0.95,
+            "excludes_zero": true
+          },
+          "exact_accuracy": {
+            "point": 0.1406892230576441,
+            "ci_low": 0.12498715538847116,
+            "ci_high": 0.15787218045112775,
+            "confidence": 0.95,
+            "excludes_zero": true
+          },
+          "within_1": {
+            "point": 0.36345029239766086,
+            "ci_low": 0.3447135547201336,
+            "ci_high": 0.3825867794486215,
+            "confidence": 0.95,
+            "excludes_zero": true
+          },
+          "within_2": {
+            "point": 0.5153759398496242,
+            "ci_low": 0.4896983082706767,
+            "ci_high": 0.5425272556390976,
+            "confidence": 0.95,
+            "excludes_zero": true
+          },
+          "within_3": {
+            "point": 0.6176482873851296,
+            "ci_low": 0.5921366959064328,
+            "ci_high": 0.6448383458646616,
+            "confidence": 0.95,
+            "excludes_zero": true
+          },
+          "spearman": {
+            "point": 0.6542943493186748,
+            "ci_low": 0.6105797950759251,
+            "ci_high": 0.6967748257197615,
+            "confidence": 0.95,
+            "excludes_zero": true
+          },
+          "top_3_set_accuracy": {
+            "point": 0.6142857142857143,
+            "ci_low": 0.5619047619047618,
+            "ci_high": 0.6666666666666666,
+            "confidence": 0.95,
+            "excludes_zero": true
+          },
+          "top_5_set_accuracy": {
+            "point": 0.7399999999999999,
+            "ci_low": 0.7057142857142857,
+            "ci_high": 0.7742857142857141,
+            "confidence": 0.95,
+            "excludes_zero": true
+          },
+          "podium_set_accuracy": {
+            "point": 0.14285714285714285,
+            "ci_low": 0.07142857142857142,
+            "ci_high": 0.22857142857142856,
+            "confidence": 0.95,
+            "excludes_zero": true
+          }
+        }
+      },
+      "evaluation": {
+        "generated": "2026-09-02",
+        "primary_metric": "spearman",
+        "split": {
+          "window": {
+            "width": 8,
+            "as_of": "2026-09-03",
+            "seasons": [
+              2018,
+              2019,
+              2020,
+              2021,
+              2022,
+              2023,
+              2024,
+              2025
+            ],
+            "first_season": 2018,
+            "last_season": 2025
+          },
+          "training_seasons": [
+            2018,
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "holdout_seasons": [
+            2023,
+            2024,
+            2025
+          ],
+          "boundary_season": 2023,
+          "n_training_seasons": 5,
+          "n_holdout_seasons": 3,
+          "meets_constitutional_minimum": true,
+          "minimum_required": {
+            "total": 8,
+            "training": 5,
+            "holdout": 3
+          }
+        },
+        "holdout_races": 70,
+        "holdout_rows": 1387,
+        "predictors": {
+          "grid_order": {
+            "name": "grid_order",
+            "races_scored": 70,
+            "draws": 1,
+            "metrics": {
+              "mae": {
+                "point": 3.305981620718463,
+                "ci_low": 3.0403375104427734,
+                "ci_high": 3.5673786549707605,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "exact_accuracy": {
+                "point": 0.15545112781954887,
+                "ci_low": 0.13221146616541354,
+                "ci_high": 0.18165601503759396,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_1": {
+                "point": 0.36460317460317454,
+                "ci_low": 0.33384941520467837,
+                "ci_high": 0.3960186925647452,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_2": {
+                "point": 0.5368086883876358,
+                "ci_low": 0.5033802213868004,
+                "ci_high": 0.5722324561403509,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_3": {
+                "point": 0.6600083542188804,
+                "ci_low": 0.6256420217209692,
+                "ci_high": 0.6954996867167919,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "spearman": {
+                "point": 0.6554824034877108,
+                "ci_low": 0.6050203607758894,
+                "ci_high": 0.7047459141551357,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "top_3_set_accuracy": {
+                "point": 0.6809523809523809,
+                "ci_low": 0.6285714285714284,
+                "ci_high": 0.7333333333333333,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "top_5_set_accuracy": {
+                "point": 0.7542857142857143,
+                "ci_low": 0.7114285714285714,
+                "ci_high": 0.7942857142857142,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "podium_set_accuracy": {
+                "point": 0.24285714285714285,
+                "ci_low": 0.15714285714285714,
+                "ci_high": 0.34285714285714286,
+                "confidence": 0.95,
+                "excludes_zero": true
+              }
+            }
+          },
+          "standings_order": {
+            "name": "standings_order",
+            "races_scored": 70,
+            "draws": 1,
+            "metrics": {
+              "mae": {
+                "point": 3.7135171261487048,
+                "ci_low": 3.486970133667502,
+                "ci_high": 3.9401871345029247,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "exact_accuracy": {
+                "point": 0.11823725981620718,
+                "ci_low": 0.10128540100250627,
+                "ci_high": 0.13444214703425236,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_1": {
+                "point": 0.3012489557226399,
+                "ci_low": 0.2744820384294069,
+                "ci_high": 0.32948214285714283,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_2": {
+                "point": 0.4645655806182122,
+                "ci_low": 0.43279479949874683,
+                "ci_high": 0.4982902046783626,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_3": {
+                "point": 0.5884878863826233,
+                "ci_low": 0.5564475772765246,
+                "ci_high": 0.6215808270676692,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "spearman": {
+                "point": 0.6128156525768201,
+                "ci_low": 0.5682820022745941,
+                "ci_high": 0.6575831437838291,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "top_3_set_accuracy": {
+                "point": 0.5857142857142856,
+                "ci_low": 0.5332142857142859,
+                "ci_high": 0.6380952380952379,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "top_5_set_accuracy": {
+                "point": 0.6999999999999998,
+                "ci_low": 0.6571428571428571,
+                "ci_high": 0.7399999999999999,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "podium_set_accuracy": {
+                "point": 0.1,
+                "ci_low": 0.02857142857142857,
+                "ci_high": 0.17178571428571235,
+                "confidence": 0.95,
+                "excludes_zero": true
+              }
+            },
+            "delta_vs_grid_order": {
+              "mae": {
+                "point": 0.40753550543024225,
+                "ci_low": 0.1701931913116125,
+                "ci_high": 0.6635398913951545,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "exact_accuracy": {
+                "point": -0.037213868003341685,
+                "ci_low": -0.07142857142857142,
+                "ci_high": -0.007216060985797839,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_1": {
+                "point": -0.06335421888053468,
+                "ci_low": -0.102859649122807,
+                "ci_high": -0.02321125730994153,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_2": {
+                "point": -0.07224310776942355,
+                "ci_low": -0.11275062656641602,
+                "ci_high": -0.03239912280701758,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_3": {
+                "point": -0.0715204678362573,
+                "ci_low": -0.10984732664995822,
+                "ci_high": -0.03439348370927319,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "spearman": {
+                "point": -0.04266675091089067,
+                "ci_low": -0.08303472441608223,
+                "ci_high": -0.0026561098123460344,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "top_3_set_accuracy": {
+                "point": -0.09523809523809525,
+                "ci_low": -0.15238095238095242,
+                "ci_high": -0.03809523809523809,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "top_5_set_accuracy": {
+                "point": -0.054285714285714284,
+                "ci_low": -0.10571428571428572,
+                "ci_high": -0.002857142857142855,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "podium_set_accuracy": {
+                "point": -0.14285714285714285,
+                "ci_low": -0.2571428571428571,
+                "ci_high": -0.02857142857142857,
+                "confidence": 0.95,
+                "excludes_zero": true
+              }
+            }
+          },
+          "xgboost_ranker_primary_telemetry": {
+            "name": "xgboost_ranker_primary_telemetry",
+            "races_scored": 70,
+            "draws": 1,
+            "metrics": {
+              "mae": {
+                "point": 3.416917293233082,
+                "ci_low": 3.2157744360902254,
+                "ci_high": 3.6193477443609026,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "exact_accuracy": {
+                "point": 0.1406892230576441,
+                "ci_low": 0.12498715538847116,
+                "ci_high": 0.15787218045112775,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_1": {
+                "point": 0.36345029239766086,
+                "ci_low": 0.3447135547201336,
+                "ci_high": 0.3825867794486215,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_2": {
+                "point": 0.5153759398496242,
+                "ci_low": 0.4896983082706767,
+                "ci_high": 0.5425272556390976,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "within_3": {
+                "point": 0.6176482873851296,
+                "ci_low": 0.5921366959064328,
+                "ci_high": 0.6448383458646616,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "spearman": {
+                "point": 0.6542943493186748,
+                "ci_low": 0.6105797950759251,
+                "ci_high": 0.6967748257197615,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "top_3_set_accuracy": {
+                "point": 0.6142857142857143,
+                "ci_low": 0.5619047619047618,
+                "ci_high": 0.6666666666666666,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "top_5_set_accuracy": {
+                "point": 0.7399999999999999,
+                "ci_low": 0.7057142857142857,
+                "ci_high": 0.7742857142857141,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "podium_set_accuracy": {
+                "point": 0.14285714285714285,
+                "ci_low": 0.07142857142857142,
+                "ci_high": 0.22857142857142856,
+                "confidence": 0.95,
+                "excludes_zero": true
+              }
+            },
+            "delta_vs_grid_order": {
+              "mae": {
+                "point": 0.11093567251461989,
+                "ci_low": -0.0653694653299916,
+                "ci_high": 0.2894812030075187,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "exact_accuracy": {
+                "point": -0.01476190476190476,
+                "ci_low": -0.041579887218045106,
+                "ci_high": 0.011672305764410997,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "within_1": {
+                "point": -0.0011528822055137872,
+                "ci_low": -0.03455701754385963,
+                "ci_high": 0.03275971177944859,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "within_2": {
+                "point": -0.0214327485380117,
+                "ci_low": -0.05794246031746031,
+                "ci_high": 0.015866541353383456,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "within_3": {
+                "point": -0.042360066833751056,
+                "ci_low": -0.07358051378446115,
+                "ci_high": -0.008440058479532175,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "spearman": {
+                "point": -0.0011880541690360558,
+                "ci_low": -0.03101011457214466,
+                "ci_high": 0.028423037636107033,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "top_3_set_accuracy": {
+                "point": -0.06666666666666665,
+                "ci_low": -0.11904761904761903,
+                "ci_high": -0.014285714285714285,
+                "confidence": 0.95,
+                "excludes_zero": true
+              },
+              "top_5_set_accuracy": {
+                "point": -0.014285714285714282,
+                "ci_low": -0.060000000000000005,
+                "ci_high": 0.02857142857142857,
+                "confidence": 0.95,
+                "excludes_zero": false
+              },
+              "podium_set_accuracy": {
+                "point": -0.1,
+                "ci_low": -0.2,
+                "ci_high": -0.014285714285714285,
+                "confidence": 0.95,
+                "excludes_zero": true
+              }
+            }
+          }
+        },
+        "segmentation": {
+          "grid_order": {
+            "season": {
+              "2023": 0.5818637502848027,
+              "2024": 0.730484913263551,
+              "2025": 0.6479636591478696
+            },
+            "circuit_type": {
+              "hybrid": 0.49711779448621546,
+              "permanent": 0.6646520393054246,
+              "street": 0.6848370927318296
+            },
+            "overtaking_tier": {
+              "easy": 0.6405495836778647,
+              "hard": 0.6912406015037595,
+              "moderate": 0.6156015037593985,
+              "very_hard": 0.8506265664160401
+            }
+          },
+          "standings_order": {
+            "season": {
+              "2023": 0.6203918888129413,
+              "2024": 0.6764662882696938,
+              "2025": 0.542220133667502
+            },
+            "circuit_type": {
+              "hybrid": 0.43909774436090226,
+              "permanent": 0.626808389259594,
+              "street": 0.6349624060150374
+            },
+            "overtaking_tier": {
+              "easy": 0.6073598318045754,
+              "hard": 0.6564661654135338,
+              "moderate": 0.5835213032581453,
+              "very_hard": 0.5979949874686716
+            }
+          },
+          "xgboost_ranker_primary_telemetry": {
+            "season": {
+              "2023": 0.6257120072909546,
+              "2024": 0.7124729716447983,
+              "2025": 0.6223162071846282
+            },
+            "circuit_type": {
+              "hybrid": 0.5482456140350878,
+              "permanent": 0.6598584056048047,
+              "street": 0.6754246727930937
+            },
+            "overtaking_tier": {
+              "easy": 0.6215038875962283,
+              "hard": 0.7045739348370926,
+              "moderate": 0.6363826232247284,
+              "very_hard": 0.7137844611528821
+            }
+          }
+        },
+        "verdict": {
+          "metric": "spearman",
+          "reference": "grid_order",
+          "reference_score": 0.6554824034877108,
+          "beaten_by": [],
+          "not_beaten_by": [
+            {
+              "name": "standings_order",
+              "point": -0.04266675091089067,
+              "ci_low": -0.08303472441608223,
+              "ci_high": -0.0026561098123460344,
+              "confidence": 0.95,
+              "excludes_zero": true
+            },
+            {
+              "name": "xgboost_ranker_primary_telemetry",
+              "point": -0.0011880541690360558,
+              "ci_low": -0.03101011457214466,
+              "ci_high": 0.028423037636107033,
+              "confidence": 0.95,
+              "excludes_zero": false
+            }
+          ],
+          "any_predictor_beats_the_grid": false
+        }
+      }
+    }
+  },
+  "telemetry_minus_primary": {
+    "mae": {
+      "point": -0.13398496240601504,
+      "ci_low": -0.2717406015037594,
+      "ci_high": 0.007090225563909651,
+      "confidence": 0.95,
+      "excludes_zero": false
+    },
+    "exact_accuracy": {
+      "point": 0.02255221386800334,
+      "ci_low": 0.002471073517126152,
+      "ci_high": 0.04206422305764411,
+      "confidence": 0.95,
+      "excludes_zero": true
+    },
+    "within_1": {
+      "point": 0.03916457811194655,
+      "ci_low": 0.007405597326649968,
+      "ci_high": 0.06961779448621556,
+      "confidence": 0.95,
+      "excludes_zero": true
+    },
+    "within_2": {
+      "point": 0.02762322472848788,
+      "ci_low": -0.0028040935672514426,
+      "ci_high": 0.05854041353383456,
+      "confidence": 0.95,
+      "excludes_zero": false
+    },
+    "within_3": {
+      "point": 0.000831244778613193,
+      "ci_low": -0.02605659983291561,
+      "ci_high": 0.029182226399331657,
+      "confidence": 0.95,
+      "excludes_zero": false
+    },
+    "spearman": {
+      "point": 0.017095259156294094,
+      "ci_low": -0.006445246519660495,
+      "ci_high": 0.039330558539205134,
+      "confidence": 0.95,
+      "excludes_zero": false
+    },
+    "top_3_set_accuracy": {
+      "point": 0.028571428571428567,
+      "ci_low": -0.019047619047619046,
+      "ci_high": 0.07619047619047618,
+      "confidence": 0.95,
+      "excludes_zero": false
+    },
+    "top_5_set_accuracy": {
+      "point": 0.025714285714285714,
+      "ci_low": -0.011428571428571432,
+      "ci_high": 0.06285714285714286,
+      "confidence": 0.95,
+      "excludes_zero": false
+    },
+    "podium_set_accuracy": {
+      "point": 0.02857142857142857,
+      "ci_low": -0.05714285714285714,
+      "ci_high": 0.11428571428571428,
+      "confidence": 0.95,
+      "excludes_zero": false
+    }
+  },
+  "pairing": "Paired within bootstrap replicates on the identical holdout races (plan D-5). Subtracting the two arms' independently bootstrapped intervals would overstate the uncertainty.",
+  "telemetry_features": [
+    {
+      "name": "practice_long_run_pace_pct",
+      "holdout_rows": 1387,
+      "holdout_rows_with_a_value": 1215
+    },
+    {
+      "name": "practice_stint_trend_pct",
+      "holdout_rows": 1387,
+      "holdout_rows_with_a_value": 1215
+    },
+    {
+      "name": "practice_best_lap_pct",
+      "holdout_rows": 1387,
+      "holdout_rows_with_a_value": 1382
+    },
+    {
+      "name": "practice_long_run_laps",
+      "holdout_rows": 1387,
+      "holdout_rows_with_a_value": 1382
+    }
+  ],
+  "telemetry_attached": true,
+  "absent_telemetry_sources": [],
+  "coverage": {
+    "per_season": {
+      "2010": {
+        "corpus_rows": 456,
+        "covered": 0,
+        "coverage": 0.0,
+        "source_covers_season": false
+      },
+      "2011": {
+        "corpus_rows": 454,
+        "covered": 0,
+        "coverage": 0.0,
+        "source_covers_season": false
+      },
+      "2012": {
+        "corpus_rows": 478,
+        "covered": 0,
+        "coverage": 0.0,
+        "source_covers_season": false
+      },
+      "2013": {
+        "corpus_rows": 418,
+        "covered": 0,
+        "coverage": 0.0,
+        "source_covers_season": false
+      },
+      "2014": {
+        "corpus_rows": 407,
+        "covered": 0,
+        "coverage": 0.0,
+        "source_covers_season": false
+      },
+      "2015": {
+        "corpus_rows": 378,
+        "covered": 0,
+        "coverage": 0.0,
+        "source_covers_season": false
+      },
+      "2016": {
+        "corpus_rows": 462,
+        "covered": 0,
+        "coverage": 0.0,
+        "source_covers_season": false
+      },
+      "2017": {
+        "corpus_rows": 400,
+        "covered": 0,
+        "coverage": 0.0,
+        "source_covers_season": false
+      },
+      "2018": {
+        "corpus_rows": 420,
+        "covered": 420,
+        "coverage": 1.0,
+        "source_covers_season": true
+      },
+      "2019": {
+        "corpus_rows": 420,
+        "covered": 420,
+        "coverage": 1.0,
+        "source_covers_season": true
+      },
+      "2020": {
+        "corpus_rows": 340,
+        "covered": 339,
+        "coverage": 0.9971,
+        "source_covers_season": true
+      },
+      "2021": {
+        "corpus_rows": 440,
+        "covered": 440,
+        "coverage": 1.0,
+        "source_covers_season": true
+      },
+      "2022": {
+        "corpus_rows": 440,
+        "covered": 440,
+        "coverage": 1.0,
+        "source_covers_season": true
+      },
+      "2023": {
+        "corpus_rows": 440,
+        "covered": 435,
+        "coverage": 0.9886,
+        "source_covers_season": true
+      },
+      "2024": {
+        "corpus_rows": 479,
+        "covered": 479,
+        "coverage": 1.0,
+        "source_covers_season": true
+      },
+      "2025": {
+        "corpus_rows": 479,
+        "covered": 479,
+        "coverage": 1.0,
+        "source_covers_season": true
+      }
+    },
+    "cited_file": "/Users/shivatsk7/Codes/race result predictor/results/telemetry_coverage_2018_2025.json",
+    "cited_file_found": true,
+    "agrees_with_cited_file": true,
+    "disagreements": {}
+  },
+  "finding": "spearman: primary 0.6372, primary+telemetry 0.6543. Telemetry minus primary +0.0171 (95% CI -0.0064 to +0.0393, paired). NO MEASURED BENEFIT: the interval includes zero on 8 of the corpus's 16 seasons (2018-2025), holdout 2023-2025. A measured null is the answer FR-215 asks for, not a failed run."
+}
