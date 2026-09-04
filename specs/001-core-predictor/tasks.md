@@ -281,6 +281,47 @@ verified true until P6's CLI (T-601+) gives it somewhere else to fail. Same
 defect class as AC-3/AC-19 sitting on P4's gate rather than P2's or P3's:
 ticking it here would assert a check on paths that do not exist.
 
+**P5 COMPLETE** (2026-09-05). All fourteen tasks done and validated against
+the real 2010-2025 corpus and its 2023-2025 holdout, not fixtures. AC-5, AC-6,
+and AC-9 met; AC-10 deliberately held for P6.
+
+The simulator ported v0's structure (D-7) and replaced every one of its
+hand-typed constants with a parameter measured from the corpus, per FR-751.
+Two real defects were found by running the pipeline against real data rather
+than trusting the design, and both are the kind a green test suite does not
+catch on its own:
+
+1. **A correctness bug.** `simulate_holdout` first ranked the whole 1387-row
+   holdout as one race instead of ~20-driver fields per race, and interval
+   coverage came back at exactly 0.0% — silently, not as an error. Fixed by
+   predicting race-by-race; coverage moved to 81.2% against a stated 80%,
+   which is the evidence the fix was right, not merely plausible.
+2. **A methodology gap**, visible only once the bug stopped hiding it. The
+   win event's rarity means its top probability bins often hold a single
+   race, whose binary outcome is 0.0 or 1.0 by construction — one coin flip
+   standing in for "the worst calibration gap in the whole curve" at 0.499.
+   `MIN_RELIABILITY_BIN_COUNT` excludes a bin that thin, the same judgement
+   `shrink_towards` and the cold-start flag already make for one race of
+   evidence.
+
+Headline numbers, all on the 2023-2025 holdout:
+
+| quantity | value | source |
+|---|---|---|
+| FR-402 interval coverage | 81.2% (stated 80%) | `results/calibration_2023_2025.json` |
+| Win / podium / points reliability gap | 0.19 / 0.16 / 0.16 | same, against a 10-point threshold (OQ-3) |
+| Noise floor (near-identical teammate pairs) | 27.4% of position variance, ≈2.79 positions | `results/noise_floor.json` |
+| Model MAE vs. the floor | 3.37 positions, **+0.58 above the floor** | same |
+
+**Every probability this project emits still carries `UNCALIBRATED`** (T-509)
+— coverage passes the threshold, win/podium/points do not. That label, not a
+narrative gloss, is what FR-705/706 require until a future run clears it.
+The noise-floor number is this phase's most useful new fact for P6's write-up:
+the model's error sits close enough to what near-identical cars and grid
+slots already disagree by that most of the gap between "beats the grid" and
+"does not" may simply be asking a chaotic sport for more precision than
+exists to give.
+
 ---
 
 ## Phase P6 — Interface & Write-up
