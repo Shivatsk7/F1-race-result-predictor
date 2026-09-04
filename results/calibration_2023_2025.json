@@ -1,0 +1,317 @@
+{
+  "split": {
+    "window": {
+      "width": 16,
+      "as_of": "2026-09-05",
+      "seasons": [
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "first_season": 2010,
+      "last_season": 2025
+    },
+    "training_seasons": [
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022
+    ],
+    "holdout_seasons": [
+      2023,
+      2024,
+      2025
+    ],
+    "boundary_season": 2023,
+    "n_training_seasons": 13,
+    "n_holdout_seasons": 3,
+    "meets_constitutional_minimum": true,
+    "minimum_required": {
+      "total": 8,
+      "training": 5,
+      "holdout": 3
+    }
+  },
+  "model_code_commit": "34b18f6b0d5851a57674efbac64ec828ae23666f-dirty",
+  "n_simulations": 1000,
+  "seed": 20260815,
+  "safety_car_proxy": {
+    "corpus_rate": 0.2548262548262548,
+    "note": "measured as the rate of >=2 retirements within the first 5 laps; not a confirmed safety-car deployment count (T-510)"
+  },
+  "calibration": {
+    "threshold": 0.1,
+    "n_holdout_races": 70,
+    "n_holdout_rows": 1387,
+    "events": {
+      "win": {
+        "event": "win",
+        "reliability_curve": [
+          {
+            "bin": "(-0.001, 0.1]",
+            "mean_predicted": 0.011694158075601375,
+            "observed_frequency": 0.006013745704467354,
+            "count": 1164
+          },
+          {
+            "bin": "(0.1, 0.2]",
+            "mean_predicted": 0.14425581395348838,
+            "observed_frequency": 0.08139534883720931,
+            "count": 86
+          },
+          {
+            "bin": "(0.2, 0.3]",
+            "mean_predicted": 0.25186,
+            "observed_frequency": 0.18,
+            "count": 50
+          },
+          {
+            "bin": "(0.3, 0.4]",
+            "mean_predicted": 0.3508289473684211,
+            "observed_frequency": 0.5394736842105263,
+            "count": 76
+          },
+          {
+            "bin": "(0.4, 0.5]",
+            "mean_predicted": 0.4225,
+            "observed_frequency": 0.5,
+            "count": 10
+          },
+          {
+            "bin": "(0.5, 0.6]",
+            "mean_predicted": 0.501,
+            "observed_frequency": 1.0,
+            "count": 1
+          }
+        ],
+        "max_reliability_gap": 0.18864473684210525,
+        "brier_score": {
+          "model": {
+            "point": 0.03272173841269842,
+            "ci_low": 0.030194967604636587,
+            "ci_high": 0.03548484352192983,
+            "confidence": 0.95,
+            "excludes_zero": true
+          },
+          "climatological_baseline": {
+            "point": 0.047953855563194675,
+            "ci_low": 0.04774507050988452,
+            "ci_high": 0.0481998020865913,
+            "confidence": 0.95,
+            "excludes_zero": true
+          },
+          "grid_baseline": {
+            "point": 0.031076141595740216,
+            "ci_low": 0.026903808818808796,
+            "ci_high": 0.03582834849437502,
+            "confidence": 0.95,
+            "excludes_zero": true
+          }
+        },
+        "status": "UNCALIBRATED"
+      },
+      "podium": {
+        "event": "podium",
+        "reliability_curve": [
+          {
+            "bin": "(-0.001, 0.1]",
+            "mean_predicted": 0.01513129102844639,
+            "observed_frequency": 0.01312910284463895,
+            "count": 914
+          },
+          {
+            "bin": "(0.1, 0.2]",
+            "mean_predicted": 0.14526851851851852,
+            "observed_frequency": 0.08333333333333333,
+            "count": 108
+          },
+          {
+            "bin": "(0.2, 0.3]",
+            "mean_predicted": 0.25082539682539684,
+            "observed_frequency": 0.12698412698412698,
+            "count": 63
+          },
+          {
+            "bin": "(0.3, 0.4]",
+            "mean_predicted": 0.35171929824561404,
+            "observed_frequency": 0.3333333333333333,
+            "count": 57
+          },
+          {
+            "bin": "(0.4, 0.5]",
+            "mean_predicted": 0.45518333333333333,
+            "observed_frequency": 0.43333333333333335,
+            "count": 60
+          },
+          {
+            "bin": "(0.5, 0.6]",
+            "mean_predicted": 0.5553898305084746,
+            "observed_frequency": 0.6440677966101694,
+            "count": 59
+          },
+          {
+            "bin": "(0.6, 0.7]",
+            "mean_predicted": 0.6567448979591837,
+            "observed_frequency": 0.8163265306122449,
+            "count": 98
+          },
+          {
+            "bin": "(0.7, 0.8]",
+            "mean_predicted": 0.7211071428571428,
+            "observed_frequency": 0.6428571428571429,
+            "count": 28
+          }
+        ],
+        "max_reliability_gap": 0.15958163265306125,
+        "brier_score": {
+          "model": {
+            "point": 0.06784311164578112,
+            "ci_low": 0.06096486963909776,
+            "ci_high": 0.07528377174060147,
+            "confidence": 0.95,
+            "excludes_zero": true
+          },
+          "climatological_baseline": {
+            "point": 0.1286273065850428,
+            "ci_low": 0.12813169975186786,
+            "ci_high": 0.12921112604749202,
+            "confidence": 0.95,
+            "excludes_zero": true
+          },
+          "grid_baseline": {
+            "point": 0.06772076783018535,
+            "ci_low": 0.05972111629543845,
+            "ci_high": 0.07603432491025032,
+            "confidence": 0.95,
+            "excludes_zero": true
+          }
+        },
+        "status": "UNCALIBRATED"
+      },
+      "points": {
+        "event": "points",
+        "reliability_curve": [
+          {
+            "bin": "(-0.001, 0.1]",
+            "mean_predicted": 0.04453378378378379,
+            "observed_frequency": 0.0945945945945946,
+            "count": 296
+          },
+          {
+            "bin": "(0.1, 0.2]",
+            "mean_predicted": 0.14329914529914528,
+            "observed_frequency": 0.2222222222222222,
+            "count": 117
+          },
+          {
+            "bin": "(0.2, 0.3]",
+            "mean_predicted": 0.24622666666666665,
+            "observed_frequency": 0.22666666666666666,
+            "count": 75
+          },
+          {
+            "bin": "(0.3, 0.4]",
+            "mean_predicted": 0.3388852459016394,
+            "observed_frequency": 0.36065573770491804,
+            "count": 61
+          },
+          {
+            "bin": "(0.4, 0.5]",
+            "mean_predicted": 0.44549999999999995,
+            "observed_frequency": 0.2894736842105263,
+            "count": 76
+          },
+          {
+            "bin": "(0.5, 0.6]",
+            "mean_predicted": 0.5587179487179487,
+            "observed_frequency": 0.5128205128205128,
+            "count": 78
+          },
+          {
+            "bin": "(0.6, 0.7]",
+            "mean_predicted": 0.6534673913043478,
+            "observed_frequency": 0.5434782608695652,
+            "count": 92
+          },
+          {
+            "bin": "(0.7, 0.8]",
+            "mean_predicted": 0.757551948051948,
+            "observed_frequency": 0.7337662337662337,
+            "count": 154
+          },
+          {
+            "bin": "(0.8, 0.9]",
+            "mean_predicted": 0.8530833333333333,
+            "observed_frequency": 0.875,
+            "count": 384
+          },
+          {
+            "bin": "(0.9, 1.0]",
+            "mean_predicted": 0.909425925925926,
+            "observed_frequency": 0.8518518518518519,
+            "count": 54
+          }
+        ],
+        "max_reliability_gap": 0.15602631578947362,
+        "brier_score": {
+          "model": {
+            "point": 0.15330018657477026,
+            "ci_low": 0.13579033056015036,
+            "ci_high": 0.17126641114954053,
+            "confidence": 0.95,
+            "excludes_zero": true
+          },
+          "climatological_baseline": {
+            "point": 0.25102465406382823,
+            "ci_low": 0.2508980284320604,
+            "ci_high": 0.2511738176816852,
+            "confidence": 0.95,
+            "excludes_zero": true
+          },
+          "grid_baseline": {
+            "point": 0.15897984865335446,
+            "ci_low": 0.1443458348642209,
+            "ci_high": 0.17401669144861662,
+            "confidence": 0.95,
+            "excludes_zero": true
+          }
+        },
+        "status": "UNCALIBRATED"
+      }
+    },
+    "interval_coverage": {
+      "stated": 0.8,
+      "observed": {
+        "point": 0.8117167919799496,
+        "ci_low": 0.7855635964912281,
+        "ci_high": 0.8358674812030075,
+        "confidence": 0.95,
+        "excludes_zero": true
+      },
+      "status": "CALIBRATED"
+    },
+    "any_uncalibrated": true
+  }
+}
