@@ -459,7 +459,15 @@ def aggregate_positions(
     *,
     points_positions: int = POINTS_POSITIONS,
 ) -> pd.DataFrame:
-    """Turn a `(n_simulations, n_drivers)` position matrix into FR-603's table."""
+    """Turn a `(n_simulations, n_drivers)` position matrix into FR-603's table.
+
+    `expected_finish` is never published alone: this project's FR-752 check
+    (`models.base.assert_carries_uncertainty`) governs a bare point plus an
+    interval, but the guarantee here is stronger than that shape — every row
+    carries the full `prob_pNN` distribution `assert_probabilities_sum_to_one`
+    already checks below, and a full distribution is a superset of an
+    interval, not an alternative to one.
+    """
     n_drivers = len(frame)
     output = frame[["driver_id", "constructor_id", "grid_position"]].copy()
     output["expected_finish"] = position_matrix.mean(axis=0)

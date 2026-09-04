@@ -47,7 +47,7 @@ from f1pred.config import SEED
 from f1pred.evaluate.split import ChronologicalSplit
 from f1pred.features.build import TARGET_COLUMN
 from f1pred.features.registry import REGISTRY, Registry
-from f1pred.models.base import rank_to_positions
+from f1pred.models.base import assert_carries_uncertainty, rank_to_positions
 
 logger = logging.getLogger(__name__)
 
@@ -344,7 +344,7 @@ class TrainedRanker:
         field_size = float(len(positions))
         lower = (positions + self.interval.lower_offset).clip(1.0, field_size)
         upper = (positions + self.interval.upper_offset).clip(1.0, field_size)
-        return pd.DataFrame(
+        result = pd.DataFrame(
             {
                 "predicted_position": positions,
                 "predicted_position_lower": lower,
@@ -353,6 +353,11 @@ class TrainedRanker:
             },
             index=race.index,
         )
+        # FR-752 (T-514): checked at the one place this project turns a point
+        # prediction into something published, not trusted from how the frame
+        # above was built.
+        assert_carries_uncertainty(result)
+        return result
 
     # -- the record (FR-404) ------------------------------------------------
 

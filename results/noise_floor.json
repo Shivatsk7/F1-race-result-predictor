@@ -1,0 +1,47 @@
+{
+  "n_corpus_rows": 6911,
+  "seasons": [
+    2010,
+    2011,
+    2012,
+    2013,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "noise_floor": {
+    "estimates": {
+      "dnf_incident_bound": {
+        "method": "dnf_incident_bound",
+        "value": 0.1351468673129793,
+        "n_observations": 6911,
+        "description": "share of all rows whose status_raw is an unambiguous racing incident (['Accident', 'Collision', 'Collision damage', 'Spun off']) or a mechanical failure (34 distinct values); a lower bound, not a variance share",
+        "position_units": null
+      },
+      "near_identical_teammate_variance": {
+        "method": "near_identical_teammate_variance",
+        "value": 0.27385796574996096,
+        "n_observations": 1540,
+        "description": "Var(finish_A - finish_B)/2 over corpus-wide Var(finish position), for 1540 classified teammate pairs within a 3-position grid gap \u2014 identical car, identical circuit, identical day, near-identical starting position",
+        "position_units": 2.7936487061740927
+      }
+    },
+    "headline_method": "near_identical_teammate_variance",
+    "headline_value": 0.27385796574996096
+  },
+  "model_error_in_context": {
+    "model_mae_positions": 3.3737176274018377,
+    "floor_positions": 2.7936487061740927,
+    "model_error_minus_floor_positions": 0.580068921227745,
+    "note": "the model's mean absolute error, read against a floor measured from real near-identical teammate pairs rather than against zero (FR-755, Constitution X.5); a model whose error already sits near the floor has little further room a pre-race model could close"
+  }
+}

@@ -385,7 +385,7 @@ This spec is satisfied when all of the following hold:
 - [x] **AC-6** Stated interval coverage is measured and reported. *(FR-704)*
 - [ ] **AC-7** Every number in the README resolves to a committed results file. *(FR-902)*
 - [ ] **AC-8** Full test suite passes offline in under 60 seconds. *(NFR-04, NFR-05)*
-- [ ] **AC-9** The irreducible noise floor is estimated, committed to `results/`, and model error is reported relative to it. *(FR-754, FR-755)*
+- [x] **AC-9** The irreducible noise floor is estimated, committed to `results/`, and model error is reported relative to it. *(FR-754, FR-755)*
 - [ ] **AC-10** No prediction anywhere in the system is emitted as a bare point estimate. *(FR-752)*
 - [ ] **AC-11** The corpus window is resolved from completed seasons at run time, `W` is configurable, and every results file records both `W` and the concrete season list used. Advancing the system clock past a season boundary changes the window without a code edit. *(FR-508..510)*
 - [x] **AC-12** The regime table is declared data, every historical-performance feature is either regime-relative or declares why it cannot be, and the measured regime-transfer penalty is committed to `results/` for **2014, 2017 and 2022** at two decay settings — each carrying its actual training-season count, with 2014 labelled `DIAGNOSTIC` and the headline stated as `n=2`. *(FR-209, FR-210, FR-406, FR-511, FR-511a, FR-512)*

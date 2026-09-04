@@ -33,6 +33,48 @@ class Predictor(Protocol):
     def predict(self, race: pd.DataFrame) -> pd.Series: ...
 
 
+class BarePointEstimateError(ValueError):
+    """Raised when a frame publishes a predicted position with no attached
+    uncertainty (FR-752, Constitution X.2)."""
+
+
+def assert_carries_uncertainty(
+    frame: pd.DataFrame,
+    *,
+    point_column: str = "predicted_position",
+    lower_column: str = "predicted_position_lower",
+    upper_column: str = "predicted_position_upper",
+) -> None:
+    """FR-752: a *published* predicted position may never stand alone.
+
+    This governs what a frame hands to a reader — `predict_with_interval`'s
+    output, a simulation's aggregated table — not `Predictor.predict()`
+    itself. `predict()`'s bare `pd.Series` of positions is FR-304's internal
+    comparison primitive: the evaluation harness scores a predicted *order*
+    against the actual one, and an interval has no meaning there. FR-752
+    concerns the boundary where a position is shown to someone as a forecast,
+    which is a different act from ranking one predictor against another.
+
+    A frame with no `point_column` at all passes trivially — there is nothing
+    published here to police. One that has it must carry both interval bounds
+    on every row; a null bound is not an interval, only the appearance of one.
+    """
+    if point_column not in frame.columns:
+        return
+    missing = [c for c in (lower_column, upper_column) if c not in frame.columns]
+    if missing:
+        raise BarePointEstimateError(
+            f"{point_column!r} is published without {missing} attached — "
+            f"FR-752 forbids a bare point estimate"
+        )
+    if frame[lower_column].isna().any() or frame[upper_column].isna().any():
+        raise BarePointEstimateError(
+            f"{point_column!r} carries a null interval bound on at least one "
+            f"row — a missing bound is not an interval, it only looks like one "
+            f"until it is read"
+        )
+
+
 def rank_to_positions(values: pd.Series, *, ascending: bool) -> pd.Series:
     """Turn any ordering score into dense positions 1..n.
 
@@ -49,4 +91,9 @@ def rank_to_positions(values: pd.Series, *, ascending: bool) -> pd.Series:
     )
 
 
-__all__ = ["Predictor", "rank_to_positions"]
+__all__ = [
+    "BarePointEstimateError",
+    "Predictor",
+    "assert_carries_uncertainty",
+    "rank_to_positions",
+]
