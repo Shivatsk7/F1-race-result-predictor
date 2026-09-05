@@ -7,8 +7,8 @@
     "FR-501",
     "AC-19"
   ],
-  "generated": "2026-09-02",
-  "code_commit": "7a748f5f071eb2f1f2d3dfcde8aa7debc1a7fce2-dirty",
+  "generated": "2026-09-05",
+  "code_commit": "11b3f4fcd77e401fccbd63ee5209512d2479b13b-dirty",
   "question": "What do the telemetry features add, measured on the seasons the telemetry source covers?",
   "primary_metric": "spearman",
   "seasons": {
@@ -71,7 +71,7 @@
   "split": {
     "window": {
       "width": 8,
-      "as_of": "2026-09-03",
+      "as_of": "2026-09-05",
       "seasons": [
         2018,
         2019,
@@ -430,7 +430,7 @@
           "n_jobs": 1,
           "trees_kept": 9
         },
-        "code_commit": "7a748f5f071eb2f1f2d3dfcde8aa7debc1a7fce2-dirty",
+        "code_commit": "11b3f4fcd77e401fccbd63ee5209512d2479b13b-dirty",
         "evaluation_metrics": {
           "mae": {
             "point": 3.5509022556390972,
@@ -498,12 +498,12 @@
         }
       },
       "evaluation": {
-        "generated": "2026-09-02",
+        "generated": "2026-09-05",
         "primary_metric": "spearman",
         "split": {
           "window": {
             "width": 8,
-            "as_of": "2026-09-03",
+            "as_of": "2026-09-05",
             "seasons": [
               2018,
               2019,
@@ -1304,7 +1304,7 @@
           "n_jobs": 1,
           "trees_kept": 41
         },
-        "code_commit": "7a748f5f071eb2f1f2d3dfcde8aa7debc1a7fce2-dirty",
+        "code_commit": "11b3f4fcd77e401fccbd63ee5209512d2479b13b-dirty",
         "evaluation_metrics": {
           "mae": {
             "point": 3.416917293233082,
@@ -1372,12 +1372,12 @@
         }
       },
       "evaluation": {
-        "generated": "2026-09-02",
+        "generated": "2026-09-05",
         "primary_metric": "spearman",
         "split": {
           "window": {
             "width": 8,
-            "as_of": "2026-09-03",
+            "as_of": "2026-09-05",
             "seasons": [
               2018,
               2019,
@@ -2035,5 +2035,30 @@
     "agrees_with_cited_file": true,
     "disagreements": {}
   },
-  "finding": "spearman: primary 0.6372, primary+telemetry 0.6543. Telemetry minus primary +0.0171 (95% CI -0.0064 to +0.0393, paired). NO MEASURED BENEFIT: the interval includes zero on 8 of the corpus's 16 seasons (2018-2025), holdout 2023-2025. A measured null is the answer FR-215 asks for, not a failed run."
+  "finding": "spearman: primary 0.6372, primary+telemetry 0.6543. Telemetry minus primary +0.0171 (95% CI -0.0064 to +0.0393, paired). NO MEASURED BENEFIT: the interval includes zero on 8 of the corpus's 16 seasons (2018-2025), holdout 2023-2025. A measured null is the answer FR-215 asks for, not a failed run.",
+  "corpus_provenance": {
+    "scope": "subset",
+    "width": 8,
+    "seasons": [
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "first_season": 2018,
+    "last_season": 2025,
+    "resolved": "2026-09-05",
+    "failure_manifest": {
+      "available": true,
+      "races_attempted": 329,
+      "failure_count": 0,
+      "failure_rate": 0.0,
+      "max_failure_rate": 0.1
+    },
+    "why_not_the_window": "practice telemetry exists only from 2018, so this arm covers 8 of the window's 16 seasons (FR-214)"
+  }
 }

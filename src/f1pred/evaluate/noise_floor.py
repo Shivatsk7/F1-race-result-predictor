@@ -40,6 +40,7 @@ import numpy as np
 import pandas as pd
 
 from f1pred.config import RESULTS_DIR
+from f1pred.provenance import Scope, stamp
 from f1pred.data.schema import ClassificationOutcome
 from f1pred.dataset import enrich, load_corpus
 
@@ -286,6 +287,19 @@ def run_noise_floor_estimate(
     }
     if model_mae is not None:
         record["model_error_in_context"] = error_relative_to_floor(model_mae, report)
+    # The floor is measured over the whole corpus rather than the window: it
+    # is a property of the sport, and more teammate pairs make it a better
+    # estimate (AC-11's non-window scope).
+    stamp(
+        record,
+        scope=Scope.ARCHIVE,
+        reason=(
+            "the noise floor is a property of the sport, estimated from every "
+            "classified teammate pair on disk; restricting it to the rolling "
+            "window would discard evidence without making the estimate more "
+            "current"
+        ),
+    )
     target = path or (RESULTS_DIR / "noise_floor.json")
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(record, indent=2, default=str) + "\n")

@@ -132,6 +132,41 @@ same races, the model transfers *better* than the grid across the biggest reset
 in the corpus. The raw number alone would have been published as a weakness the
 data does not support.
 
+## Does the target variable itself hold up?
+
+Every metric on this page rests on one prior question: does "finishing
+position" mean what the sport says it means? The rule is checked against the
+source's own classification, race by race *(AC-15, FR-001a; source:
+[`results/target_validation.json`](results/target_validation.json))*.
+
+**318 of 329 races agree — 96.7%.** Of the 25 rows that disagree:
+
+- **17** are retirements tied on laps completed, usually at lap zero, where
+  nothing can separate them and grid position is the declared fallback. Known
+  and recorded as OQ-8.
+- **5** are two disqualified cars trading last place, which carries no
+  information anyone uses.
+- **3 are genuinely wrong.** Hamilton and Leclerc at the 2023 United States GP
+  and Russell at the 2024 Belgian GP were disqualified after the race but carry
+  a numeric position sentinel in the source data. The rule derives
+  classification from that sentinel and never from the status text — a
+  deliberate choice, because two cars at Bahrain 2022 stopped with mechanical
+  failures and were still officially classified. Here that choice misfires:
+  having completed the most laps of anyone in the retirement group, the three
+  are ranked ahead of cars that retired, while the source correctly places them
+  last.
+
+Those three are **not** patched, because the patch is to let the status text
+override the sentinel and that is exactly what the requirement forbids. It is
+recorded as **OQ-9** for a decision, with its cost measured rather than
+assumed: three rows in 6,868, every one in the last five positions of its race,
+where rank correlation over the whole field is least sensitive.
+
+This is the first time the validator had been run over the whole corpus. It had
+existed since the data-collection phase and been exercised on two hand-built
+races, so "disagreements are reported" was true of the function and not of the
+project.
+
 ## Why this was rebuilt
 
 The v0 system (preserved at tag `v0-vibe-coded`) ran end to end and looked

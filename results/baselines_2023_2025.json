@@ -427,5 +427,38 @@
   ],
   "code_commit": "f820d8254675f71446f3cf1202a96a9cdc8b73c2",
   "note": "Baselines evaluated BEFORE the model exists (P3 exit gate), so the bar is set before there is any temptation to move it. The grid baseline's primary-metric score is the number the model must beat with a confidence interval excluding zero.",
-  "verdict_text": "Primary metric: spearman. grid_order scores 0.6555 on 70 holdout races (2023-2025).\n\nDOES NOT BEAT THE GRID BASELINE.\n  standings_order: -0.0427 (95% CI -0.0830 to -0.0027)."
+  "verdict_text": "Primary metric: spearman. grid_order scores 0.6555 on 70 holdout races (2023-2025).\n\nDOES NOT BEAT THE GRID BASELINE.\n  standings_order: -0.0427 (95% CI -0.0830 to -0.0027).",
+  "corpus_provenance": {
+    "scope": "window",
+    "width": 16,
+    "seasons": [
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "first_season": 2010,
+    "last_season": 2025,
+    "resolved": "2026-09-05",
+    "failure_manifest": {
+      "available": true,
+      "races_attempted": 329,
+      "failure_count": 0,
+      "failure_rate": 0.0,
+      "max_failure_rate": 0.1
+    },
+    "stamped_retroactively": "stamped after the fact, on 2026-09-05, from the split this file already records. Not re-scored: the baselines were deliberately measured before the model existed, and the original run is the artefact."
+  }
 }

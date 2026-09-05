@@ -755,7 +755,7 @@
       "n_jobs": 1,
       "trees_kept": 5
     },
-    "code_commit": "c8542db2a8a4a375992ce96c455e4c04cb1f3660-dirty",
+    "code_commit": "11b3f4fcd77e401fccbd63ee5209512d2479b13b-dirty",
     "evaluation_metrics": {
       "mae": {
         "point": 3.3737176274018377,
@@ -836,8 +836,40 @@
   },
   "absent_sources": [],
   "corpus_rows": 6868,
+  "corpus_provenance": {
+    "scope": "window",
+    "width": 16,
+    "seasons": [
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "first_season": 2010,
+    "last_season": 2025,
+    "resolved": "2026-09-05",
+    "failure_manifest": {
+      "available": true,
+      "races_attempted": 329,
+      "failure_count": 0,
+      "failure_rate": 0.0,
+      "max_failure_rate": 0.1
+    }
+  },
   "runtime": {
-    "wall_clock_seconds": 24.06,
+    "wall_clock_seconds": 23.86,
     "budget_seconds": 300,
     "within_budget": true,
     "reference_machine": "Apple Silicon, macOS 25.6, Python 3.13 (plan.md \u00a74)",

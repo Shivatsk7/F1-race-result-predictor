@@ -1,8 +1,24 @@
 {
-  "wall_clock_seconds": 16.65,
+  "wall_clock_seconds": 18.46,
   "budget_seconds": 60.0,
   "within_budget": true,
-  "tests_collected": 803,
+  "tests_collected": 877,
   "network": "blocked; see tests/conftest.py",
-  "reference_machine": "Apple Silicon, macOS 25.6, Python 3.13 (plan.md \u00a74)"
+  "reference_machine": "Apple Silicon, macOS 25.6, Python 3.13 (plan.md \u00a74)",
+  "corpus_provenance": {
+    "scope": "not_corpus",
+    "width": 0,
+    "seasons": [],
+    "first_season": null,
+    "last_season": null,
+    "resolved": "2026-09-06",
+    "failure_manifest": {
+      "available": true,
+      "races_attempted": 329,
+      "failure_count": 0,
+      "failure_rate": 0.0,
+      "max_failure_rate": 0.1
+    },
+    "why_not_the_window": "a timing measurement of the test suite, not a result about race data; no corpus window applies"
+  }
 }

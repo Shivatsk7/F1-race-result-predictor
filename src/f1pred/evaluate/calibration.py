@@ -33,6 +33,7 @@ import numpy as np
 import pandas as pd
 
 from f1pred.config import RESULTS_DIR, SEED
+from f1pred.provenance import stamp
 from f1pred.dataset import Experiment, enrich, load_corpus, prepare
 from f1pred.evaluate.bootstrap import DEFAULT_CONFIDENCE, DEFAULT_REPLICATES, Interval
 from f1pred.evaluate.runner import train_model
@@ -503,6 +504,7 @@ def run_calibration(
 
 def write_calibration_results(record: dict[str, Any], path: Path | None = None) -> Path:
     """FR-506-style machine-readable record, alongside the human-read one."""
+    stamp(record)
     target = path or (RESULTS_DIR / "calibration.json")
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(record, indent=2, default=str) + "\n")

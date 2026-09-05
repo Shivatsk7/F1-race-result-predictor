@@ -1,10 +1,10 @@
 {
-  "generated": "2026-09-02",
+  "generated": "2026-09-05",
   "primary_metric": "spearman",
   "split": {
     "window": {
       "width": 16,
-      "as_of": "2026-09-03",
+      "as_of": "2026-09-05",
       "seasons": [
         2010,
         2011,
@@ -1038,5 +1038,37 @@
     "oracle_arm": "INADMISSIBLE. The oracle arm reads post-race features and cannot be run before a race has happened. Its score is not a forecast and must never be quoted as model performance (FR-207). It exists here only to size the gap reported under `inflation`.",
     "primary_arm": "Admissible. Pre-race features only, scored on the same holdout (FR-202, FR-304).",
     "verdict_block": "The `verdict` block is the harness's standard FR-507 output and counts the oracle arm among the predictors that beat the grid. The oracle arm beat the grid by reading the result. Only the primary arm's line there is a claim about forecasting; for the size of the gap between them, read `inflation`."
+  },
+  "corpus_provenance": {
+    "scope": "window",
+    "width": 16,
+    "seasons": [
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "first_season": 2010,
+    "last_season": 2025,
+    "resolved": "2026-09-05",
+    "failure_manifest": {
+      "available": true,
+      "races_attempted": 329,
+      "failure_count": 0,
+      "failure_rate": 0.0,
+      "max_failure_rate": 0.1
+    }
   }
 }

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-02",
+  "generated": "2026-09-05",
   "experiment": "fit_diagnostic",
   "question": "does the model reproduce its training races rather than learn from them?",
   "primary_metric": "spearman",
@@ -7,7 +7,7 @@
   "split": {
     "window": {
       "width": 16,
-      "as_of": "2026-09-03",
+      "as_of": "2026-09-05",
       "seasons": [
         2010,
         2011,
@@ -87,5 +87,37 @@
     "holdout": 0.6554824034877108,
     "gap": -0.06671188306199738
   },
-  "finding": "Without early stopping the ranker scores 0.9625 on the races it trained on against 0.6302 on the holdout, a gap of 0.3323 over 400 trees \u2014 it is reproducing its training races. With early stopping the gap is 0.0520 over 5 trees and the holdout score rises to 0.6599. The grid baseline, which cannot memorise anything, shows a gap of -0.0667 on the same split, so the training seasons are not simply the easier races."
+  "finding": "Without early stopping the ranker scores 0.9625 on the races it trained on against 0.6302 on the holdout, a gap of 0.3323 over 400 trees \u2014 it is reproducing its training races. With early stopping the gap is 0.0520 over 5 trees and the holdout score rises to 0.6599. The grid baseline, which cannot memorise anything, shows a gap of -0.0667 on the same split, so the training seasons are not simply the easier races.",
+  "corpus_provenance": {
+    "scope": "window",
+    "width": 16,
+    "seasons": [
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "first_season": 2010,
+    "last_season": 2025,
+    "resolved": "2026-09-05",
+    "failure_manifest": {
+      "available": true,
+      "races_attempted": 329,
+      "failure_count": 0,
+      "failure_rate": 0.0,
+      "max_failure_rate": 0.1
+    }
+  }
 }

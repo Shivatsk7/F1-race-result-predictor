@@ -23,6 +23,7 @@ from typing import Any, Final
 import pandas as pd
 
 from f1pred import render
+from f1pred.provenance import stamp
 from f1pred.config import RESULTS_DIR, SEED
 from f1pred.evaluate.bootstrap import (
     DEFAULT_REPLICATES,
@@ -297,7 +298,13 @@ def render_verdict(record: dict[str, Any]) -> str:
 
 
 def write_results(record: dict[str, Any], path: Path | None = None) -> Path:
-    """FR-506: the machine-readable file, alongside whatever a human reads."""
+    """FR-506: the machine-readable file, alongside whatever a human reads.
+
+    Stamped on the way out (AC-11, AC-21). Doing it here rather than at each
+    caller is the point: a results file whose provenance depends on its author
+    remembering is a results file that will eventually lack it.
+    """
+    stamp(record)
     target = path or (RESULTS_DIR / "baselines.json")
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(record, indent=2, default=str) + "\n")

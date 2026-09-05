@@ -49,6 +49,7 @@ from typing import Any, Final
 import pandas as pd
 
 from f1pred.config import RAW_DIR, RESULTS_DIR, SEED
+from f1pred.provenance import Scope, stamp
 from f1pred.corpus import CorpusWindow
 from f1pred.data import telemetry
 from f1pred.dataset import Experiment, available_seasons, load_corpus, prepare
@@ -422,6 +423,17 @@ def run(
 
     target = path or Path(results_dir) / (
         f"{LABEL}_{split.holdout[0]}_{split.holdout[-1]}.json"
+    )
+    # FR-214: the telemetry source starts in 2018 while the corpus starts in
+    # 2010, so this arm reads half the window by construction. Declared, so a
+    # reader cannot mistake its seasons for the evaluation's.
+    stamp(
+        record,
+        scope=Scope.SUBSET,
+        reason=(
+            "practice telemetry exists only from 2018, so this arm covers 8 of "
+            "the window's 16 seasons (FR-214)"
+        ),
     )
     logger.info("wrote %s", write_results(record, target))
     return record, arms

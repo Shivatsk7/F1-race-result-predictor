@@ -4,7 +4,7 @@
     "measured_on": "tag v0-vibe-coded",
     "measured": "2026-08-15",
     "reproducible_from_this_tree": false,
-    "note": "v0's sources were deleted from the tree in P0 and survive only at the tag (plan A-1). These figures are therefore a record of a past measurement, not an output of the current pipeline, and they are the only numbers in the README of that kind. They are committed so that FR-902 holds literally — every figure on the page resolves to a file — rather than by an exception carved out for them."
+    "note": "v0's sources were deleted from the tree in P0 and survive only at the tag (plan A-1). These figures are therefore a record of a past measurement, not an output of the current pipeline, and they are the only numbers in the README of that kind. They are committed so that FR-902 holds literally \u2014 every figure on the page resolves to a file \u2014 rather than by an exception carved out for them."
   },
   "holdout": {
     "races": 2,
@@ -17,11 +17,48 @@
     "defect": "Computed from the actual weather of the race being predicted, so every v0 metric below is inflated by knowing whether it rained."
   },
   "metrics": {
-    "mae": {"v0_model": 3.675, "grid_order_baseline": 3.55, "winner": "grid_order_baseline"},
-    "exact_position_rate": {"v0_model": 0.15, "grid_order_baseline": 0.175, "winner": "grid_order_baseline"},
-    "within_two_positions_rate": {"v0_model": 0.425, "grid_order_baseline": 0.55, "winner": "grid_order_baseline"},
-    "top_three_hit_rate": {"v0_model": 0.5, "grid_order_baseline": 0.667, "winner": "grid_order_baseline"},
-    "spearman": {"v0_model": 0.621, "grid_order_baseline": 0.569, "winner": "v0_model"}
+    "mae": {
+      "v0_model": 3.675,
+      "grid_order_baseline": 3.55,
+      "winner": "grid_order_baseline"
+    },
+    "exact_position_rate": {
+      "v0_model": 0.15,
+      "grid_order_baseline": 0.175,
+      "winner": "grid_order_baseline"
+    },
+    "within_two_positions_rate": {
+      "v0_model": 0.425,
+      "grid_order_baseline": 0.55,
+      "winner": "grid_order_baseline"
+    },
+    "top_three_hit_rate": {
+      "v0_model": 0.5,
+      "grid_order_baseline": 0.667,
+      "winner": "grid_order_baseline"
+    },
+    "spearman": {
+      "v0_model": 0.621,
+      "grid_order_baseline": 0.569,
+      "winner": "v0_model"
+    }
   },
-  "verdict": "v0 lost to a one-line baseline on five of six metrics, while reading the race's own weather and being scored on forty rows."
+  "verdict": "v0 lost to a one-line baseline on five of six metrics, while reading the race's own weather and being scored on forty rows.",
+  "corpus_provenance": {
+    "scope": "not_corpus",
+    "width": 0,
+    "seasons": [],
+    "first_season": null,
+    "last_season": null,
+    "resolved": "2026-09-05",
+    "failure_manifest": {
+      "available": true,
+      "races_attempted": 329,
+      "failure_count": 0,
+      "failure_rate": 0.0,
+      "max_failure_rate": 0.1
+    },
+    "why_not_the_window": "a record of a measurement made against code deleted in P0; it describes no corpus this tree can read",
+    "stamped_retroactively": "stamped after the fact, on 2026-09-05, from the seasons this file already names. It was written before results files carried provenance; re-running it would refetch an unchanged corpus over the network."
+  }
 }

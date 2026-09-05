@@ -58,6 +58,7 @@ from f1pred.config import (
     RegimeSeverity,
 )
 from f1pred.corpus import archive_seasons
+from f1pred.provenance import Scope, stamp
 from f1pred.dataset import Experiment, available_seasons, prepare
 from f1pred.evaluate.bootstrap import (
     DEFAULT_CONFIDENCE,
@@ -773,6 +774,20 @@ def run(
     record["recency_weighting"] = recency_effect(record)
 
     if write:
+        # FR-511 reads the archive, not the window, so that a historical
+        # observation cannot age out of the window and vanish from the result
+        # without anyone noticing (amendment 2026-08-25). Declared here rather
+        # than letting the default stamp claim a window this never used.
+        stamp(
+            record,
+            seasons=archive,
+            scope=Scope.ARCHIVE,
+            reason=(
+                "FR-511 measures regulation transfer across the whole archive; "
+                "binding it to the rolling window would let the 2017 observation "
+                "age out silently in 2028"
+            ),
+        )
         written = write_results(record, path or RESULTS_DIR / "regime_transfer.json")
         logger.info("wrote %s", written)
     return record

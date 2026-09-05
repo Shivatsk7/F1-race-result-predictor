@@ -484,3 +484,70 @@ class TestTheOfflineGuardWorks:
         """NFR-05's exception is data collection, and only data collection."""
         marked = re.findall(r"@pytest\.mark\.network", (ROOT / "tests").joinpath("test_fetch.py").read_text())
         assert marked, "the networked tests lost their marker"
+
+
+class TestEveryResultsFileDeclaresItsCorpus:
+    """AC-11 and AC-21, enforced rather than swept once.
+
+    AC-11 asks every results file to record `W` and its concrete season list.
+    AC-21 asks the collection failure manifest to be reproduced in every
+    results file, so a reader can tell an *absent* race from one that never
+    happened — which `FailureManifest`'s own docstring has claimed since P1 and
+    which was true only of the collection reports.
+
+    Both answer the same question — which corpus is this number about? — so
+    there is one stamp and this is the check on it. Written after a sweep found
+    six files carrying no window at all: a sweep fixes today's files, and a
+    test fixes the next one somebody writes.
+    """
+
+    FILES = sorted((ROOT / "results").glob("*.json"))
+
+    @staticmethod
+    def block(path):
+        from f1pred.provenance import PROVENANCE_KEY
+
+        return json.loads(path.read_text()).get(PROVENANCE_KEY)
+
+    def test_there_are_results_files_to_check(self):
+        assert self.FILES, "no results files found; this check would be vacuous"
+
+    @pytest.mark.parametrize("path", FILES, ids=lambda p: p.name)
+    def test_every_file_declares_which_corpus_produced_it(self, path):
+        block = self.block(path)
+        assert block is not None, (
+            f"{path.name} carries no corpus provenance. Under AC-11 every "
+            f"results file records its window width and season list; write it "
+            f"through a stamped writer rather than by hand."
+        )
+
+    @pytest.mark.parametrize("path", FILES, ids=lambda p: p.name)
+    def test_every_file_reproduces_the_failure_manifest(self, path):
+        manifest = (self.block(path) or {}).get("failure_manifest")
+        assert manifest is not None, f"{path.name} does not reproduce the manifest (AC-21)"
+        assert "available" in manifest
+
+    @pytest.mark.parametrize("path", FILES, ids=lambda p: p.name)
+    def test_a_non_window_scope_says_why(self, path):
+        """A file that did not use the window must say so, not stay silent."""
+        from f1pred.provenance import Scope
+
+        block = self.block(path) or {}
+        if block.get("scope") != Scope.WINDOW.value:
+            assert block.get("why_not_the_window"), (
+                f"{path.name} declares scope {block.get('scope')!r} without a "
+                f"reason. An unexplained non-window scope is indistinguishable "
+                f"from a mistake."
+            )
+
+    @pytest.mark.parametrize("path", FILES, ids=lambda p: p.name)
+    def test_a_corpus_scoped_file_names_real_seasons(self, path):
+        from f1pred.provenance import Scope
+
+        block = self.block(path) or {}
+        if block.get("scope") == Scope.NOT_CORPUS.value:
+            return
+        seasons = block.get("seasons")
+        assert seasons, f"{path.name} names no seasons"
+        assert block["width"] >= 1
+        assert seasons == sorted(seasons), f"{path.name} lists seasons out of order"

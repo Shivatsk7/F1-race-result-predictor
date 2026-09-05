@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-02",
+  "generated": "2026-09-05",
   "experiment": "regulation_transfer",
   "primary_metric": "spearman",
   "corpus": {
@@ -4632,5 +4632,38 @@
       2017,
       2022
     ]
+  },
+  "corpus_provenance": {
+    "scope": "archive",
+    "width": 16,
+    "seasons": [
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "first_season": 2010,
+    "last_season": 2025,
+    "resolved": "2026-09-05",
+    "failure_manifest": {
+      "available": true,
+      "races_attempted": 329,
+      "failure_count": 0,
+      "failure_rate": 0.0,
+      "max_failure_rate": 0.1
+    },
+    "why_not_the_window": "FR-511 measures regulation transfer across the whole archive; binding it to the rolling window would let the 2017 observation age out silently in 2028"
   }
 }

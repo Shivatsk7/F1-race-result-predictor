@@ -84,5 +84,28 @@
       "sprint_finish_pct": 6393,
       "sprint_places_gained_pct": 6393
     }
+  },
+  "corpus_provenance": {
+    "scope": "subset",
+    "width": 5,
+    "seasons": [
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "first_season": 2021,
+    "last_season": 2025,
+    "resolved": "2026-09-05",
+    "failure_manifest": {
+      "available": true,
+      "races_attempted": 329,
+      "failure_count": 0,
+      "failure_rate": 0.0,
+      "max_failure_rate": 0.1
+    },
+    "why_not_the_window": "sprint weekends began in 2021, so no earlier season has a sprint result to collect (FR-211)",
+    "stamped_retroactively": "stamped after the fact, on 2026-09-05, from the seasons this file already names. It was written before results files carried provenance; re-running it would refetch an unchanged corpus over the network."
   }
 }

@@ -47,5 +47,38 @@
     "retrieved": "2026-08-31",
     "licence": "Open-Meteo: free for non-commercial use; ERA5 via Copernicus (CC-BY-4.0)",
     "role_split": "Days before the race year form the FR-206 climatological prior (PRE_RACE). The race day itself is POST_RACE and reachable only from the oracle set."
+  },
+  "corpus_provenance": {
+    "scope": "window",
+    "width": 16,
+    "seasons": [
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "first_season": 2010,
+    "last_season": 2025,
+    "resolved": "2026-09-05",
+    "failure_manifest": {
+      "available": true,
+      "races_attempted": 329,
+      "failure_count": 0,
+      "failure_rate": 0.0,
+      "max_failure_rate": 0.1
+    },
+    "stamped_retroactively": "stamped after the fact, on 2026-09-05, from the seasons this file already names. It was written before results files carried provenance; re-running it would refetch an unchanged corpus over the network."
   }
 }

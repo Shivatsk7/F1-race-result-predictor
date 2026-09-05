@@ -97,19 +97,32 @@ def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:
 
 
 def _record(elapsed: float, collected: int) -> None:
+    """Write the measurement, stamped like every other file under `results/`.
+
+    Stamped `not_corpus`: this is a timing of the suite, not a result about
+    race data, and AC-11's window would be meaningless on it. Declared rather
+    than omitted — an absent stamp reads as an oversight and this one is a
+    decision. Without the stamp here the file would fail the provenance check
+    on every full run, because this writer overwrites it each time.
+    """
+    from f1pred.provenance import PROVENANCE_KEY, Scope, corpus_provenance
+
+    record = {
+        "wall_clock_seconds": round(elapsed, 2),
+        "budget_seconds": SUITE_BUDGET_SECONDS,
+        "within_budget": elapsed < SUITE_BUDGET_SECONDS,
+        "tests_collected": collected,
+        "network": "blocked; see tests/conftest.py",
+        "reference_machine": "Apple Silicon, macOS 25.6, Python 3.13 (plan.md §4)",
+    }
+    record[PROVENANCE_KEY] = corpus_provenance(
+        [],
+        scope=Scope.NOT_CORPUS,
+        reason=(
+            "a timing measurement of the test suite, not a result about race "
+            "data; no corpus window applies"
+        ),
+    )
     path = ROOT / "results" / "test_suite_timing.json"
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(
-            {
-                "wall_clock_seconds": round(elapsed, 2),
-                "budget_seconds": SUITE_BUDGET_SECONDS,
-                "within_budget": elapsed < SUITE_BUDGET_SECONDS,
-                "tests_collected": collected,
-                "network": "blocked; see tests/conftest.py",
-                "reference_machine": "Apple Silicon, macOS 25.6, Python 3.13 (plan.md §4)",
-            },
-            indent=2,
-        )
-        + "\n"
-    )
+    path.write_text(json.dumps(record, indent=2) + "\n")

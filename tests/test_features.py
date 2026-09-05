@@ -393,3 +393,115 @@ class TestEnrichmentAbsence:
         for column in ENRICHMENT_COLUMNS:
             enriched[column] = 1.0
         assert build_primary(enriched).absent_sources == ()
+
+
+class TestRealTransferRegression:
+    """AC-20's actual wording: a regression test on a **known** mid-corpus move.
+
+    Everything above uses `synthetic_corpus`, whose transfer is injected by the
+    fixture — which tests the mechanism but proves nothing about the moves that
+    are really in the data. These read the collected corpus.
+
+    Sainz's Toro Rosso to Renault move is the sharpest case available: it
+    happened at **round 17 of 2017**, mid-season. A January switch could be
+    handled correctly by any code that merely resets features each year, so a
+    mid-season move is what separates real transfer handling from an annual
+    reset that happens to look like it.
+
+    Skipped rather than failed when the corpus is absent, so a clean checkout
+    without collected data still runs green (NFR-05: no network here either).
+    """
+
+    @pytest.fixture(scope="class")
+    def corpus(self):
+        from f1pred.dataset import available_seasons, load_corpus
+
+        if not available_seasons():
+            pytest.skip("no collected corpus on disk; run `f1pred collect`")
+        return load_corpus()
+
+    @pytest.fixture(scope="class")
+    def transfers(self, corpus):
+        return detect_transfers(corpus)
+
+    def test_the_mid_season_move_is_detected_at_the_right_round(self, transfers):
+        sainz = transfers[
+            (transfers["driver_id"] == "sainz") & (transfers["season"] == 2017)
+        ]
+        assert len(sainz) == 1, "Sainz's 2017 move is missing or double-counted"
+        row = sainz.iloc[0]
+        assert int(row["round"]) == 17, (
+            f"the move is recorded at round {row['round']}; it happened at "
+            f"round 17, and snapping it to round 1 would be an annual reset "
+            f"masquerading as transfer handling"
+        )
+        assert row["previous_constructor_id"] == "toro_rosso"
+        assert row["constructor_id"] == "renault"
+
+    def test_a_canonical_between_season_move_is_detected(self, transfers):
+        hamilton = transfers[
+            (transfers["driver_id"] == "hamilton") & (transfers["season"] == 2013)
+        ]
+        assert len(hamilton) == 1
+        assert hamilton.iloc[0]["previous_constructor_id"] == "mclaren"
+        assert hamilton.iloc[0]["constructor_id"] == "mercedes"
+
+    def test_the_race_after_a_real_move_is_flagged(self, corpus, transfers):
+        """FR-216: the flag is on the row, not merely in a side table."""
+        built = build_primary(corpus)
+        keys = built.keys
+        for driver, season, rnd in (("sainz", 2017, 17), ("hamilton", 2013, 1)):
+            mask = (
+                (keys["driver_id"] == driver)
+                & (keys["season"] == season)
+                & (keys["round"] == rnd)
+            )
+            assert mask.any(), f"{driver} {season} round {rnd} is not in the corpus"
+            assert built.flags.loc[mask, "post_transfer"].all(), (
+                f"{driver}'s {season} move is recorded but the race after it "
+                f"carries no POST_TRANSFER flag"
+            )
+
+    def test_the_new_constructors_form_is_not_inherited_from_the_old_one(
+        self, corpus
+    ):
+        """The correctness half of FR-216, on a real move.
+
+        Sainz's constructor-form features at Renault must not carry Toro
+        Rosso's history across the move. Checked as: the value at the transfer
+        race differs from what the same driver's feature held immediately
+        before it, since the two constructors were not equally competitive.
+        """
+        built = build_primary(corpus)
+        keys = built.keys
+        constructor_features = [
+            name for name in built.feature_names if name.startswith("constructor_")
+        ]
+        assert constructor_features, "no constructor-form features to check"
+
+        sainz = keys["driver_id"] == "sainz"
+        season_2017 = keys["season"] == 2017
+        before = built.X.loc[sainz & season_2017 & (keys["round"] == 16)]
+        after = built.X.loc[sainz & season_2017 & (keys["round"] == 17)]
+        assert len(before) == 1 and len(after) == 1
+
+        changed = [
+            name
+            for name in constructor_features
+            if not _values_match(before.iloc[0][name], after.iloc[0][name])
+        ]
+        assert changed, (
+            "every constructor-form feature is unchanged across Sainz's move "
+            "to Renault, which means Toro Rosso's history was carried over"
+        )
+
+
+def _values_match(a, b) -> bool:
+    """NaN-tolerant equality: a reset feature may legitimately become null."""
+    import math
+
+    a_null = a is None or (isinstance(a, float) and math.isnan(a))
+    b_null = b is None or (isinstance(b, float) and math.isnan(b))
+    if a_null or b_null:
+        return a_null and b_null
+    return a == b
