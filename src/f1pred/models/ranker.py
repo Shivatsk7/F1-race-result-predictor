@@ -420,6 +420,66 @@ class TrainedRanker:
         )
         return model_path
 
+    @classmethod
+    def load(cls, path: Path) -> TrainedRanker:
+        """Read back what `save` wrote, under the same stem.
+
+        The feature list comes from the record rather than from the booster,
+        because it is the record that FR-404 makes authoritative and the record
+        that a reader can check. A booster whose feature count disagrees with
+        the record is a corrupted pair, and it raises here rather than
+        predicting from whichever of the two the library happened to prefer.
+        """
+        path = Path(path)
+        record_path, model_path = path.with_suffix(".json"), path.with_suffix(".ubj")
+        if not record_path.exists() or not model_path.exists():
+            raise ModelError(
+                f"a saved model is two files under one stem, {path}.ubj and "
+                f"{path}.json; found "
+                f"{[p.name for p in (model_path, record_path) if p.exists()] or 'neither'}"
+            )
+        record = json.loads(record_path.read_text(encoding="utf-8"))
+        booster = xgb.XGBRanker()
+        booster.load_model(model_path)
+
+        # FR-404 records each feature as a name and its declared availability;
+        # the model itself needs the names, in the recorded order.
+        features = tuple(f["name"] for f in record["features"])
+        loaded_count = getattr(booster, "n_features_in_", len(features))
+        if loaded_count != len(features):
+            raise ModelError(
+                f"{model_path.name} takes {loaded_count} features but "
+                f"{record_path.name} records {len(features)}; the pair does not "
+                f"describe one model"
+            )
+
+        interval_record = record["interval"]
+        # `trees_kept` rides with the hyperparameters in the record but is not
+        # one of them — it is what early stopping left, and it is restored onto
+        # the model rather than passed back into the parameter object.
+        hyperparameters = dict(record["hyperparameters"])
+        trees = int(hyperparameters.pop("trees_kept", 0))
+        params = Hyperparameters(**hyperparameters)
+        return cls(
+            booster=booster,
+            feature_names=features,
+            params=params,
+            interval=Interval(
+                lower_offset=float(interval_record["lower_offset"]),
+                upper_offset=float(interval_record["upper_offset"]),
+                coverage=float(interval_record["coverage"]),
+                calibration_rows=int(interval_record["calibration_rows"]),
+                calibration_seasons=tuple(interval_record["calibration_seasons"]),
+            ),
+            training_seasons=tuple(record["training_seasons"]),
+            training_rows=int(record["training_rows"]),
+            training_date_range=tuple(record["training_date_range"]),
+            code_commit=record["code_commit"],
+            trees=trees,
+            name=record.get("name", "xgboost_ranker"),
+            evaluation_metrics=dict(record.get("evaluation_metrics") or {}),
+        )
+
 
 #: FR-404 enumerates six fields. The tuple is the enumeration, and
 #: `metadata()` fails against it rather than trusting the writer to count.

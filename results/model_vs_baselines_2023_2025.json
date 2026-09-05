@@ -1,10 +1,10 @@
 {
-  "generated": "2026-09-02",
+  "generated": "2026-09-05",
   "primary_metric": "spearman",
   "split": {
     "window": {
       "width": 16,
-      "as_of": "2026-09-03",
+      "as_of": "2026-09-05",
       "seasons": [
         2010,
         2011,
@@ -755,7 +755,7 @@
       "n_jobs": 1,
       "trees_kept": 5
     },
-    "code_commit": "7a748f5f071eb2f1f2d3dfcde8aa7debc1a7fce2",
+    "code_commit": "c8542db2a8a4a375992ce96c455e4c04cb1f3660-dirty",
     "evaluation_metrics": {
       "mae": {
         "point": 3.3737176274018377,
@@ -835,5 +835,12 @@
     }
   },
   "absent_sources": [],
-  "corpus_rows": 6868
+  "corpus_rows": 6868,
+  "runtime": {
+    "wall_clock_seconds": 24.06,
+    "budget_seconds": 300,
+    "within_budget": true,
+    "reference_machine": "Apple Silicon, macOS 25.6, Python 3.13 (plan.md \u00a74)",
+    "measured": "2026-09-05"
+  }
 }

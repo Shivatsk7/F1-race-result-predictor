@@ -8,6 +8,9 @@ version = "0.1.0.dev0"
 description = "Spec-driven F1 race result predictor with honest baseline evaluation"
 requires-python = ">=3.13"
 
+[project.scripts]
+f1pred = "f1pred.cli:main"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 

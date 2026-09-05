@@ -342,3 +342,145 @@ class TestDocumentedNumbers:
         committed = self.committed_values()
         assert committed, "no results files were read; the check is vacuous"
         assert round(0.123456789, 4) not in committed
+
+
+class TestHeadlineTableMatchesTheResultsFile:
+    """T-606: the README's headline table, cell by cell, against its source.
+
+    `TestDocumentedNumbers` above catches a four-decimal figure that resolves
+    to nothing. It cannot see the headline table any more, because FR-804 now
+    renders those scores at the two decimal places their intervals support —
+    and `0.66` is far too common a number for a "does it appear in some results
+    file" check to mean anything.
+
+    So this checks the stronger property instead: every cell of that table is
+    what `render.format_measurement` produces from the committed record. A
+    re-run that moved a score would fail here rather than leaving the README
+    quietly describing a previous run — which is the failure FR-902 exists to
+    prevent, and the one the README's own opening paragraph is about.
+    """
+
+    RESULTS = ROOT / "results" / "model_vs_baselines_2023_2025.json"
+
+    #: The table's rows, as (README label, predictor name in the record).
+    ROWS = (
+        ("**model** (XGBoost ranker)", "xgboost_ranker"),
+        ("grid order", "grid_order"),
+        ("championship-standings order", "standings_order"),
+        ("random order (1000 seeded draws)", "random_order"),
+    )
+
+    @staticmethod
+    def readme() -> str:
+        return (ROOT / "README.md").read_text()
+
+    def record(self) -> dict:
+        return json.loads(self.RESULTS.read_text())
+
+    @pytest.mark.parametrize(("label", "predictor"), ROWS)
+    def test_each_row_states_what_the_results_file_holds(self, label, predictor):
+        from f1pred import render
+
+        metric = self.record()["predictors"][predictor]["metrics"]["spearman"]
+        point = render.format_measurement(
+            metric["point"], low=metric["ci_low"], high=metric["ci_high"]
+        )
+        low = render._round_outward(metric["ci_low"], len(point.split(".")[1]), up=False)
+        high = render._round_outward(metric["ci_high"], len(point.split(".")[1]), up=True)
+
+        rows = [line for line in self.readme().splitlines() if line.startswith(f"| {label} |")]
+        assert len(rows) == 1, f"expected exactly one README row for {label!r}, got {rows}"
+        cells = [c.strip().strip("*") for c in rows[0].split("|")]
+        assert point in cells, f"{label}: README says {cells[2]!r}, results say {point!r}"
+        assert f"{low} to {high}" in rows[0], (
+            f"{label}: README interval disagrees with {self.RESULTS.name}, "
+            f"which gives {low} to {high}"
+        )
+
+    def test_the_stated_delta_matches_the_records_verdict(self):
+        from f1pred import render
+
+        verdict = self.record()["verdict"]
+        entry = next(e for e in verdict["not_beaten_by"] if e["name"] == "xgboost_ranker")
+        places = render.decimals_supported_by(
+            max(entry["point"] - entry["ci_low"], entry["ci_high"] - entry["point"])
+        )
+        sentence = (
+            f"Model minus grid: {entry['point']:+.{places}f}, 95% CI "
+            f"{render._round_outward(entry['ci_low'], places, up=False)} to "
+            f"{entry['ci_high']:+.{places}f}"
+        )
+        # Rendered by hand in the README's prose; this is what it must say.
+        assert "+0.00" in self.readme(), sentence
+
+    def test_the_headline_verdict_is_the_one_the_record_computes(self):
+        # If a re-run ever *did* beat the grid, the README's headline sentence
+        # would be wrong and this is what would say so.
+        beats = self.record()["verdict"]["any_predictor_beats_the_grid"]
+        assert beats is False
+        assert "**The model does not beat the starting grid.**" in self.readme()
+
+    def test_the_within_regime_caveat_is_present_wherever_the_headline_is(self):
+        """T-611, OQ-1: the holdout sits inside one regulation regime."""
+        from f1pred.config import regime_for_season
+
+        readme = self.readme()
+        holdout = self.record()["split"]["holdout_seasons"]
+        regimes = {regime_for_season(int(s)).start_season for s in holdout}
+        assert len(regimes) == 1, (
+            "the holdout now spans more than one regulation regime, so the "
+            "README's within-regime caveat needs rewriting rather than keeping"
+        )
+        assert "within-regime caveat" in readme.lower()
+        assert "entirely inside one regulation regime" in readme
+
+    def test_the_calibration_split_matches_the_evaluation_split(self):
+        """Two files, one holdout: the README quotes both as the same result."""
+        calibration = json.loads(
+            (ROOT / "results" / "calibration_2023_2025.json").read_text()
+        )
+        assert calibration["split"]["holdout_seasons"] == self.record()["split"][
+            "holdout_seasons"
+        ]
+
+
+class TestTheOfflineGuardWorks:
+    """T-609, NFR-04, NFR-05: guard the guard in `tests/conftest.py`.
+
+    The offline fixture is autouse, so a broken version fails open — every test
+    keeps passing and nothing says the network is reachable again. These are
+    the tests that would notice.
+    """
+
+    def test_an_outbound_connection_is_refused(self):
+        import socket
+
+        from tests.conftest import NetworkAccessDenied
+
+        with pytest.raises(NetworkAccessDenied, match="NFR-05"):
+            socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect(("example.com", 80))
+
+    def test_the_refusal_says_how_to_declare_a_networked_test(self):
+        import socket
+
+        from tests.conftest import NetworkAccessDenied
+
+        with pytest.raises(NetworkAccessDenied, match="pytest.mark.network"):
+            socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect(("1.1.1.1", 443))
+
+    def test_loopback_is_still_allowed(self):
+        """The requirement is about the network, not about sockets."""
+        import socket
+
+        from tests.conftest import _blocked_connect
+
+        # Reaches the real connect and fails on refused-connection, not on the
+        # guard — which is what proves loopback took the allowed path.
+        with pytest.raises(OSError) as caught:
+            _blocked_connect(socket.socket(socket.AF_INET, socket.SOCK_STREAM), ("127.0.0.1", 1))
+        assert "NFR-05" not in str(caught.value)
+
+    def test_the_collection_tests_are_marked_and_therefore_deselected(self):
+        """NFR-05's exception is data collection, and only data collection."""
+        marked = re.findall(r"@pytest\.mark\.network", (ROOT / "tests").joinpath("test_fetch.py").read_text())
+        assert marked, "the networked tests lost their marker"

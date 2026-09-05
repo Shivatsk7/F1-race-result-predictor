@@ -1,0 +1,27 @@
+{
+  "what": "The audit of the v0 system that motivated this rebuild.",
+  "provenance": {
+    "measured_on": "tag v0-vibe-coded",
+    "measured": "2026-08-15",
+    "reproducible_from_this_tree": false,
+    "note": "v0's sources were deleted from the tree in P0 and survive only at the tag (plan A-1). These figures are therefore a record of a past measurement, not an output of the current pipeline, and they are the only numbers in the README of that kind. They are committed so that FR-902 holds literally — every figure on the page resolves to a file — rather than by an exception carved out for them."
+  },
+  "holdout": {
+    "races": 2,
+    "rows": 40,
+    "defect": "Two races is not a holdout. Every metric below is indistinguishable from noise, which is the second of the two root causes the rebuild addresses."
+  },
+  "leakage": {
+    "feature": "weather_mixed",
+    "importance_rank": 3,
+    "defect": "Computed from the actual weather of the race being predicted, so every v0 metric below is inflated by knowing whether it rained."
+  },
+  "metrics": {
+    "mae": {"v0_model": 3.675, "grid_order_baseline": 3.55, "winner": "grid_order_baseline"},
+    "exact_position_rate": {"v0_model": 0.15, "grid_order_baseline": 0.175, "winner": "grid_order_baseline"},
+    "within_two_positions_rate": {"v0_model": 0.425, "grid_order_baseline": 0.55, "winner": "grid_order_baseline"},
+    "top_three_hit_rate": {"v0_model": 0.5, "grid_order_baseline": 0.667, "winner": "grid_order_baseline"},
+    "spearman": {"v0_model": 0.621, "grid_order_baseline": 0.569, "winner": "v0_model"}
+  },
+  "verdict": "v0 lost to a one-line baseline on five of six metrics, while reading the race's own weather and being scored on forty rows."
+}

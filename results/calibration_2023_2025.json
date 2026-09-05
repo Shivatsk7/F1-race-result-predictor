@@ -54,7 +54,7 @@
       "holdout": 3
     }
   },
-  "model_code_commit": "34b18f6b0d5851a57674efbac64ec828ae23666f-dirty",
+  "model_code_commit": "c8542db2a8a4a375992ce96c455e4c04cb1f3660-dirty",
   "n_simulations": 1000,
   "seed": 20260815,
   "safety_car_proxy": {

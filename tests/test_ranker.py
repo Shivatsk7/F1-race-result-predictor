@@ -393,6 +393,62 @@ class TestPersistence:
         assert np.allclose(before, after)
 
 
+class TestLoading:
+    """`load` is what `f1pred predict` uses, so it must restore the model the
+    record describes rather than an approximation of it."""
+
+    def test_a_loaded_model_predicts_what_the_saved_one_did(
+        self, fitted, one_race, tmp_path
+    ):
+        fitted.save(tmp_path / "ranker")
+        loaded = TrainedRanker.load(tmp_path / "ranker")
+        assert np.allclose(
+            fitted.predict(one_race).to_numpy(), loaded.predict(one_race).to_numpy()
+        )
+
+    def test_the_interval_survives_the_round_trip(self, fitted, tmp_path):
+        # An interval that widened or narrowed in transit would make every
+        # prediction the loaded model emits claim a coverage it does not have.
+        fitted.save(tmp_path / "ranker")
+        loaded = TrainedRanker.load(tmp_path / "ranker")
+        assert loaded.interval == fitted.interval
+
+    def test_the_provenance_survives_the_round_trip(self, fitted, tmp_path):
+        fitted.save(tmp_path / "ranker")
+        loaded = TrainedRanker.load(tmp_path / "ranker")
+        assert loaded.feature_names == fitted.feature_names
+        assert loaded.training_seasons == fitted.training_seasons
+        assert loaded.training_rows == fitted.training_rows
+        assert loaded.code_commit == fitted.code_commit
+        assert loaded.trees == fitted.trees
+
+    def test_the_hyperparameters_survive_the_round_trip(self, fitted, tmp_path):
+        # `trees_kept` rides with the hyperparameters in the record but is not
+        # one of them; passing it back into the dataclass would fail loudly,
+        # and silently dropping it would lose the shipped tree count.
+        fitted.save(tmp_path / "ranker")
+        loaded = TrainedRanker.load(tmp_path / "ranker")
+        assert loaded.params == fitted.params
+
+    def test_half_a_saved_model_is_refused(self, fitted, tmp_path):
+        fitted.save(tmp_path / "ranker")
+        (tmp_path / "ranker.json").unlink()
+        with pytest.raises(ModelError, match="two files under one stem"):
+            TrainedRanker.load(tmp_path / "ranker")
+
+    def test_a_record_that_disagrees_with_its_booster_is_refused(
+        self, fitted, tmp_path
+    ):
+        """A mismatched pair must not predict from whichever half wins."""
+        fitted.save(tmp_path / "ranker")
+        record_path = tmp_path / "ranker.json"
+        record = json.loads(record_path.read_text())
+        record["features"] = record["features"][:-1]
+        record_path.write_text(json.dumps(record))
+        with pytest.raises(ModelError, match="does not describe one model"):
+            TrainedRanker.load(tmp_path / "ranker")
+
+
 class TestEarlyStopping:
     """The mechanism that keeps the fit from memorising its training races.
 

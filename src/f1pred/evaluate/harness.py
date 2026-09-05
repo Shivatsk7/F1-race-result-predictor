@@ -22,6 +22,7 @@ from typing import Any, Final
 
 import pandas as pd
 
+from f1pred import render
 from f1pred.config import RESULTS_DIR, SEED
 from f1pred.evaluate.bootstrap import (
     DEFAULT_REPLICATES,
@@ -248,14 +249,38 @@ def verdict(results: dict[str, PredictorResult]) -> dict[str, Any]:
     return lines
 
 
+def _delta(entry: dict[str, Any]) -> str:
+    """A delta and its interval, at the precision the interval supports.
+
+    FR-804 rule 2 applies here and not only to tables: this sentence is the
+    project's headline claim, and it is the last place a spare decimal should
+    be allowed to imply a resolution the bootstrap did not find. Signed, so a
+    delta that rounds to zero still shows which side of zero it fell.
+    """
+    places = render.decimals_supported_by(
+        max(entry["point"] - entry["ci_low"], entry["ci_high"] - entry["point"])
+    )
+    return (
+        f"{entry['point']:+.{places}f} "
+        f"(95% CI {entry['ci_low']:+.{places}f} to {entry['ci_high']:+.{places}f}"
+        f"{'' if entry['excludes_zero'] else ', includes zero'})"
+    )
+
+
 def render_verdict(record: dict[str, Any]) -> str:
     """The sentence FR-507 requires, computed rather than written."""
     v = record["verdict"]
     metric, ref = v["metric"], v["reference"]
+    reference_metric = record["predictors"][ref]["metrics"][metric]
     head = (
         f"Primary metric: {metric}. "
-        f"{ref} scores {v['reference_score']:.4f} on "
-        f"{record['holdout_races']} holdout races "
+        f"{ref} scores "
+        + render.format_measurement(
+            reference_metric["point"],
+            low=reference_metric["ci_low"],
+            high=reference_metric["ci_high"],
+        )
+        + f" on {record['holdout_races']} holdout races "
         f"({record['split']['holdout_seasons'][0]}-"
         f"{record['split']['holdout_seasons'][-1]})."
     )
@@ -263,18 +288,11 @@ def render_verdict(record: dict[str, Any]) -> str:
         return head + "\n\nNo predictor was compared against it."
     if v["any_predictor_beats_the_grid"]:
         best = max(v["beaten_by"], key=lambda e: e["point"])
-        body = (
-            f"\n\nBEATS THE GRID: {best['name']} by {best['point']:+.4f} "
-            f"(95% CI {best['ci_low']:+.4f} to {best['ci_high']:+.4f}, excludes zero)."
-        )
+        body = f"\n\nBEATS THE GRID: {best['name']} by {_delta(best)}."
     else:
         body = "\n\nDOES NOT BEAT THE GRID BASELINE."
     for entry in v["not_beaten_by"]:
-        body += (
-            f"\n  {entry['name']}: {entry['point']:+.4f} "
-            f"(95% CI {entry['ci_low']:+.4f} to {entry['ci_high']:+.4f}"
-            f"{', includes zero' if not entry['excludes_zero'] else ''})."
-        )
+        body += f"\n  {entry['name']}: {_delta(entry)}."
     return head + body
 
 

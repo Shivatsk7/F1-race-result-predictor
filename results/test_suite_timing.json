@@ -1,0 +1,8 @@
+{
+  "wall_clock_seconds": 16.65,
+  "budget_seconds": 60.0,
+  "within_budget": true,
+  "tests_collected": 803,
+  "network": "blocked; see tests/conftest.py",
+  "reference_machine": "Apple Silicon, macOS 25.6, Python 3.13 (plan.md \u00a74)"
+}
