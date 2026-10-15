@@ -8,6 +8,7 @@ it.
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -46,6 +47,129 @@ DEFAULT_WINDOW_WIDTH: Final[int] = 16
 
 #: FR-510: no reported result may rest on fewer than eight seasons.
 MIN_WINDOW_WIDTH: Final[int] = 8
+
+# --------------------------------------------------------------------------
+# Exam plan (Constitution IV.4, change evaluation-rules-rework)
+# --------------------------------------------------------------------------
+#
+# Every season has one fixed role. The roles are a committed record, not a
+# function of the calendar or of what is on disk: the rolling window above
+# moved the test seasons by itself at each rollover, and a test set that moves
+# or is reused for every decision stops being a test. Only a dated amendment
+# to Constitution IV.4 may change this table, and it bumps `version`.
+
+
+class SeasonRole(Enum):
+    """What a season may be used for (Constitution IV.4)."""
+
+    #: Training only; never scored as a test.
+    LEARNING = "learning_only"
+    #: Every decision about the model, including tuning (IV.4a).
+    PRACTICE = "practice_exam"
+    #: Opened only when a stage of work is finished, and logged (IV.4b).
+    FINAL = "final_exam"
+    #: Sealed; opened once, after the rework is complete (IV.4d).
+    BONUS = "bonus_exam"
+
+
+@dataclass(frozen=True, slots=True)
+class SeasonSpan:
+    role: SeasonRole
+    first: int
+    last: int
+
+
+@dataclass(frozen=True, slots=True)
+class ExamPlan:
+    version: int
+    amended: str
+    authority: str
+    spans: tuple[SeasonSpan, ...]
+    #: Set by hand once the rework is finished; the bonus exam refuses until then.
+    rework_complete: bool
+
+    def role_for_season(self, season: int) -> SeasonRole:
+        """Return `season`'s role.
+
+        Takes no date, deliberately: a role cannot depend on when it is asked.
+        Raises for a season the plan does not cover rather than guessing one;
+        an unplanned season is missing data, not a default (cf. FR-109).
+        """
+        for span in self.spans:
+            if span.first <= season <= span.last:
+                return span.role
+        covered = f"{self.spans[0].first}-{self.spans[-1].last}"
+        raise ValueError(
+            f"season {season} has no role in exam plan v{self.version} "
+            f"(covers {covered}); amend the plan rather than inferring one"
+        )
+
+    def seasons(self, role: SeasonRole) -> tuple[int, ...]:
+        """Every season holding `role`, in order."""
+        return tuple(
+            season
+            for span in self.spans
+            if span.role is role
+            for season in range(span.first, span.last + 1)
+        )
+
+    def as_dict(self) -> dict[str, object]:
+        return {
+            "version": self.version,
+            "amended": self.amended,
+            "authority": self.authority,
+            "rework_complete": self.rework_complete,
+            "roles": {
+                role.value: list(self.seasons(role)) for role in SeasonRole
+            },
+        }
+
+
+EXAM_PLAN: Final[ExamPlan] = ExamPlan(
+    version=1,
+    amended="2026-10-13",
+    authority="Constitution IV.4 (v1.4.0), ratified 2026-10-13",
+    spans=(
+        SeasonSpan(SeasonRole.LEARNING, 2010, 2019),
+        SeasonSpan(SeasonRole.PRACTICE, 2020, 2022),
+        SeasonSpan(SeasonRole.FINAL, 2023, 2025),
+        SeasonSpan(SeasonRole.BONUS, 2026, 2026),
+    ),
+    rework_complete=False,
+)
+
+EXAM_PLAN_PATH: Final[Path] = RESULTS_DIR / "exam_plan.json"
+
+
+def role_for_season(season: int) -> SeasonRole:
+    """The committed role of `season` under `EXAM_PLAN`."""
+    return EXAM_PLAN.role_for_season(season)
+
+
+def write_exam_plan(path: Path | None = None) -> Path:
+    """Write `EXAM_PLAN` to `results/exam_plan.json`.
+
+    The constant is the source of truth; the file is its committed, readable
+    copy, and a test fails if the two disagree. Like every results file it
+    carries the corpus stamp (AC-11, AC-21); a plan is not a measurement of
+    race data, so the stamp says so.
+    """
+    # Imported here: provenance imports this module.
+    from f1pred.provenance import Scope, stamp
+
+    record = stamp(
+        EXAM_PLAN.as_dict(),
+        scope=Scope.NOT_CORPUS,
+        reason=(
+            "the exam plan assigns roles to seasons; it is a committed decision "
+            "(Constitution IV.4), not a result computed from race data"
+        ),
+    )
+    target = path if path is not None else EXAM_PLAN_PATH
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(json.dumps(record, indent=2) + "\n")
+    return target
+
 
 # --------------------------------------------------------------------------
 # Collection tolerances (FR-104c, FR-106)

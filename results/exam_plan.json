@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "amended": "2026-10-13",
+  "authority": "Constitution IV.4 (v1.4.0), ratified 2026-10-13",
+  "rework_complete": false,
+  "roles": {
+    "learning_only": [
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019
+    ],
+    "practice_exam": [
+      2020,
+      2021,
+      2022
+    ],
+    "final_exam": [
+      2023,
+      2024,
+      2025
+    ],
+    "bonus_exam": [
+      2026
+    ]
+  },
+  "corpus_provenance": {
+    "scope": "not_corpus",
+    "width": 0,
+    "seasons": [],
+    "first_season": null,
+    "last_season": null,
+    "resolved": "2026-10-13",
+    "failure_manifest": {
+      "available": true,
+      "races_attempted": 329,
+      "failure_count": 0,
+      "failure_rate": 0.0,
+      "max_failure_rate": 0.1
+    },
+    "why_not_the_window": "the exam plan assigns roles to seasons; it is a committed decision (Constitution IV.4), not a result computed from race data"
+  }
+}

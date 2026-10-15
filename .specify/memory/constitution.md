@@ -1,8 +1,8 @@
 # Project Constitution
 
 **Project:** Race Result Predictor
-**Version:** 1.3.0
-**Ratified:** 2026-08-15 (v1.0.0) · Amended 2026-08-15 (v1.1.0, v1.2.0), 2026-08-25 (v1.3.0)
+**Version:** 1.4.0
+**Ratified:** 2026-08-15 (v1.0.0) · Amended 2026-08-15 (v1.1.0, v1.2.0), 2026-08-25 (v1.3.0), 2026-10-13 (v1.4.0)
 
 This document defines the non-negotiable rules of this project. Every spec, plan,
 and task must comply. Where a spec conflicts with this constitution, the
@@ -124,6 +124,39 @@ estimate is not a result.
 
 > **Rationale.** v0's holdout was two races and forty rows. Every metric it
 > produced was indistinguishable from noise, in both directions.
+
+**IV.4** *(Added in v1.4.0; ratified 2026-10-13 by Shiva Kaushik.)* Seasons SHALL hold fixed exam
+roles, recorded in one committed exam plan and changed only by a dated amendment,
+never by the calendar or by what data is on disk:
+
+| Role | Seasons | Use |
+|------|---------|-----|
+| Learning only | 2010–2019 | Training; never scored as a test |
+| Practice exam | 2020–2022 | Every decision about the model, including tuning |
+| Final exam | 2023–2025 | Opened only when a stage of work is finished |
+| Bonus exam | 2026 | Sealed; opened once, after the rework is complete |
+
+**IV.4a** Tuning, feature selection, and any choice between candidate models SHALL
+use the practice exam only. A final-exam or bonus-exam score SHALL NOT be used to
+choose, keep, or drop anything.
+
+**IV.4b** Every opening of the final or bonus exam SHALL be recorded in a committed,
+append-only exam log before any score is shown. An opening that is not logged did
+not happen honestly.
+
+**IV.4c** The practice exam SHALL predict each of its seasons with a model trained
+only on earlier seasons, and its three seasons, pooled, satisfy the three-season
+holdout minimum of IV.2.
+
+**IV.4d** The bonus exam is one season. Under IV.2 a single season is not evidence:
+its score is supplementary and SHALL NOT on its own support a claim that the model
+works (Article II.2).
+
+> **Rationale (IV.4).** One test set reused for every decision stops being a test:
+> try twenty changes, keep the best, and some of the "gains" fit only those races.
+> The rolling window of FR-508 also moved the test seasons by itself at each season
+> rollover. Fixed roles keep one set of races for deciding and keep the final exam
+> unspent.
 
 ---
 
@@ -303,6 +336,7 @@ zero.
 | **1.2.0** | **2026-08-15** | **New III.6** distinguishing leakage from stochasticity; **new Article X — Race Randomness Must Be Modelled, Not Known** | Owner observed Article III addressed F1's unpredictability only by prohibition. Article III was **not** loosened: supplying actual outcomes deletes uncertainty rather than modelling it. Instead the missing affirmative obligation was added, including X.5's irreducible noise floor. |
 
 | **1.3.0** | **2026-08-25** | **X.1 extended**: weather-condition volatility added as a fifth required randomness factor. New X.1a separating weather's input role from its randomness role. | Owner observed that FR-751..755 never mentioned weather. Article X's own rationale named "weather swings" as irreducible randomness, but X.1's enumerated minimum omitted it, and the spec inherited the omission. |
+| **1.4.0** | **2026-10-13** | **Ratified 2026-10-13 by Shiva Kaushik.** **New IV.4–IV.4d**: fixed exam roles (practice 2020–2022, final 2023–2025, sealed bonus 2026); decisions on the practice exam only; logged final-exam openings; a one-season exam is supplementary. | Model ties the grid-order baseline; a rework of many small changes needs a test set that is not worn out by reuse, and the rolling window would have moved the holdout at the 2026 rollover. Change `evaluation-rules-rework`. |
 
 ### Outstanding compliance debt
 

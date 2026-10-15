@@ -5,7 +5,7 @@
 **Ratified by:** — Shiva Kaushik - Done
 **Ratified on:** - 2026-08-25
 **Created:** 2026-08-15
-**Governed by:** `.specify/memory/constitution.md` v1.3.0
+**Governed by:** `.specify/memory/constitution.md` v1.4.0
 
 > **Ratification checklist** — tick each section once read in full (IX.2).
 > Ticked entries were verified byte-identical to the text read on 2026-08-25.
@@ -24,6 +24,8 @@
 > - [x] §3.6–3.7 Simulation and calibration (FR-601..605, FR-701..706)
 > - [x] §3.7a **Race randomness** (FR-751..755, FR-751a) — *Article X: noise floor, proper scoring*
 > - [x] §3.8–3.9 Interface and documentation (FR-801..804, FR-901..905)
+>   - FR-501, FR-508, FR-755, FR-801 returned to Draft 2026-10-13 by change `evaluation-rules-rework` (Constitution IX.5).
+>   - **§3.5, §3.7a and §3.8–3.9 re-ratified 2026-10-13 by Shiva Kaushik**, read in full per IX.2.
 > - [x] §4 Non-functional requirements
 > - [x] §5 **Out of scope** — every deletion in P0 was justified from this list
 > - [x] §6 Acceptance criteria — what "done" means
@@ -203,7 +205,7 @@ rather than re-argued.
 | ID | Requirement |
 |----|-------------|
 | **FR-500** | The **primary metric** SHALL be Spearman rank correlation between predicted and actual classified finishing position (FR-001), averaged unweighted across races. Wherever this spec or the Constitution says "the primary metric", it means this one. Every requirement that gates a claim on model performance SHALL gate on this metric. |
-| **FR-501** | Evaluation SHALL use a chronological split over the corpus window defined in FR-508, of **≥8 seasons**: **≥5 seasons training, ≥3 seasons holdout** (Constitution IV.2). |
+| **FR-501** | Evaluation SHALL use a chronological split over the corpus window defined in FR-508, of **≥8 seasons**: **≥5 seasons training, ≥3 seasons holdout** (Constitution IV.2). **[Amended 2026-10-13 by change `evaluation-rules-rework`, re-ratified 2026-10-13 by Shiva Kaushik: the holdout becomes fixed exam roles (practice 2020–2022 for decisions, final 2023–2025 logged), not the newest seasons of the window.]** |
 | **FR-501a** | IF fewer than 8 seasons are collected, THEN the shortfall SHALL be recorded in every results file and in the README, and the minima SHALL NOT be lowered to fit (Constitution IV.2a). |
 | **FR-502** | Evaluation SHALL report, for the model and every baseline, exactly these nine metrics: (1) MAE, (2) exact-position accuracy, (3) within-1 accuracy, (4) within-2 accuracy, (5) within-3 accuracy, (6) Spearman correlation, (7) top-3 set accuracy, (8) top-5 set accuracy, (9) podium-set accuracy. |
 | **FR-503** | Every reported metric SHALL carry a bootstrap 95% confidence interval. |
@@ -211,7 +213,7 @@ rather than re-argued.
 | **FR-505** | Evaluation SHALL segment results by season, by circuit type, and by overtaking-difficulty tier as declared in FR-109, so that aggregate performance cannot conceal systematic failure. |
 | **FR-506** | Evaluation SHALL emit a machine-readable results file alongside the human-readable report. |
 | **FR-507** | IF the model does not beat the grid baseline on the primary metric with a confidence interval excluding zero, THEN the evaluation output SHALL state this explicitly and prominently. |
-| **FR-508** | The corpus SHALL be a **fixed-width rolling window** of the `W` most recently completed seasons, with a default width of **16**, resolving to 2010–2025 as of the 2025 season. WHEN a new season completes, the window SHALL advance by one season at **both** ends — the newly completed season enters, the oldest leaves — and all reported results SHALL be regenerated rather than carried forward. |
+| **FR-508** | The corpus SHALL be a **fixed-width rolling window** of the `W` most recently completed seasons, with a default width of **16**, resolving to 2010–2025 as of the 2025 season. WHEN a new season completes, the window SHALL advance by one season at **both** ends — the newly completed season enters, the oldest leaves — and all reported results SHALL be regenerated rather than carried forward. **[Amended 2026-10-13 by change `evaluation-rules-rework`, re-ratified 2026-10-13 by Shiva Kaushik: the rolling window no longer chooses test seasons; it still sets the collection range.]** |
 | **FR-509** | The window SHALL admit **completed seasons only**. An in-progress season SHALL NOT enter the training or evaluation corpus, and its partial row count SHALL NOT trigger the FR-106 deviation warning. An in-progress season MAY still be a *prediction target* under FR-801; being predictable and being admissible to the corpus are distinct roles. |
 | **FR-510** | `W` SHALL be a configurable parameter with a documented default, never a constant embedded in code, and its value SHALL be recorded in every results file alongside the concrete season list the window resolved to. **`W` SHALL NOT resolve below 8** for any reported result; a configuration attempting it SHALL fail loudly rather than silently producing a sub-constitutional corpus. |
 | **FR-511** | Evaluation SHALL include a **regulation-transfer experiment** quantifying what a regime change costs: the primary metric (FR-500) for a model trained on all seasons strictly prior to a reset season and evaluated on that reset season, compared against the identical protocol applied to **the season immediately preceding that reset**. The difference SHALL be reported as the **measured regime-transfer penalty**, with the number of transitions observed stated alongside it. The experiment SHALL run over the **full collected archive rather than the FR-508 rolling window**: it is a diagnostic about regulatory history, not about present-day relevance, and binding it to a window that advances yearly would silently destroy observations as they age out. |
@@ -311,7 +313,7 @@ the seasons are already on disk.
 | **FR-752** | No prediction SHALL be published as a bare point estimate; every predicted position SHALL carry a distribution or interval (X.2). |
 | **FR-753** | Evaluation SHALL include at least one **proper scoring rule** (Brier or log score) that rewards correctly stated uncertainty, not rank accuracy alone (X.4). |
 | **FR-754** | The system SHALL estimate and report the **irreducible noise floor**: the share of finishing-order variance no pre-race information can explain. |
-| **FR-755** | Reported model error SHALL be interpreted against the noise floor rather than against zero, in both the evaluation report and the README (X.5). |
+| **FR-755** | Reported model error SHALL be interpreted against the noise floor rather than against zero, in both the evaluation report and the README (X.5). **[Amended 2026-10-13 by change `evaluation-rules-rework`, re-ratified 2026-10-13 by Shiva Kaushik: the noise floor is compared as an average miss over classified finishers, not as a standard deviation against all-driver error.]** |
 
 **On FR-754 method.** The floor is estimated empirically — e.g. by measuring how
 much finishing order varies between races that are near-identical in all
@@ -325,7 +327,7 @@ of a chaotic sport could exist.
 
 | ID | Requirement |
 |----|-------------|
-| **FR-801** | The system SHALL expose a command-line interface covering: collect, build features, train, evaluate, simulate, and predict-from-grid. |
+| **FR-801** | The system SHALL expose a command-line interface covering: collect, build features, train, evaluate, simulate, and predict-from-grid. **[Amended 2026-10-13 by change `evaluation-rules-rework`, re-ratified 2026-10-13 by Shiva Kaushik: `evaluate` scores the practice exam; new `judge` and `exam` commands; `simulate` needs a stage name; `--holdout-seasons` removed.]** |
 | **FR-802** | WHEN a required upstream artifact is missing, THE SYSTEM SHALL fail with a message naming the exact command that produces it. |
 | **FR-803** | The predict-from-grid command SHALL accept a documented CSV schema and SHALL validate it, reporting all schema violations at once rather than failing on the first. |
 | **FR-804** | Numeric output precision SHALL follow two enforceable rules: (1) probabilities SHALL be rendered to at most **two decimal places**; (2) a metric accompanied by a confidence interval SHALL NOT be rendered to more decimal places than its CI half-width — a metric of 0.412 with a half-width of 0.03 renders as `0.41`, not `0.412`. v0 printed win probabilities to four decimals with no evidence any of them meant anything. |

@@ -1,8 +1,8 @@
 {
-  "wall_clock_seconds": 18.46,
+  "wall_clock_seconds": 17.91,
   "budget_seconds": 60.0,
   "within_budget": true,
-  "tests_collected": 877,
+  "tests_collected": 890,
   "network": "blocked; see tests/conftest.py",
   "reference_machine": "Apple Silicon, macOS 25.6, Python 3.13 (plan.md \u00a74)",
   "corpus_provenance": {
@@ -11,7 +11,7 @@
     "seasons": [],
     "first_season": null,
     "last_season": null,
-    "resolved": "2026-09-06",
+    "resolved": "2026-10-15",
     "failure_manifest": {
       "available": true,
       "races_attempted": 329,
