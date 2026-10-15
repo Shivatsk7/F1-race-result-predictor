@@ -40,3 +40,6 @@ graphify-out/
 # `openspec init`/`openspec update`; the specs themselves live in openspec/.
 .claude/commands/opsx/
 .claude/skills/openspec-*/
+
+# Kilo Code editor settings (local to this machine).
+.kilo/
