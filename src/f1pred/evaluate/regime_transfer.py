@@ -16,11 +16,13 @@ one, with nothing in the output to explain why. `corpus.archive_seasons` exists
 for exactly this, and the seasons are already on disk, so the diagnostic costs
 nothing and its observation count grows instead of decaying.
 
-**It cannot borrow `ChronologicalSplit`, and does not try.** See `TransferSplit`
-below: every arm here holds out a *single* season, and one arm trains on four,
-both of which that type refuses by design. Weakening those checks to fit this
-experiment would weaken them for the headline evaluation too, which is the one
-place they are load-bearing.
+**It cannot borrow `ChronologicalSplit`, and does not try.** Every arm here
+holds out a *single* season, and one arm trains on four, both of which that
+type refuses by design. Arms are `split.SeasonFold`s instead (imported here as
+`TransferSplit`, the name this module's records and tests grew up with), which
+express a short fold while labelling it `DIAGNOSTIC`. Weakening
+`ChronologicalSplit` to fit this experiment would weaken it for every other
+evaluation too.
 
 **Its penalty interval is unpaired, and says so.** The two arms of a transition
 are scored on *different races* — season R against season R-1 — so
@@ -69,16 +71,15 @@ from f1pred.evaluate.bootstrap import (
 )
 from f1pred.evaluate.harness import score_predictor, write_results
 from f1pred.evaluate.metrics import METRICS, PRIMARY_METRIC, RACE_KEYS, Metric
-from f1pred.evaluate.split import MIN_TRAINING_SEASONS
+from f1pred.evaluate.split import (
+    DIAGNOSTIC_LABEL,
+    FoldError,
+    SeasonFold,
+)
 from f1pred.models.baselines import GridOrderBaseline
 from f1pred.models.ranker import Hyperparameters, TrainedRanker, train
 
 logger = logging.getLogger(__name__)
-
-#: FR-511a's label for a transition that falls short of the FR-501 training
-#: minimum. It is a string in the results file rather than an absent field
-#: because a reader scanning for compliance must find something, not nothing.
-DIAGNOSTIC_LABEL: Final[str] = "DIAGNOSTIC"
 
 #: FR-512 requires the experiment at zero decay and at a non-zero one. Zero is
 #: uniform weighting exactly (T-408), so the pair is a controlled comparison
@@ -119,189 +120,15 @@ PAIRING_UNAVAILABLE: Final[str] = (
 )
 
 
-class TransferError(ValueError):
-    """Raised when a transfer experiment cannot be run as specified."""
+#: Raised when a transfer experiment cannot be run as specified. It *is* the
+#: fold's error rather than a wrapper around it: an arm whose fold cannot be
+#: built is an experiment that cannot be run, and one exception type means a
+#: caller catching it misses neither.
+TransferError = FoldError
 
-
-# --------------------------------------------------------------------------
-# The split this experiment needs, and cannot get from `split.py`
-# --------------------------------------------------------------------------
-
-
-@dataclass(frozen=True, slots=True)
-class TransferSplit:
-    """Train on the seasons before one target season, evaluate on that season.
-
-    **Why this is not a `ChronologicalSplit`.** That type enforces the
-    Constitution IV.2 minima structurally — at least eight seasons, at least
-    five training, at least three held out — and refuses anything else at
-    construction. Every arm of FR-511 evaluates a *single* season, and the 2014
-    transition trains on four. Both are unexpressible there, and that is the
-    correct behaviour for the headline path: it is the one place where a thin
-    split must be impossible rather than merely discouraged.
-
-    FR-511a asks for something different from an exemption. A transition that
-    knowingly falls below the five-season floor must be **expressible while
-    labelled** — run, reported, counted, and barred from supporting a headline
-    claim — which a type that refuses to construct it cannot deliver. So this
-    type expresses it and `describe()` labels it `DIAGNOSTIC`, judging each
-    transition against `MIN_TRAINING_SEASONS` independently, as FR-511a
-    requires.
-
-    Keeping it in this module rather than in `split.py` is the other half of
-    the argument. The headline evaluation imports its split from `split.py` and
-    would have to import *this* one deliberately, by name, from a module whose
-    every output carries a compliance label. There is no route by which the
-    headline path reaches a sub-minimum split by accident.
-
-    The surface is the one `ranker.train` and `harness.evaluate` consume —
-    neither does an isinstance check — so the two paths score models the same
-    way even though they cannot share a split type.
-    """
-
-    training_seasons: tuple[int, ...]
-    evaluated_season: int
-
-    def __post_init__(self) -> None:
-        # Normalised to a tuple of plain ints: these reach a JSON results file,
-        # and `json` refuses an np.int64 with an error naming the type rather
-        # than the field it came from.
-        seasons = tuple(int(s) for s in self.training_seasons)
-        object.__setattr__(self, "training_seasons", seasons)
-        object.__setattr__(self, "evaluated_season", int(self.evaluated_season))
-
-        if not seasons:
-            raise TransferError(
-                "a transfer arm with no training seasons is not an arm; the "
-                "reset at the corpus start has nothing before it to train on"
-            )
-        if len(set(seasons)) != len(seasons):
-            raise TransferError(f"training seasons {list(seasons)} contain a duplicate")
-        if list(seasons) != sorted(seasons):
-            raise TransferError(
-                f"training seasons {list(seasons)} are not in chronological order"
-            )
-        offending = [s for s in seasons if s >= self.evaluated_season]
-        if offending:
-            raise TransferError(
-                f"training season(s) {offending} are at or after the evaluated "
-                f"season {self.evaluated_season}. FR-511 trains on seasons "
-                f"*strictly* prior to the one being scored (FR-403)."
-            )
-
-    @classmethod
-    def from_archive(
-        cls, archive: Sequence[int], evaluated_season: int
-    ) -> TransferSplit:
-        """Every archive season strictly before `evaluated_season`, as training.
-
-        The archive is passed in rather than resolved here so that the same
-        construction serves the real corpus and a fixture, and so that no arm
-        can quietly widen its own training set.
-        """
-        return cls(
-            training_seasons=tuple(s for s in sorted(archive) if s < evaluated_season),
-            evaluated_season=evaluated_season,
-        )
-
-    # -- the boundary -------------------------------------------------------
-
-    @property
-    def seasons(self) -> tuple[int, ...]:
-        return (*self.training_seasons, self.evaluated_season)
-
-    @property
-    def holdout(self) -> tuple[int, ...]:
-        """One season. The whole point of the experiment is that it is one."""
-        return (self.evaluated_season,)
-
-    @property
-    def boundary_season(self) -> int:
-        """The first held-out season. Nothing at or after it may train."""
-        return self.evaluated_season
-
-    @property
-    def n_training_seasons(self) -> int:
-        """FR-511a: the count that every arm reports and is judged on."""
-        return len(self.training_seasons)
-
-    @property
-    def meets_constitutional_minimum(self) -> bool:
-        """FR-511a, judged per transition against the FR-501 training floor.
-
-        Only the training minimum applies. The holdout floor of three seasons
-        is a property of the headline evaluation's design, and an experiment
-        whose unit of observation is one reset season cannot satisfy it without
-        ceasing to measure a reset.
-        """
-        return self.n_training_seasons >= MIN_TRAINING_SEASONS
-
-    @property
-    def label(self) -> str | None:
-        """`DIAGNOSTIC` when this arm falls short, `None` when it complies."""
-        return None if self.meets_constitutional_minimum else DIAGNOSTIC_LABEL
-
-    # -- applying it --------------------------------------------------------
-
-    def _seasons_of(self, df: pd.DataFrame) -> pd.Series:
-        if "season" not in df.columns:
-            raise TransferError("frame has no `season` column to split on")
-        return pd.to_numeric(df["season"], errors="coerce")
-
-    def train_mask(self, df: pd.DataFrame) -> pd.Series:
-        return self._seasons_of(df).isin(self.training_seasons)
-
-    def holdout_mask(self, df: pd.DataFrame) -> pd.Series:
-        return self._seasons_of(df).isin(self.holdout)
-
-    def split(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-        """Training rows and holdout rows, in that order.
-
-        Seasons *after* the evaluated one belong to neither and are dropped.
-        The frame handed in is the whole archive, so without this the 2014 arm
-        would train on 2015 through 2025 — the future of the regime it is
-        supposed to be meeting for the first time.
-        """
-        return df[self.train_mask(df)].copy(), df[self.holdout_mask(df)].copy()
-
-    def assert_no_leakage(self, training: pd.DataFrame) -> None:
-        """FR-403: nothing at or after the boundary may appear in training.
-
-        Called by the trainer rather than trusted. The failure this prevents is
-        specific to this experiment: an arm that leaked the reset season into
-        training would report a *small* transfer penalty, which reads as good
-        news and is the finding nobody would think to question.
-        """
-        seasons = set(self._seasons_of(training).dropna().astype(int))
-        offending = sorted(s for s in seasons if s >= self.boundary_season)
-        if offending:
-            raise TransferError(
-                f"training data contains season(s) {offending} at or after the "
-                f"evaluated season {self.boundary_season} (FR-403)"
-            )
-
-    # -- reporting ----------------------------------------------------------
-
-    def describe(self) -> dict[str, object]:
-        """What FR-511a requires of every arm in `results/`.
-
-        `meets_constitutional_minimum` is computed against the imported
-        `MIN_TRAINING_SEASONS` rather than a literal five, so that a change to
-        the constitutional floor reaches this experiment instead of leaving it
-        asserting an old one.
-        """
-        return {
-            "training_seasons": list(self.training_seasons),
-            "n_training_seasons": self.n_training_seasons,
-            "evaluated_season": self.evaluated_season,
-            # Named as the headline split names it, so the two records can be
-            # read side by side and `harness.render_verdict` can read either.
-            "holdout_seasons": list(self.holdout),
-            "boundary_season": self.boundary_season,
-            "meets_constitutional_minimum": self.meets_constitutional_minimum,
-            "minimum_required": {"training": MIN_TRAINING_SEASONS},
-            "label": self.label,
-        }
+#: Each arm's split: train on every season before one target, score that one.
+#: Defined in `split.py` as `SeasonFold`, where the practice exam also uses it.
+TransferSplit = SeasonFold
 
 
 # --------------------------------------------------------------------------

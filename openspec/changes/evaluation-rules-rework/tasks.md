@@ -17,8 +17,8 @@
 
 ## 3. One-season split and the training boundary
 
-- [ ] 3.1 Move `TransferSplit` from `src/f1pred/evaluate/regime_transfer.py` to `src/f1pred/evaluate/split.py` as `SeasonFold`, and import it back into `regime_transfer`. Verify that `tests/test_regime_transfer.py` passes without edits to its assertions.
-- [ ] 3.2 Add a `TrainingBoundary` protocol (`split`, `assert_no_leakage`, `training_seasons`) and type `ranker.train()` against it. Verify with tests that `train()` accepts both split types and refuses a fold whose training rows include the scored season or later.
+- [x] 3.1 Move `TransferSplit` from `src/f1pred/evaluate/regime_transfer.py` to `src/f1pred/evaluate/split.py` as `SeasonFold`, and import it back into `regime_transfer`. Verify that `tests/test_regime_transfer.py` passes without edits to its assertions.
+- [x] 3.2 Add a `TrainingBoundary` protocol (`split`, `assert_no_leakage`, `training_seasons`) and type `ranker.train()` against it. Verify with tests that `train()` accepts both split types and refuses a fold whose training rows include the scored season or later. *(Done: `TransferError` is now the fold's own error type, so the transfer tests catch it unchanged. `train()` also checks that the rows it was handed come only from the split's declared training seasons, so a faulty split cannot widen the fit even if its own check is missing.)*
 
 ## 4. Exam log and the gates
 

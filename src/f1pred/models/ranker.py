@@ -5,7 +5,8 @@ Three things changed in the port, and each of them is the point of the port.
 **The split is not the model's business.** v0's trainer took the whole frame
 and cut its own test set with `TimeSeriesSplit`, so the boundary the model
 trained against and the boundary it was scored against were set in different
-files by different code. Here training takes a `ChronologicalSplit` and calls
+files by different code. Here training takes a split (`TrainingBoundary`: a
+`ChronologicalSplit` or a one-season `SeasonFold`) and calls
 `assert_no_leakage` on what it is about to fit (FR-403) — the model never
 chooses its own holdout, and cannot be handed one that overlaps.
 
@@ -44,7 +45,7 @@ import pandas as pd
 import xgboost as xgb
 
 from f1pred.config import SEED
-from f1pred.evaluate.split import ChronologicalSplit
+from f1pred.evaluate.split import TrainingBoundary
 from f1pred.features.build import TARGET_COLUMN
 from f1pred.features.registry import REGISTRY, Registry
 from f1pred.models.base import assert_carries_uncertainty, rank_to_positions
@@ -633,7 +634,7 @@ def _calibrate(
 def train(
     frame: pd.DataFrame,
     *,
-    split: ChronologicalSplit,
+    split: TrainingBoundary,
     features: Sequence[str],
     params: Hyperparameters | None = None,
     name: str = "xgboost_ranker",
@@ -662,8 +663,19 @@ def train(
             f"training seasons {list(split.training_seasons)} select no rows "
             f"from this frame"
         )
-    # FR-403. Checked, not assumed — see ChronologicalSplit.assert_no_leakage.
+    # FR-403. Checked, not assumed — the split checks its own boundary...
     split.assert_no_leakage(training)
+    # ...and the trainer checks the split's cut against what it declared, so a
+    # split whose `split()` and `training_seasons` disagree cannot widen the fit.
+    declared = {int(s) for s in split.training_seasons}
+    undeclared = sorted(
+        {int(s) for s in pd.to_numeric(training["season"]).dropna()} - declared
+    )
+    if undeclared:
+        raise ModelError(
+            f"the split returned training rows from season(s) {undeclared} that "
+            f"are not among its declared training seasons {sorted(declared)}"
+        )
 
     training = training.sort_values(list(RACE_KEYS), kind="stable")
     # Plain ints, not numpy scalars: these reach a JSON results file, and

@@ -18,7 +18,12 @@ import pandas as pd
 import pytest
 
 from f1pred.corpus import CorpusWindow
-from f1pred.evaluate.split import ChronologicalSplit
+from f1pred.evaluate.split import (
+    ChronologicalSplit,
+    FoldError,
+    SeasonFold,
+    TrainingBoundary,
+)
 from f1pred.models.base import Predictor
 from f1pred.models.ranker import (
     FR404_FIELDS,
@@ -226,6 +231,75 @@ class TestTrainingBoundary:
         model = train(wider, split=make_split(), features=FEATURES, params=quick())
         assert FIRST_SEASON - 5 not in model.training_seasons
 
+
+
+class _LeakyBoundary:
+    """A split whose cut ignores its own boundary: every row comes back as training.
+
+    Its boundary check and declared seasons are a real fold's, so the only
+    defect is the cut itself — the case `train` must catch rather than trust.
+    """
+
+    def __init__(self, fold: SeasonFold, *, check: bool = True) -> None:
+        self._fold = fold
+        self._check = check
+
+    @property
+    def training_seasons(self) -> tuple[int, ...]:
+        return self._fold.training_seasons
+
+    def split(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+        return df.copy(), df.iloc[0:0].copy()
+
+    def assert_no_leakage(self, training: pd.DataFrame) -> None:
+        if self._check:
+            self._fold.assert_no_leakage(training)
+
+
+class TestBothSplitTypesTrain:
+    """`train` takes a `TrainingBoundary`: a multi-season split or a one-season fold."""
+
+    def test_both_split_types_are_training_boundaries(self):
+        assert isinstance(make_split(), TrainingBoundary)
+        assert isinstance(
+            SeasonFold.from_archive(range(FIRST_SEASON, LAST_SEASON + 1), LAST_SEASON),
+            TrainingBoundary,
+        )
+
+    def test_a_fold_trains_on_exactly_its_earlier_seasons(self):
+        fold = SeasonFold.from_archive(range(FIRST_SEASON, LAST_SEASON + 1), 2015)
+        model = train(corpus(), split=fold, features=FEATURES, params=quick())
+        assert model.training_seasons == tuple(range(FIRST_SEASON, 2015))
+        assert max(model.training_seasons) < fold.evaluated_season
+
+    def test_a_fold_ignores_seasons_after_the_scored_one(self, one_race):
+        """The frame is the whole corpus; 2016-2020 must not reach a 2015 fold."""
+        fold = SeasonFold.from_archive(range(FIRST_SEASON, LAST_SEASON + 1), 2015)
+        clean = corpus()
+        poisoned = clean.copy()
+        later = poisoned["season"] >= 2015
+        for column in FEATURES:
+            poisoned.loc[later, column] = -999.0
+        a = train(clean, split=fold, features=FEATURES, params=quick())
+        b = train(poisoned, split=fold, features=FEATURES, params=quick())
+        assert a.predict(one_race).equals(b.predict(one_race))
+
+    def test_a_fold_training_on_its_scored_season_cannot_be_built(self):
+        with pytest.raises(FoldError, match="at or after the evaluated season"):
+            SeasonFold(training_seasons=(2013, 2014, 2015), evaluated_season=2015)
+
+    def test_training_rows_from_the_scored_season_are_refused(self):
+        """The fold's own boundary check runs inside `train`."""
+        fold = SeasonFold.from_archive(range(FIRST_SEASON, LAST_SEASON + 1), 2015)
+        with pytest.raises(FoldError, match=r"\[2015, 2016, 2017, 2018, 2019, 2020\]"):
+            train(corpus(), split=_LeakyBoundary(fold), features=FEATURES, params=quick())
+
+    def test_a_cut_wider_than_the_declared_seasons_is_refused(self):
+        """Even when the split's own check is missing, `train` does not trust the cut."""
+        fold = SeasonFold.from_archive(range(FIRST_SEASON, LAST_SEASON + 1), 2015)
+        leaky = _LeakyBoundary(fold, check=False)
+        with pytest.raises(ModelError, match="not among its declared training seasons"):
+            train(corpus(), split=leaky, features=FEATURES, params=quick())
 
 class TestReproducibility:
     def test_same_seed_same_data_same_predictions(self, one_race):
